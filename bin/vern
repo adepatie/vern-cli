@@ -5,21 +5,26 @@ var program        = require('commander'),
     fs             = require('fs-extra'),
     exec           = require('child_process').exec,
     prompt         = require('prompt'),
-    template_dir   = './templates',
-    project_dir    = template_dir + '/projects',
-    controller_dir = template_dir + '/controller',
-    model_dir      = template_dir + '/model',
-    route_dir      = template_dir + '/route',
-    view_dir       = template_dir + '/view',
-    pkg            = fs.readJsonSync('./package.json');
+    template_dir   = '../templates',
+    _project       = require(template_dir + '/project'),
+    _container     = require(template_dir + '/container'),
+    _controller    = require(template_dir + '/controller'),
+    _model         = require(template_dir + '/model'),
+    _directive     = require(template_dir + '/directive'),
+    _service       = require(template_dir + '/service'),
+    _view          = require(template_dir + '/view'),
+    default_config = require(template_dir + '/vern_config.json'),
+    pkg            = require('../package.json');
 
 program
   .version(pkg.version)
   .usage('[command] [options]')
   .option('project, --project <path>', 'Create a new project', buildProject)
+  .option('container, --container <path>', 'Create a new container', buildContainer)
   .option('controller, --controller <name>', 'Create a controller when inside a project folder', buildController)
-  .option('route, --route <path>', 'Create a route when inside a project folder', buildRoute)
   .option('model, --model <name>', 'Create a model when inside a project folder', buildModel)
+  .option('service, --service <path>', 'Create a service when inside a project folder', buildService)
+  .option('directive, --directive <path>', 'Create a service when inside a project folder', buildDirective)
   .option('view, --view <name>', 'Create a view when inside a project folder', buildView)
   .option('deploy, --deploy <stage>', 'Create a view when inside a project folder', deployApp)
   .option('config, --config', 'Configure your app when inside a project folder', configApp)
@@ -56,14 +61,9 @@ function buildProject(path, overwrite) {
 }
 
 function copyProject(path) {
-  fs.copy(template_dir + '/project', path, function(err) {
-    if(err) {
-      return console.log(err);
-    }
+  _project.copy(path, function(err, res) {
     console.log('Created project in: ' + path.green);
-    fs.outputJson(path + '/vern.json', {
-      version: pkg.version
-    }, function(err) {
+    fs.outputJson(path + '/vern.json', default_config, function(err) {
       if(err) {
         return console.log(err);
       }
@@ -75,11 +75,19 @@ function copyProject(path) {
   });
 }
 
+function buildContainer(path) {
+
+}
+
 function buildController(name) {
 
 }
 
-function buildRoute(path) {
+function buildService(path) {
+
+}
+
+function buildDirective(path) {
 
 }
 
