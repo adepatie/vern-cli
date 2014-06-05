@@ -1,0 +1,45 @@
+{
+  "name": "vern-cli",
+  "version": "0.0.1",
+  "description": "Vern module and project management",
+  "main": "bin/vern",
+  "bin": {
+    "vern": "./bin/vern"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "make test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uh-sem-blee/vern-cli"
+  },
+  "keywords": [
+    "vern",
+    "mvc",
+    "rest",
+    "api",
+    "angularjs",
+    "mongodb",
+    "less",
+    "framework",
+    "platform"
+  ],
+  "author": "uh-sem-blee",
+  "license": "Copyright 2014 uh-sem-blee, Co.",
+  "bugs": {
+    "url": "https://github.com/uh-sem-blee/vern-cli/issues"
+  },
+  "homepage": "https://github.com/uh-sem-blee/vern-cli",
+  "devDependencies": {},
+  "dependencies": {
+    "fs-extra": "latest",
+    "commander": "latest",
+    "prompt": "latest",
+    "validator": "latest",
+    "optimist": "latest",
+    "vern-core": "latest"
+  }
+}
