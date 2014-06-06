@@ -155,6 +155,7 @@ function parseStart(server) {
       break;
     case 'admin':
       startAdmin();
+      break;
     case 'default':
     case 'all':
       startAPI();
