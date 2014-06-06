@@ -10,6 +10,7 @@ module.exports = {
       }
     }
 
+    fs.copySync(__dirname + '/template', path);
 
     callback(null, null);
   }

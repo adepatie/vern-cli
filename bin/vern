@@ -54,36 +54,50 @@ function Builds() {
 
   $scope.buildProject = function(options) {
     var path = options[0];
+    var project = null;
     if(!path) {
-      path = '.';
-    }
-    console.log("Setting up VERN now!".green);
-    prompt.message = '';
-    prompt.start();
-    if(fs.existsSync(path)) {
-      prompt.get({
-        name: 'overwrite',
-        message: 'Overwrite the existing directory?',
-        validator: /y[es]*|n[o]?/,
-        warning: 'Must respond yes or no',
-        default: 'no'
-      }, function(err, res) {
-        if(err) {
-          return console.log(err);
-        }
-
-        if(res.overwrite.charAt(0) === 'y') {
-          copyProject(path);
-        } else {
-          console.log('Not going to overwrite. Good bye!'.red);
-        }
+      program.prompt('Enter a project name (use . for current directory):'.green, function(project) {
+        build(project, project);
       });
     } else {
-      copyProject(path);
+      if(path === '.') {
+        project = process.cwd().split('/').pop();
+      } else {
+        project = path.split('/').pop();
+      }
+      build(path, project);
+    }
+
+    function build(path, project) {
+      default_config.module = project;
+      console.log('Setting up ' + project.green + ' now!');
+      prompt.message = '';
+      prompt.start();
+      if(fs.existsSync(path)) {
+        prompt.get({
+          name: 'overwrite',
+          message: 'Overwrite the existing directory?',
+          validator: /y[es]*|n[o]?/,
+          warning: 'Must respond yes or no',
+          default: 'no'
+        }, function(err, res) {
+          if(err) {
+            return console.log(err);
+          }
+
+          if(res.overwrite.charAt(0) === 'y') {
+            copyProject(path);
+          } else {
+            console.log('Not going to overwrite. Good bye!'.red);
+          }
+        });
+      } else {
+        copyProject(path);
+      }
     }
   };
 
-  function copyProject(path) {
+  function copyProject(path, project) {
     _project.copy(path, function(err, res) {
       console.log('Created project in: ' + path.green);
       fs.outputJson(path + '/vern.json', default_config, function(err) {
@@ -103,7 +117,8 @@ function Builds() {
   };
 
   $scope.buildController = function(options) {
-
+    var projectConfig = require(process.cwd() + '/vern.json');
+    console.log(projectConfig);
   };
 
   $scope.buildService = function(options) {
@@ -121,6 +136,18 @@ function Builds() {
   $scope.buildView = function(options) {
 
   };
+
+  return $scope;
+}
+
+function Installs() {
+  var $scope = this;
+
+  return $scope;
+}
+
+function Packages() {
+  var $scope = this;
 
   return $scope;
 }

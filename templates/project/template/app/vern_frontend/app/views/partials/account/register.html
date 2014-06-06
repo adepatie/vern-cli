@@ -1,0 +1,37 @@
+<div class="register">
+  <div class="step-holder"  ng-style="setStepHolderPosition()">
+    <div class="step step-1" ng-class="stepActive(1)">
+      <div class="login-button-holder">
+        <a href class="btn" ng-click="gotoStep(2)">Sign in</a>
+      </div>
+      <h1>Welcome to VERN</h1>
+      <h3>Sign up by entering your details below</h3>
+      <div class="signup-methods">
+        <form novalidate name="registerForm" ng-submit="registerAccount()">
+          <input required ng-validate type="email" ng-model="registerData.email" placeholder="Enter your email">
+          <input type="submit" class="btn btn-primary" value="Get Started">
+        </form>
+      </div>
+    </div>
+    <div class="step step-2" ng-class="stepActive(2)">
+      <div class="register-button-holder">
+        <a href class="btn" ng-click="gotoStep(1)">Register</a>
+      </div>
+      <h1>Sign in</h1>
+      <form novalidate name="loginForm" ng-submit="loginAccount()">
+        <p>
+          <input required ng-validate type="email" ng-model="loginData.username" placeholder="Enter your email or username">
+        </p>
+        <p>
+          <input required ng-validate type="password" ng-model="loginData.password" placeholder="Enter your password">
+        </p>
+        <input type="submit" class="btn btn-primary" value="Sign In">
+      </form>
+    </div>
+    <div class="step step-3" ng-class="stepActive(3)">
+      <h1>Thank You</h1>
+      <h2>Check your email</h2>
+      <h3>You'll receive an email shortly with instructions to activate your account</h3>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,21 @@
+<div class="ngAssetUpload">
+  <div ng-if="options.multiple == false && fileUrl.length" class="fileContainer">
+    <div class="file">
+      <a class="glyphicon glyphicon-remove" ng-click="removeFile()"></a>
+      <input ng-if="options.image == false" type="text" ng-model="fileUrl">
+      <img img-editable ng-if="options.image == true" ng-src="{{fileUrl}}">
+    </div>
+  </div>
+  <div ng-if="options.multiple == true" class="fileContainer">
+    <div class="file" ng-repeat="file in fileUrl track by $index">
+      <a class="glyphicon glyphicon-remove" ng-click="removeFile($index)"></a>
+      <input ng-if="options.image == false" type="text" ng-model="file">
+      <img ng-if="options.image == true" ng-model="file" ng-src="{{file}}">
+    </div>
+  </div>
+  <div class="uploadContainer">
+    <input type="file" ng-multiple="options.multiple" ng-hide="true" class="uploader">
+    <button type="button" ng-click="uploadFile()" class="btn" ng-show="!formWait">Upload File</button>
+    <div ng-show="formWait" class="spinner"><div class="mask"></div></div>
+  </div>
+</div>

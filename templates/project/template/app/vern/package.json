@@ -1,0 +1,27 @@
+{
+  "name": "vern",
+  "version": "0.0.0",
+  "description": "Vern API",
+  "main": "server.js",
+  "dependencies": {
+    "validator": "latest",
+    "optimist": "latest",
+    "vern-core": "latest"
+  },
+  "devDependencies": {
+    "mocha": "latest",
+    "request": "latest",
+    "bench-rest": "~0.5.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uh-sem-blee/vern"
+  },
+  "author": "John Josef",
+  "license": "BSD",
+  "readmeFilename": "README.md"
+}

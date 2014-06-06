@@ -1,0 +1,1 @@
+# Add your assets here for hosting on a CDN

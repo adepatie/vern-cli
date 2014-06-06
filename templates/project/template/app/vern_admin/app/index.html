@@ -1,0 +1,97 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" ng-app="VernApp"> <!--<![endif]-->
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <title>Vern Administration</title>
+    <meta name="description" content="" />
+    <meta name="keywords" content="">
+    <meta name="fragment" content="!" />
+    <meta property="og:title" content="VERN" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="" />
+    <link rel="fluid-icon" href="/images/fluid.png">
+    <link rel="apple-touch-icon-precomposed" href="/images/apple.png">
+    <link rel="apple-touch-icon-precomposed" sizes="76x76" href="/images/apple-76.png">
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="/images/apple-120.png">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="/images/apple-152.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <link rel="stylesheet" href="components/bootstrap/dist/css/bootstrap.min.css">
+    <!-- build:css({app,.tmp}) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+
+    <link href="//fonts.googleapis.com/css?family=Roboto:100italic,100,300italic,300,400italic,400,500italic,500,700italic,700,900italic,900" rel="stylesheet" type="text/css">
+
+  </head>
+  <body>
+    <!--[if lt IE 9]>
+      <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+    <![endif]-->
+
+    <!-- Add your site or application content here -->
+    <div class="api-loading" ng-if="apiLoading"><div class="icon-loader">...</div></div>
+    <div class="alerts">
+      <alert ng-repeat="alert in rootAlerts" type="alert.type" close="closeAlert($index)"><div ng-bind="alert.content"></div></alert>
+    </div>
+        
+    <ng-view></ng-view>
+
+    <script src="components/jquery/dist/jquery.min.js"></script>
+    <script src="components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="components/angular/angular.min.js"></script>
+    <script src="components/angular-route/angular-route.min.js"></script>
+    <script src="components/angular-touch/angular-touch.min.js"></script>
+    <script src="components/angular-bootstrap/ui-bootstrap-tpls.min.js"></script>
+    <script src="components/jquery-ui/ui/minified/jquery-ui.min.js"></script>
+    <script src="components/angular-sanitize/angular-sanitize.min.js"></script>
+    <script src="components/angular-ui-sortable/sortable.js"></script>
+    <script src="components/angular-local-storage/angular-local-storage.js"></script>
+
+    <!-- build:js scripts/scripts.js -->
+    <script src="scripts/config.js"></script>
+    <script src="scripts/app.js"></script>
+    <script src="scripts/rootScope.js"></script>
+
+    <script src="scripts/dictionary/index.js"></script>
+
+    <script src="scripts/services/apiRequest.js"></script>
+    <script src="scripts/services/accountManager.js"></script>
+    <script src="scripts/services/dataManager.js"></script>
+
+    <script src="scripts/controllers/main.js"></script>
+    <script src="scripts/controllers/menu.js"></script>
+    <script src="scripts/controllers/account/main.js"></script>
+    <script src="scripts/controllers/account/users.js"></script>
+
+    <script src="scripts/directives/open-modal.js"></script>
+    <script src="scripts/directives/ng-toggle.js"></script>
+    <script src="scripts/directives/token-input.js"></script>
+    <script src="scripts/directives/asset-upload.js"></script>
+    <script src="scripts/directives/ng-validate.js"></script>
+    <script src="scripts/directives/display-data-set.js"></script>
+
+    <script src="scripts/filters/semantic-date.js"></script>
+    <!-- endbuild -->
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+      var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+      (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+      g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+      s.parentNode.insertBefore(g,s)}(document,'script'));
+    </script>
+    <script>
+      if(window.location.hostname === 'localhost' || window.location.hostname === '0.0.0.0') {
+        document.write('<script src="http://'
+        + window.location.hostname
+        + ':35730/livereload.js?snipver=1" type="text/javascript"><\/script>');
+      }
+    </script>
+  </body>
+</html>
