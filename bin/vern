@@ -3,7 +3,7 @@
 var program        = require('commander'),
     os             = require('os'),
     fs             = require('fs-extra'),
-    exec           = require('child_process').exec,
+    spawn          = require('child_process').spawn,
     prompt         = require('prompt'),
     template_dir   = '../templates',
     _project       = require(template_dir + '/project'),
@@ -19,18 +19,24 @@ var program        = require('commander'),
 program
   .version(pkg.version)
   .usage('<command> [options]')
-  .option('create, --create <object> <options>', 'Create a new module', parseCreate)
-  .option('install, --install <module.spec> <options>', 'Install a module into your project', parseInstall)
-  .option('package, --pageack <module.spec> <options>', 'Start the package builder', parsePackage)
-  .option('deploy, --deploy <stage>', 'Create a view when inside a project folder', deployApp)
+  .option('create, --create [object] [options]', 'Create a new module', parseCreate)
+  .option('start --start [server]', 'Start a server module (api, frontend, admin)', parseStart)
+  .option('stop --stop [server]', 'Stop a server module (api, frontend, admin)', parseStop)
+  .option('restart --restart [server]', 'Restart a server module (api, frontend, admin)', parseRestart)
+  .option('install, --install [module.spec] [options]', 'Install a module into your project', parseInstall)
+  .option('package, --package [module.spec] [options]', 'Start the package builder', parsePackage)
+  .option('deploy, --deploy [stage]', 'Create a view when inside a project folder', deployApp)
   .option('config, --config', 'Configure your app when inside a project folder', configApp)
   .parse(process.argv);
+
+prompt.message = '';
+prompt.start();
 
 if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
 }
 
-function parseCreate(object, options) {
+function parseCreate() {
   var i = process.argv.indexOf('create');
   var params = process.argv.slice(i + 1);
 
@@ -39,12 +45,173 @@ function parseCreate(object, options) {
   new Builds()['build' + buildName](params.slice(1));
 }
 
-function parseInstall(module, options) {
+function parseStart(server) {
+  if(!fs.existsSync(process.cwd() + '/vern.json')) {
+    console.log('');
+    console.log('No ' + 'vern.json'.red + ' found');
+    console.log('');
+    return;
+  }
+
+  function handleRunner(task, runner, callback) {
+    runner.on('close', function(code) {
+      if(code === 0) {
+        callback(null, task + ' successful'.green);
+      } else {
+        callback(task + ' exited with '.red + code.red, null)
+      }
+    });
+  }
+
+  function startAPI() {
+    var runner = spawn('npm', ['install'], {
+      cwd: process.cwd() + '/app/vern',
+      stdio: 'inherit'
+    });
+    handleRunner('npm install', runner, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+      console.log(success);
+      console.log('');
+      console.log('starting server ...'.green);
+      console.log('');
+      runner = spawn('node', ['server'], {
+        cwd: process.cwd() + '/app/vern',
+        stdio: 'inherit'
+      });
+    });
+  }
+
+  function startFrontend() {
+    var runner = spawn('npm', ['install'], {
+      cwd: process.cwd() + '/app/vern_frontend',
+      stdio: 'inherit'
+    });
+    handleRunner('npm install', runner, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+      console.log(success);
+      console.log('');
+      var runner = spawn('bower', ['install'], {
+        cwd: process.cwd() + '/app/vern_frontend',
+        stdio: 'inherit'
+      });
+      handleRunner('bower install', runner, function(err, success) {
+        if(err) {
+          return console.log(err);
+        }
+        console.log(success);
+        console.log('');
+        console.log('starting server ...'.green);
+        console.log('');
+        runner = spawn('grunt', ['server'], {
+          cwd: process.cwd() + '/app/vern_frontend',
+          stdio: 'inherit'
+        });
+      })
+    });
+  }
+
+  function startAdmin() {
+    var runner = spawn('npm', ['install'], {
+      cwd: process.cwd() + '/app/vern_admin',
+      stdio: 'inherit'
+    });
+    handleRunner('npm install', runner, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+      console.log(success);
+      console.log('');
+      var runner = spawn('bower', ['install'], {
+        cwd: process.cwd() + '/app/vern_admin',
+        stdio: 'inherit'
+      });
+      handleRunner('bower install', runner, function(err, success) {
+        if(err) {
+          return console.log(err);
+        }
+        console.log(success);
+        console.log('');
+        console.log('starting server ...'.green);
+        console.log('');
+        runner = spawn('grunt', ['server'], {
+          cwd: process.cwd() + '/app/vern_admin',
+          stdio: 'inherit'
+        });
+      })
+    });
+  }
+
+  var projectConfig = require(process.cwd() + '/vern.json');
+  switch(server) {
+    case 'api':
+      startAPI();
+      break;
+    case 'frontend':
+      startFrontend();
+      break;
+    case 'admin':
+      startAdmin();
+    case 'default':
+    case 'all':
+      startAPI();
+      startFrontend();
+      startAdmin();
+      break;
+  }
+}
+
+function parseStop(server) {
+  if(!fs.existsSync(process.cwd() + '/vern.json')) {
+    console.log('');
+    console.log('No ' + 'vern.json'.red + ' found');
+    console.log('');
+    return;
+  }
+  var projectConfig = require(process.cwd() + '/vern.json');
+  switch(server) {
+    case 'api':
+
+      break;
+    case 'frontend':
+
+      break;
+    case 'admin':
+
+      break;
+  }
+}
+
+function parseRestart(server) {
+  if(!fs.existsSync(process.cwd() + '/vern.json')) {
+    console.log('');
+    console.log('No ' + 'vern.json'.red + ' found');
+    console.log('');
+    return;
+  }
+  var projectConfig = require(process.cwd() + '/vern.json');
+  switch(server) {
+    case 'api':
+
+      break;
+    case 'frontend':
+
+      break;
+    case 'admin':
+
+      break;
+  }
+}
+
+function parseInstall() {
   var i = process.argv.indexOf('install');
   var params = process.argv.slice(i + 1);
 }
 
-function parsePackage(module, options) {
+function parsePackage() {
   var i = process.argv.indexOf('package');
   var params = process.argv.slice(i + 1);
 }
@@ -56,7 +223,7 @@ function Builds() {
     var path = options[0];
     var project = null;
     if(!path) {
-      program.prompt('Enter a project name (use . for current directory):'.green, function(project) {
+      prompt.get({name: 'project', message: 'Enter a project name (use . for current directory):'.green}, function() {
         build(project, project);
       });
     } else {
@@ -71,8 +238,6 @@ function Builds() {
     function build(path, project) {
       default_config.module = project;
       console.log('Setting up ' + project.green + ' now!');
-      prompt.message = '';
-      prompt.start();
       if(fs.existsSync(path)) {
         prompt.get({
           name: 'overwrite',
@@ -117,24 +282,58 @@ function Builds() {
   };
 
   $scope.buildController = function(options) {
+    if(!fs.existsSync(process.cwd() + '/vern.json')) {
+      console.log('');
+      console.log('No ' + 'vern.json'.red + ' found');
+      console.log('');
+      return;
+    }
     var projectConfig = require(process.cwd() + '/vern.json');
     console.log(projectConfig);
   };
 
   $scope.buildService = function(options) {
-
+    if(!fs.existsSync(process.cwd() + '/vern.json')) {
+      console.log('');
+      console.log('No ' + 'vern.json'.red + ' found');
+      console.log('');
+      return;
+    }
+    var projectConfig = require(process.cwd() + '/vern.json');
+    console.log(projectConfig);
   };
 
   $scope.buildDirective = function(options) {
-
+    if(!fs.existsSync(process.cwd() + '/vern.json')) {
+      console.log('');
+      console.log('No ' + 'vern.json'.red + ' found');
+      console.log('');
+      return;
+    }
+    var projectConfig = require(process.cwd() + '/vern.json');
+    console.log(projectConfig);
   };
 
   $scope.buildModel = function(options) {
-
+    if(!fs.existsSync(process.cwd() + '/vern.json')) {
+      console.log('');
+      console.log('No ' + 'vern.json'.red + ' found');
+      console.log('');
+      return;
+    }
+    var projectConfig = require(process.cwd() + '/vern.json');
+    console.log(projectConfig);
   };
 
   $scope.buildView = function(options) {
-
+    if(!fs.existsSync(process.cwd() + '/vern.json')) {
+      console.log('');
+      console.log('No ' + 'vern.json'.red + ' found');
+      console.log('');
+      return;
+    }
+    var projectConfig = require(process.cwd() + '/vern.json');
+    console.log(projectConfig);
   };
 
   return $scope;
@@ -153,7 +352,9 @@ function Packages() {
 }
 
 function deployApp(stage) {
-
+  console.log('');
+  console.log('Upgrade to enterprise for access to deployment services'.red);
+  console.log('');
 }
 
 function configApp() {

@@ -41,7 +41,7 @@ module.exports = function (grunt) {
         ]
       },
       options: {
-        livereload: 35730
+        livereload: 35729
       }
     },
     connect: {
