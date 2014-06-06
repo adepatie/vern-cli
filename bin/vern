@@ -18,85 +18,111 @@ var program        = require('commander'),
 
 program
   .version(pkg.version)
-  .usage('[command] [options]')
-  .option('project, --project <path>', 'Create a new project', buildProject)
-  .option('container, --container <path>', 'Create a new container', buildContainer)
-  .option('controller, --controller <name>', 'Create a controller when inside a project folder', buildController)
-  .option('model, --model <name>', 'Create a model when inside a project folder', buildModel)
-  .option('service, --service <path>', 'Create a service when inside a project folder', buildService)
-  .option('directive, --directive <path>', 'Create a service when inside a project folder', buildDirective)
-  .option('view, --view <name>', 'Create a view when inside a project folder', buildView)
+  .usage('<command> [options]')
+  .option('create, --create <object> <options>', 'Create a new module', parseCreate)
+  .option('install, --install <module.spec> <options>', 'Install a module into your project', parseInstall)
+  .option('package, --pageack <module.spec> <options>', 'Start the package builder', parsePackage)
   .option('deploy, --deploy <stage>', 'Create a view when inside a project folder', deployApp)
   .option('config, --config', 'Configure your app when inside a project folder', configApp)
   .parse(process.argv);
 
-function buildProject(path, overwrite) {
-  if(!path) {
-    path = '.';
-  }
-  console.log("Setting up VERN now!".green);
-  prompt.message = '';
-  prompt.start();
-  if(fs.existsSync(path)) {
-    prompt.get({
-      name: 'overwrite',
-      message: 'Overwrite the existing directory?',
-      validator: /y[es]*|n[o]?/,
-      warning: 'Must respond yes or no',
-      default: 'no'
-    }, function(err, res) {
-      if(err) {
-        return console.log(err);
-      }
+if(process.argv.length <= 2) {
+  return console.log('No command given, ' + 'vern -h'.green + ' for usage');
+}
 
-      if(res.overwrite.charAt(0) === 'y') {
-        copyProject(path);
-      } else {
-        console.log('Not going to overwrite. Good bye!'.red);
-      }
+function parseCreate(object, options) {
+  var i = process.argv.indexOf('create');
+  var params = process.argv.slice(i + 1);
+
+  var buildName = params[0];
+  buildName = buildName.charAt(0).toUpperCase() + buildName.slice(1).toLowerCase();
+  new Builds()['build' + buildName](params.slice(1));
+}
+
+function parseInstall(module, options) {
+  var i = process.argv.indexOf('install');
+  var params = process.argv.slice(i + 1);
+}
+
+function parsePackage(module, options) {
+  var i = process.argv.indexOf('package');
+  var params = process.argv.slice(i + 1);
+}
+
+function Builds() {
+  var $scope = this;
+
+  $scope.buildProject = function(options) {
+    var path = options[0];
+    if(!path) {
+      path = '.';
+    }
+    console.log("Setting up VERN now!".green);
+    prompt.message = '';
+    prompt.start();
+    if(fs.existsSync(path)) {
+      prompt.get({
+        name: 'overwrite',
+        message: 'Overwrite the existing directory?',
+        validator: /y[es]*|n[o]?/,
+        warning: 'Must respond yes or no',
+        default: 'no'
+      }, function(err, res) {
+        if(err) {
+          return console.log(err);
+        }
+
+        if(res.overwrite.charAt(0) === 'y') {
+          copyProject(path);
+        } else {
+          console.log('Not going to overwrite. Good bye!'.red);
+        }
+      });
+    } else {
+      copyProject(path);
+    }
+  };
+
+  function copyProject(path) {
+    _project.copy(path, function(err, res) {
+      console.log('Created project in: ' + path.green);
+      fs.outputJson(path + '/vern.json', default_config, function(err) {
+        if(err) {
+          return console.log(err);
+        }
+
+        console.log('Created ' + (path + '/vern.json').green);
+        // Now we will prompt the user to start adding base routes, controllers, and models.
+        // We can also setup a deployment strategy(ies)
+      });
     });
-  } else {
-    copyProject(path);
   }
-}
 
-function copyProject(path) {
-  _project.copy(path, function(err, res) {
-    console.log('Created project in: ' + path.green);
-    fs.outputJson(path + '/vern.json', default_config, function(err) {
-      if(err) {
-        return console.log(err);
-      }
+  $scope.buildContainer = function(options) {
 
-      console.log('Created ' + (path + '/vern.json').green);
-      // Now we will prompt the user to start adding base routes, controllers, and models.
-      // We can also setup a deployment strategy(ies)
-    });
-  });
-}
+  };
 
-function buildContainer(path) {
+  $scope.buildController = function(options) {
 
-}
+  };
 
-function buildController(name) {
+  $scope.buildService = function(options) {
 
-}
+  };
 
-function buildService(path) {
+  $scope.buildDirective = function(options) {
 
-}
+  };
 
-function buildDirective(path) {
+  $scope.buildModel = function(options) {
 
-}
+  };
 
-function buildModel(name) {
+  $scope.buildView = function(options) {
 
-}
+  };
 
-function buildView(name) {
-
+  return $scope;
 }
 
 function deployApp(stage) {
