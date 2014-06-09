@@ -32,17 +32,59 @@ program
 prompt.message = '';
 prompt.start();
 
+var project_dirs = {
+  vern: '/app/vern',
+  admin: '/app/vern_admin',
+  assets: '/app/vern_assets',
+  frontend: '/app/vern_frontend'
+};
+
+var processes = {
+  vern: null,
+  admin: null,
+  frontend: null
+};
+
 if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
 }
 
-function parseCreate() {
-  var i = process.argv.indexOf('create');
-  var params = process.argv.slice(i + 1);
+function handleRunner(task, runner, callback) {
+  runner.on('close', function(code) {
+    if(code === 0) {
+      callback(null, task + ' successful'.green);
+    } else {
+      callback(task + ' exited with '.red + code.red, null)
+    }
+  });
+}
 
-  var buildName = params[0];
-  buildName = buildName.charAt(0).toUpperCase() + buildName.slice(1).toLowerCase();
-  new Builds()['build' + buildName](params.slice(1));
+function runNpm(path, callback) {
+  var runner = spawn('npm', ['install'], {
+    cwd: path,
+    stdio: 'inherit'
+  });
+  handleRunner('npm install', runner, function(err, success) {
+    if (err) {
+      return callback(err);
+    }
+
+    return callback(null, success);
+  });
+}
+
+function runBower(path, callback) {
+  var runner = spawn('bower', ['install'], {
+    cwd: path,
+    stdio: 'inherit'
+  });
+  handleRunner('bower install', runner, function(err, success) {
+    if (err) {
+      return callback(err);
+    }
+
+    return callback(null, success);
+  });
 }
 
 function parseStart(server) {
@@ -53,98 +95,108 @@ function parseStart(server) {
     return;
   }
 
-  function handleRunner(task, runner, callback) {
-    runner.on('close', function(code) {
-      if(code === 0) {
-        callback(null, task + ' successful'.green);
-      } else {
-        callback(task + ' exited with '.red + code.red, null)
-      }
-    });
-  }
-
-  function startAPI() {
-    var runner = spawn('npm', ['install'], {
-      cwd: process.cwd() + '/app/vern',
-      stdio: 'inherit'
-    });
-    handleRunner('npm install', runner, function(err, success) {
-      if(err) {
-        return console.log(err);
-      }
-      console.log(success);
+  function startAPI(install) {
+    if(install === true) {
+      runNpm(process.cwd() + project_dirs['vern'], function(err, success) {
+        if(err) {
+          return console.log(err);
+        }
+        console.log(success);
+        console.log('');
+        console.log('starting server ...'.green);
+        console.log('');
+        processes['vern'] = spawn('node', ['server'], {
+          cwd: process.cwd() + '/app/vern',
+          stdio: 'inherit'
+        });
+      });
+    } else {
       console.log('');
       console.log('starting server ...'.green);
       console.log('');
-      runner = spawn('node', ['server'], {
+      processes['vern'] = spawn('node', ['server'], {
         cwd: process.cwd() + '/app/vern',
         stdio: 'inherit'
       });
-    });
+    }
   }
 
-  function startFrontend() {
-    var runner = spawn('npm', ['install'], {
-      cwd: process.cwd() + '/app/vern_frontend',
-      stdio: 'inherit'
-    });
-    handleRunner('npm install', runner, function(err, success) {
-      if(err) {
-        return console.log(err);
-      }
-      console.log(success);
-      console.log('');
-      var runner = spawn('bower', ['install'], {
-        cwd: process.cwd() + '/app/vern_frontend',
-        stdio: 'inherit'
-      });
-      handleRunner('bower install', runner, function(err, success) {
+  function startFrontend(install) {
+    if(install === true) {
+      runNpm(process.cwd() + project_dirs['frontend'], function(err, success) {
         if(err) {
           return console.log(err);
         }
+
         console.log(success);
         console.log('');
-        console.log('starting server ...'.green);
-        console.log('');
-        runner = spawn('grunt', ['server'], {
-          cwd: process.cwd() + '/app/vern_frontend',
-          stdio: 'inherit'
+        runBower(process.cwd() + project_dirs['frontend'], function(err, success) {
+          if(err) {
+            return console.log(err);
+          }
+
+          console.log(success);
+          console.log('');
+          console.log('starting server ...'.green);
+          console.log('');
+
+          processes['frontend'] = spawn('grunt', ['server'], {
+            cwd: process.cwd() + project_dirs['frontend'],
+            stdio: 'inherit'
+          });
         });
-      })
-    });
+      });
+    } else {
+      console.log('');
+      console.log('starting server ...'.green);
+      console.log('');
+
+      processes['frontend'] = spawn('grunt', ['server'], {
+        cwd: process.cwd() + project_dirs['frontend'],
+        stdio: 'inherit'
+      });
+    }
   }
 
   function startAdmin() {
-    var runner = spawn('npm', ['install'], {
-      cwd: process.cwd() + '/app/vern_admin',
-      stdio: 'inherit'
-    });
-    handleRunner('npm install', runner, function(err, success) {
-      if(err) {
-        return console.log(err);
-      }
-      console.log(success);
-      console.log('');
-      var runner = spawn('bower', ['install'], {
-        cwd: process.cwd() + '/app/vern_admin',
-        stdio: 'inherit'
-      });
-      handleRunner('bower install', runner, function(err, success) {
+    if(install === true) {
+      runNpm(process.cwd() + project_dirs['admin'], function(err, success) {
         if(err) {
           return console.log(err);
         }
+
         console.log(success);
         console.log('');
-        console.log('starting server ...'.green);
-        console.log('');
-        runner = spawn('grunt', ['server'], {
-          cwd: process.cwd() + '/app/vern_admin',
-          stdio: 'inherit'
+        runBower(process.cwd() + project_dirs['admin'], function(err, success) {
+          if(err) {
+            return console.log(err);
+          }
+
+          console.log(success);
+          console.log('');
+          console.log('starting server ...'.green);
+          console.log('');
+
+          processes['admin'] = spawn('grunt', ['server'], {
+            cwd: process.cwd() + project_dirs['admin'],
+            stdio: 'inherit'
+          });
         });
-      })
-    });
+      });
+    } else {
+      console.log('');
+      console.log('starting server ...'.green);
+      console.log('');
+
+      processes['admin'] = spawn('grunt', ['server'], {
+        cwd: process.cwd() + project_dirs['admin'],
+        stdio: 'inherit'
+      });
+    }
   }
 
+  var i = process.argv.indexOf('start');
+  var params = process.argv.slice(i + 1);
   var projectConfig = require(process.cwd() + '/vern.json');
   switch(server) {
     case 'api':
@@ -207,14 +259,38 @@ function parseRestart(server) {
   }
 }
 
-function parseInstall() {
-  var i = process.argv.indexOf('install');
-  var params = process.argv.slice(i + 1);
-}
+/*
+ *
+ * Build functions
+ *
+ * These create the necessary templates and configurations for each type of component
+ *
+ * PROJECT LEVEL
+ * ===
+ * Project - Set up a complete vern structure
+ * Container - Set up a container to be packaged and installed in projects (needs more explanation)
+ *
+ * API/BACKEND LEVEL
+ * ===
+ * Controller - Set up a vern route/data controller
+ * Model - Set up a vern data model
+ *
+ * ANGULAR LEVEL (specify admin or frontend)
+ * ===
+ * View - Sets up an angular view + stylesheet + controller
+ * Directive - Sets up an angular directive
+ * Service - Sets up an angular service
+ * Filter - Sets up an angular filter
+ *
+ */
 
-function parsePackage() {
-  var i = process.argv.indexOf('package');
+function parseCreate() {
+  var i = process.argv.indexOf('create');
   var params = process.argv.slice(i + 1);
+
+  var buildName = params[0];
+  buildName = buildName.charAt(0).toUpperCase() + buildName.slice(1).toLowerCase();
+  new Builds()['build' + buildName](params.slice(1));
 }
 
 function Builds() {
@@ -278,72 +354,80 @@ function Builds() {
     });
   }
 
+  function loadProjectConfig() {
+    if(!fs.existsSync(process.cwd() + '/vern.json')) {
+      console.log('');
+      console.log('No ' + 'vern.json'.red + ' found');
+      console.log('');
+      return null;
+    }
+    return require(process.cwd() + '/vern.json');
+  }
+
   $scope.buildContainer = function(options) {
 
   };
 
   $scope.buildController = function(options) {
-    if(!fs.existsSync(process.cwd() + '/vern.json')) {
-      console.log('');
-      console.log('No ' + 'vern.json'.red + ' found');
-      console.log('');
-      return;
-    }
-    var projectConfig = require(process.cwd() + '/vern.json');
-    console.log(projectConfig);
+    var projectConfig = loadProjectConfig();
   };
 
   $scope.buildService = function(options) {
-    if(!fs.existsSync(process.cwd() + '/vern.json')) {
-      console.log('');
-      console.log('No ' + 'vern.json'.red + ' found');
-      console.log('');
-      return;
-    }
-    var projectConfig = require(process.cwd() + '/vern.json');
-    console.log(projectConfig);
+    var projectConfig = loadProjectConfig();
   };
 
   $scope.buildDirective = function(options) {
-    if(!fs.existsSync(process.cwd() + '/vern.json')) {
-      console.log('');
-      console.log('No ' + 'vern.json'.red + ' found');
-      console.log('');
-      return;
-    }
-    var projectConfig = require(process.cwd() + '/vern.json');
-    console.log(projectConfig);
+    var projectConfig = loadProjectConfig();
+  };
+
+  $scope.buildFilter = function(options) {
+    var projectConfig = loadProjectConfig();
   };
 
   $scope.buildModel = function(options) {
-    if(!fs.existsSync(process.cwd() + '/vern.json')) {
-      console.log('');
-      console.log('No ' + 'vern.json'.red + ' found');
-      console.log('');
-      return;
-    }
-    var projectConfig = require(process.cwd() + '/vern.json');
-    console.log(projectConfig);
+    var projectConfig = loadProjectConfig();
   };
 
   $scope.buildView = function(options) {
-    if(!fs.existsSync(process.cwd() + '/vern.json')) {
-      console.log('');
-      console.log('No ' + 'vern.json'.red + ' found');
-      console.log('');
-      return;
-    }
-    var projectConfig = require(process.cwd() + '/vern.json');
-    console.log(projectConfig);
+    var projectConfig = loadProjectConfig();
   };
 
   return $scope;
+}
+
+/*
+ *
+ * Install functions
+ *
+ * These methods are used to install npm/bower modules AND vern containers
+ *
+ * Installs for npm/bower should specify which vern component they are
+ * installing to (vern, admin, assets, frontend)
+ *
+ */
+function parseInstall() {
+  var i = process.argv.indexOf('install');
+  var params = process.argv.slice(i + 1);
 }
 
 function Installs() {
   var $scope = this;
 
   return $scope;
+}
+
+/*
+ *
+ * Package functions
+ *
+ * These are used to package containers which can be deployed into a project.
+ *
+ * Packages can be specified for vern/api, admin, assets, or frontend projects
+ *
+ */
+function parsePackage() {
+  var i = process.argv.indexOf('package');
+  var params = process.argv.slice(i + 1);
 }
 
 function Packages() {

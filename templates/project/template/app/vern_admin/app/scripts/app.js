@@ -14,6 +14,7 @@ angular.module('VernApp', ['ngSanitize', 'ngRoute', 'ngTouch', 'config', 'LocalS
           innerTemplateUrl: r.innerTemplateUrl,
           controller: r.controller,
           event: r.event,
+          section: r.section,
           page_title: r.page_title
         });
       }
