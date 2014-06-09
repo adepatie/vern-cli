@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp', ['ngSanitize', 'ngRoute', 'ngTouch', 'config', 'LocalStorageModule', 'ui.bootstrap', 'ui.sortable', 'VernApp.filters', 'ngDictionary'])
+angular.module('VernApp', ['ngSanitize', 'ngRoute', 'config', 'LocalStorageModule', 'ui.bootstrap', 'ui.sortable', 'VernApp.filters', 'ngDictionary'])
   .config(['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.useXDomain = true;
     delete $httpProvider.defaults.headers.common['X-Requested-With'];

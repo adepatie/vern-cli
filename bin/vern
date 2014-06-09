@@ -2,6 +2,7 @@
 
 var program        = require('commander'),
     os             = require('os'),
+    path           = require('path'),
     fs             = require('fs-extra'),
     spawn          = require('child_process').spawn,
     prompt         = require('prompt'),
@@ -32,61 +33,19 @@ program
 prompt.message = '';
 prompt.start();
 
-var project_dirs = {
-  vern: '/app/vern',
-  admin: '/app/vern_admin',
-  assets: '/app/vern_assets',
-  frontend: '/app/vern_frontend'
-};
-
-var processes = {
-  vern: null,
-  admin: null,
-  frontend: null
-};
-
 if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
 }
 
-function handleRunner(task, runner, callback) {
-  runner.on('close', function(code) {
-    if(code === 0) {
-      callback(null, task + ' successful'.green);
-    } else {
-      callback(task + ' exited with '.red + code.red, null)
-    }
-  });
-}
-
-function runNpm(path, callback) {
-  var runner = spawn('npm', ['install'], {
-    cwd: path,
-    stdio: 'inherit'
-  });
-  handleRunner('npm install', runner, function(err, success) {
-    if (err) {
-      return callback(err);
-    }
-
-    return callback(null, success);
-  });
-}
-
-function runBower(path, callback) {
-  var runner = spawn('bower', ['install'], {
-    cwd: path,
-    stdio: 'inherit'
-  });
-  handleRunner('bower install', runner, function(err, success) {
-    if (err) {
-      return callback(err);
-    }
-
-    return callback(null, success);
-  });
-}
-
+/*
+ *
+ * Starter functions
+ *
+ * These methods will start the api, admin, and frontend servers for development
+ *
+ * For a production deployment the process is different, but could be very similar
+ *
+ */
 function parseStart(server) {
   if(!fs.existsSync(process.cwd() + '/vern.json')) {
     console.log('');
@@ -95,124 +54,26 @@ function parseStart(server) {
     return;
   }
 
-  function startAPI(install) {
-    if(install === true) {
-      runNpm(process.cwd() + project_dirs['vern'], function(err, success) {
-        if(err) {
-          return console.log(err);
-        }
-        console.log(success);
-        console.log('');
-        console.log('starting server ...'.green);
-        console.log('');
-        processes['vern'] = spawn('node', ['server'], {
-          cwd: process.cwd() + '/app/vern',
-          stdio: 'inherit'
-        });
-      });
-    } else {
-      console.log('');
-      console.log('starting server ...'.green);
-      console.log('');
-      processes['vern'] = spawn('node', ['server'], {
-        cwd: process.cwd() + '/app/vern',
-        stdio: 'inherit'
-      });
-    }
-  }
-
-  function startFrontend(install) {
-    if(install === true) {
-      runNpm(process.cwd() + project_dirs['frontend'], function(err, success) {
-        if(err) {
-          return console.log(err);
-        }
-
-        console.log(success);
-        console.log('');
-        runBower(process.cwd() + project_dirs['frontend'], function(err, success) {
-          if(err) {
-            return console.log(err);
-          }
-
-          console.log(success);
-          console.log('');
-          console.log('starting server ...'.green);
-          console.log('');
-
-          processes['frontend'] = spawn('grunt', ['server'], {
-            cwd: process.cwd() + project_dirs['frontend'],
-            stdio: 'inherit'
-          });
-        });
-      });
-    } else {
-      console.log('');
-      console.log('starting server ...'.green);
-      console.log('');
-
-      processes['frontend'] = spawn('grunt', ['server'], {
-        cwd: process.cwd() + project_dirs['frontend'],
-        stdio: 'inherit'
-      });
-    }
-  }
-
-  function startAdmin() {
-    if(install === true) {
-      runNpm(process.cwd() + project_dirs['admin'], function(err, success) {
-        if(err) {
-          return console.log(err);
-        }
-
-        console.log(success);
-        console.log('');
-        runBower(process.cwd() + project_dirs['admin'], function(err, success) {
-          if(err) {
-            return console.log(err);
-          }
-
-          console.log(success);
-          console.log('');
-          console.log('starting server ...'.green);
-          console.log('');
-
-          processes['admin'] = spawn('grunt', ['server'], {
-            cwd: process.cwd() + project_dirs['admin'],
-            stdio: 'inherit'
-          });
-        });
-      });
-    } else {
-      console.log('');
-      console.log('starting server ...'.green);
-      console.log('');
-
-      processes['admin'] = spawn('grunt', ['server'], {
-        cwd: process.cwd() + project_dirs['admin'],
-        stdio: 'inherit'
-      });
-    }
-  }
-
   var i = process.argv.indexOf('start');
   var params = process.argv.slice(i + 1);
   var projectConfig = require(process.cwd() + '/vern.json');
   switch(server) {
     case 'api':
-      startAPI();
+      new Starter(projectConfig).startAPI(params);
       break;
     case 'frontend':
-      startFrontend();
+      new Starter(projectConfig).startFrontend(params);
       break;
     case 'admin':
-      startAdmin();
+      new Starter(projectConfig).startAdmin(params);
       break;
     case 'default':
     case 'all':
-      startAPI();
-      startFrontend();
-      startAdmin();
+      new Starter(projectConfig).startAPI(params, function() {
+        new Starter(projectConfig).startFrontend(params, function () {
+          new Starter(projectConfig).startAdmin(params);
+        });
+      });
       break;
   }
 }
@@ -259,6 +120,199 @@ function parseRestart(server) {
   }
 }
 
+function Starter(options) {
+  var $scope = this;
+
+  $scope.processes = {
+    vern: null,
+    admin: null,
+    frontend: null
+  };
+
+  var project_dirs = {
+    vern: '/app/vern',
+    admin: '/app/vern_admin',
+    assets: '/app/vern_assets',
+    frontend: '/app/vern_frontend'
+  };
+
+  var cwd = options.cwd || process.cwd();
+
+  $scope.handleRunner = function(task, runner, callback) {
+    runner.on('close', function(code) {
+      if(code === 0) {
+        callback(null, task + ' successful'.green);
+      } else {
+        callback(task + ' exited with '.red + code.red, null)
+      }
+    });
+
+    runner.on('error', function(message) {
+      console.log('here');
+    });
+  };
+
+  $scope.runNpm = function(cmd_path, callback) {
+    console.log('running npm in ' + cmd_path);
+    var runner = spawn('npm', ['install'], {
+      cwd: cmd_path,
+      stdio: 'inherit'
+    });
+    $scope.handleRunner('npm install in ' + cmd_path, runner, function(err, success) {
+      if (err) {
+        return callback(err);
+      }
+
+      return callback(null, success);
+    });
+  };
+
+  $scope.runBower = function(cmd_path, callback) {
+    console.log('running bower in ' + cmd_path);
+    var runner = spawn('bower', ['install'], {
+      cwd: cmd_path,
+      stdio: 'inherit'
+    });
+    $scope.handleRunner('bower install in ' + cmd_path, runner, function(err, success) {
+      if (err) {
+        return callback(err);
+      }
+
+      return callback(null, success);
+    });
+  };
+
+  $scope.vernExec = function(opts) {
+    var env = opts.environment || opts.env || 'development';
+    var project = opts.project || 'vern';
+
+    console.log('');
+    console.log('starting '.green + project.green + ' ...'.green);
+    console.log('');
+    $scope.processes[project] = spawn('node', ['server'], {
+      cwd: cwd + project_dirs[project],
+      stdio: 'inherit'
+    });
+  };
+
+  $scope.gruntExec = function(opts) {
+    var project = opts.project || 'frontend';
+
+    console.log('');
+    console.log('starting '.green + project.green + ' ...'.green);
+    console.log('');
+
+    $scope.processes[project] = spawn('grunt', ['server'], {
+      cwd: cwd + project_dirs[project],
+      stdio: 'inherit'
+    });
+  };
+
+  $scope.startAPI = function(install, nostart, callback) {
+    if(arguments.length === 1 && typeof arguments[0] === 'function') {
+      callback = arguments[0];
+    }
+    if(arguments.length === 2 && typeof arguments[1] === 'function') {
+      callback = arguments[1];
+    }
+    if(install === true) {
+      $scope.runNpm(cwd + project_dirs['vern'], function(err, success) {
+        if(err) {
+          return console.log(err);
+        }
+        console.log(success);
+        if(!nostart) {
+          $scope.vernExec({project: 'vern', env: 'development'});
+        }
+        if(callback) {
+          callback(null, 'api started');
+        }
+      });
+    } else {
+      $scope.vernExec({project: 'vern', env: 'development'});
+      if(callback) {
+        callback(null, 'api started');
+      }
+    }
+  };
+
+  $scope.startFrontend = function(install, nostart, callback) {
+    if(arguments.length === 1 && typeof arguments[0] === 'function') {
+      callback = arguments[0];
+    }
+    if(arguments.length === 2 && typeof arguments[1] === 'function') {
+      callback = arguments[1];
+    }
+    if(install === true) {
+      $scope.runNpm(cwd + project_dirs['frontend'], function(err, success) {
+        if(err) {
+          return console.log(err);
+        }
+
+        console.log(success);
+        console.log('');
+        $scope.runBower(cwd + project_dirs['frontend'], function(err, success) {
+          if(err) {
+            return console.log(err);
+          }
+
+          console.log(success);
+          if(!nostart) {
+            $scope.gruntExec({project: 'frontend'});
+          }
+          if(callback) {
+            callback(null, 'api started');
+          }
+        });
+      });
+    } else {
+      $scope.gruntExec({project: 'frontend'});
+      if(callback) {
+        callback(null, 'api started');
+      }
+    }
+  };
+
+  $scope.startAdmin = function(install, nostart, callback) {
+    if(arguments.length === 1 && typeof arguments[0] === 'function') {
+      callback = arguments[0];
+    }
+    if(arguments.length === 2 && typeof arguments[1] === 'function') {
+      callback = arguments[1];
+    }
+    if(install === true) {
+      $scope.runNpm(cwd + project_dirs['admin'], function(err, success) {
+        if(err) {
+          return console.log(err);
+        }
+
+        console.log(success);
+        console.log('');
+        $scope.runBower(cwd + project_dirs['admin'], function(err, success) {
+          if(err) {
+            return console.log(err);
+          }
+
+          console.log(success);
+          if(!nostart) {
+            $scope.gruntExec({project: 'admin'});
+          }
+          if(callback) {
+            callback(null, 'api started');
+          }
+        });
+      });
+    } else {
+      $scope.gruntExec({project: 'admin'});
+      if(callback) {
+        callback(null, 'api started');
+      }
+    }
+  };
+
+  return $scope;
+}
+
 /*
  *
  * Build functions
@@ -297,25 +351,25 @@ function Builds() {
   var $scope = this;
 
   $scope.buildProject = function(options) {
-    var path = options[0];
+    var project_path = options[0];
     var project = null;
-    if(!path) {
+    if(!project_path) {
       prompt.get({name: 'project', message: 'Enter a project name (use . for current directory):'.green}, function() {
         build(project, project);
       });
     } else {
-      if(path === '.') {
+      if(project_path === '.') {
         project = process.cwd().split('/').pop();
       } else {
-        project = path.split('/').pop();
+        project = project_path.split('/').pop();
       }
-      build(path, project);
+      build(project_path, project);
     }
 
-    function build(path, project) {
+    function build(project_path, project) {
       default_config.module = project;
       console.log('Setting up ' + project.green + ' now!');
-      if(fs.existsSync(path)) {
+      if(fs.existsSync(project_path)) {
         prompt.get({
           name: 'overwrite',
           message: 'Overwrite the existing directory?',
@@ -328,68 +382,107 @@ function Builds() {
           }
 
           if(res.overwrite.charAt(0) === 'y') {
-            copyProject(path);
+            copyProject(project_path);
           } else {
             console.log('Not going to overwrite. Good bye!'.red);
           }
         });
       } else {
-        copyProject(path);
+        copyProject(project_path);
       }
     }
   };
 
-  function copyProject(path, project) {
-    _project.copy(path, function(err, res) {
-      console.log('Created project in: ' + path.green);
-      fs.outputJson(path + '/vern.json', default_config, function(err) {
+  function copyProject(project_path, project) {
+    _project.copy(project_path, function(err, res) {
+      console.log('Created project in: ' + project_path.green);
+      fs.outputJson(project_path + '/vern.json', default_config, function(err) {
         if(err) {
           return console.log(err);
         }
 
-        console.log('Created ' + (path + '/vern.json').green);
+        console.log('Created ' + (project_path + '/vern.json').green);
         // Now we will prompt the user to start adding base routes, controllers, and models.
         // We can also setup a deployment strategy(ies)
+        prompt.get({
+          name: 'install',
+          message: 'Would you like to install all dependencies now? It will take a few minutes.',
+          validator: /y[es]*|n[o]?/,
+          warning: 'Must respond yes or no',
+          default: 'no'
+        }, function(err, res) {
+          if(res.install.charAt(0) === 'y') {
+            var newCWD = path.join(process.cwd(), project_path);
+            new Starter({cwd: newCWD}).startAPI(true, true, function(err, success) {
+              if(err) {
+                return console.log(err);
+              }
+              new Starter({cwd: newCWD}).startFrontend(true, true, function (err, success) {
+                if(err) {
+                  return console.log(err);
+                }
+                new Starter({cwd: newCWD}).startAdmin(true, true, function (err, success) {
+                  if(err) {
+                    return console.log(err);
+                  }
+
+                  console.log('');
+                  console.log('All servers dependencies installed!');
+                  console.log('');
+                  console.log('To start servers: ' + 'cd '.green + project_path.green);
+                  console.log('Then run ' + 'vern start all'.green);
+                });
+              });
+            });
+          } else {
+            console.log('');
+            console.log('You can start your servers by running ' + 'vern start all'.green);
+          }
+        });
       });
     });
   }
 
-  function loadProjectConfig() {
-    if(!fs.existsSync(process.cwd() + '/vern.json')) {
+  $scope.loadProjectConfig = function(project_path) {
+    if(!project_path) {
+      project_path = process.cwd() + '/vern.json';
+    }
+
+    if(!fs.existsSync(project_path)) {
       console.log('');
       console.log('No ' + 'vern.json'.red + ' found');
       console.log('');
       return null;
     }
     return require(process.cwd() + '/vern.json');
-  }
+  };
 
   $scope.buildContainer = function(options) {
 
   };
 
   $scope.buildController = function(options) {
-    var projectConfig = loadProjectConfig();
+    var projectConfig = $scope.loadProjectConfig();
   };
 
   $scope.buildService = function(options) {
-    var projectConfig = loadProjectConfig();
+    var projectConfig = $scope.loadProjectConfig();
   };
 
   $scope.buildDirective = function(options) {
-    var projectConfig = loadProjectConfig();
+    var projectConfig = $scope.loadProjectConfig();
   };
 
   $scope.buildFilter = function(options) {
-    var projectConfig = loadProjectConfig();
+    var projectConfig = $scope.loadProjectConfig();
   };
 
   $scope.buildModel = function(options) {
-    var projectConfig = loadProjectConfig();
+    var projectConfig = $scope.loadProjectConfig();
   };
 
   $scope.buildView = function(options) {
-    var projectConfig = loadProjectConfig();
+    var projectConfig = $scope.loadProjectConfig();
   };
 
   return $scope;

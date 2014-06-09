@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Vern API",
   "main": "server.js",
+  "engines": {
+    "node": ">=0.10.0"
+  },
   "dependencies": {
     "validator": "latest",
     "optimist": "latest",
@@ -21,7 +24,7 @@
     "type": "git",
     "url": "https://github.com/uh-sem-blee/vern"
   },
-  "author": "John Josef",
-  "license": "BSD",
+  "author": "uh-sem-blee",
+  "license": "AGPL v3",
   "readmeFilename": "README.md"
 }
