@@ -458,7 +458,7 @@ function Builds() {
         cwd = path.dirname(project_path);
         return require(cwd + '/vern.json');
       }
-      if(project_path === '/') {
+      if(path.dirname(project_path) === '/') {
         done = true;
         continue;
       }
