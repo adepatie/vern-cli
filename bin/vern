@@ -13,6 +13,7 @@ var program        = require('commander'),
     _model         = require(template_dir + '/model'),
     _directive     = require(template_dir + '/directive'),
     _service       = require(template_dir + '/service'),
+    _filter        = require(template_dir + '/filter'),
     _view          = require(template_dir + '/view'),
     default_config = require(template_dir + '/vern_config.json'),
     pkg            = require('../package.json');
@@ -350,16 +351,18 @@ function parseCreate() {
 function Builds() {
   var $scope = this;
 
+  var cwd = process.cwd();
+
   $scope.buildProject = function(options) {
     var project_path = options[0];
     var project = null;
     if(!project_path) {
-      prompt.get({name: 'project', message: 'Enter a project name (use . for current directory):'.green}, function() {
-        build(project, project);
+      prompt.get({name: 'project', message: 'Enter a project name (use . for current directory):'.green}, function(err, res) {
+        build(res.project, res.project);
       });
     } else {
       if(project_path === '.') {
-        project = process.cwd().split('/').pop();
+        project = cwd.split('/').pop();
       } else {
         project = project_path.split('/').pop();
       }
@@ -369,7 +372,7 @@ function Builds() {
     function build(project_path, project) {
       default_config.module = project;
       console.log('Setting up ' + project.green + ' now!');
-      if(fs.existsSync(project_path)) {
+      if((fs.existsSync(project_path) && project_path !== '.') || (project_path === '.' && fs.readdirSync(project_path).length > 0)) {
         prompt.get({
           name: 'overwrite',
           message: 'Overwrite the existing directory?',
@@ -412,7 +415,7 @@ function Builds() {
           default: 'no'
         }, function(err, res) {
           if(res.install.charAt(0) === 'y') {
-            var newCWD = path.join(process.cwd(), project_path);
+            var newCWD = path.join(cwd, project_path);
             new Starter({cwd: newCWD}).startAPI(true, true, function(err, success) {
               if(err) {
                 return console.log(err);
@@ -445,16 +448,27 @@ function Builds() {
 
   $scope.loadProjectConfig = function(project_path) {
     if(!project_path) {
-      project_path = process.cwd() + '/vern.json';
+      project_path = cwd + '/vern.json';
     }
 
-    if(!fs.existsSync(project_path)) {
-      console.log('');
-      console.log('No ' + 'vern.json'.red + ' found');
-      console.log('');
-      return null;
+    var done = false;
+
+    while(!done) {
+      if (fs.existsSync(project_path)) {
+        cwd = path.dirname(project_path);
+        return require(cwd + '/vern.json');
+      }
+      if(project_path === '/') {
+        done = true;
+        continue;
+      }
+      project_path = path.normalize(path.dirname(project_path) + '/../' + 'vern.json');
     }
-    return require(process.cwd() + '/vern.json');
+
+    console.log('');
+    console.log('No ' + 'vern.json'.red + ' found');
+    console.log('');
+    return null;
   };
 
   $scope.buildContainer = function(options) {
@@ -463,6 +477,18 @@ function Builds() {
 
   $scope.buildController = function(options) {
     var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    var params = {
+      name: options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Controller',
+      path: cwd + '/app/vern/controllers'
+    };
+
+    _controller.copy(params, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+    });
   };
 
   $scope.buildService = function(options) {
@@ -479,6 +505,25 @@ function Builds() {
 
   $scope.buildModel = function(options) {
     var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    var params = {
+      name: options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Model',
+      path: cwd + '/app/vern/models',
+      collection: options[0].toLowerCase(),
+      indexes: [],
+      exclude: [],
+      validations: {},
+      validation_exceptions: {},
+      non_editable: [],
+      super_constructor: null
+    };
+
+    _model.copy(params, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+    });
   };
 
   $scope.buildView = function(options) {
