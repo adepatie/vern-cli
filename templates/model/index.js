@@ -25,7 +25,7 @@ module.exports = {
       super_constructor: JSON.stringify(params.super_constructor)
     };
 
-    mustache.compileText('controller', tpl, function(err, compiled) {
+    mustache.compileText('model', tpl, function(err, compiled) {
       if(err) {
         return callback(err, null);
       }

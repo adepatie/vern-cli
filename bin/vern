@@ -14,7 +14,9 @@ var program        = require('commander'),
     _directive     = require(template_dir + '/directive'),
     _service       = require(template_dir + '/service'),
     _filter        = require(template_dir + '/filter'),
+    _route         = require(template_dir + '/route'),
     _view          = require(template_dir + '/view'),
+    utils          = require('../utils');
     default_config = require(template_dir + '/vern_config.json'),
     pkg            = require('../package.json');
 
@@ -434,12 +436,14 @@ function Builds() {
                   console.log('');
                   console.log('To start servers: ' + 'cd '.green + project_path.green);
                   console.log('Then run ' + 'vern start all'.green);
+                  console.log('');
                 });
               });
             });
           } else {
             console.log('');
             console.log('You can start your servers by running ' + 'vern start all'.green);
+            console.log('');
           }
         });
       });
@@ -488,6 +492,10 @@ function Builds() {
       if(err) {
         return console.log(err);
       }
+
+      console.log('');
+      console.log(success);
+      console.log('');
     });
   };
 
@@ -523,11 +531,120 @@ function Builds() {
       if(err) {
         return console.log(err);
       }
+
+      console.log('');
+      console.log(success);
+      console.log('');
+    });
+  };
+
+  $scope.buildRoute = function(options) {
+    var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 2) {
+      console.log('');
+      console.log('You must specify admin or frontend'.red);
+      console.log('');
+      return;
+    }
+
+    options[0] = 'vern_' + options[0];
+
+    var extraPath = '/main';
+    if(options.indexOf('--partial') > -1) {
+      extraPath = '/partials';
+    }
+    if(options.indexOf('--modal') > -1) {
+      extraPath = '/modals';
+    }
+    if(options.indexOf('--path') > -1) {
+      console.log(options);
+      console.log(options.indexOf('--path'));
+      extraPath = options[options.indexOf('--path') + 1];
+    }
+
+    var name = options[1].toLowerCase();
+    var controller_name = options[1].charAt(0).toUpperCase() + options[1].slice(1).toLowerCase().replace(/-_(.)/g, function(match, group) {
+      return group.toUpperCase();
+    }) + 'Ctrl';
+
+    var params = {
+      name: name,
+      controller_name: controller_name,
+      view_path: cwd + '/app/' + options[0] + '/app/views' + extraPath + '/' + name,
+      style_path: cwd + '/app/' + options[0] + '/app/styles/less',
+      controller_path: cwd + '/app/' + options[0] + '/app/scripts/controllers',
+      controller: true,
+      stylesheet: true
+    };
+
+    _route.copy(params, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+
+      utils.rewrite({
+        path: cwd + '/app/' + options[0] + '/app/index.html',
+        needle: '<!-- endbuild -->',
+        insertions: [
+          '<script type="text/javascript" src="scripts/controllers/' + params.name + '.js"></script>'
+        ]
+      });
+
+      utils.rewrite({
+        path: cwd + '/app/' + options[0] + '/app/styles/less/main.less',
+        needle: '// buildpoint',
+        insertions: [
+          '@import "' + params.name + '.less";'
+        ]
+      });
+
+      console.log('');
+      console.log(success.green);
+      console.log('');
     });
   };
 
   $scope.buildView = function(options) {
     var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 2) {
+      console.log('');
+      console.log('You must specify admin or frontend'.red);
+      console.log('');
+      return;
+    }
+
+    options[0] = 'vern_' + options[0];
+
+    var extraPath = '/main';
+    if(options.indexOf('--partial') > -1) {
+      extraPath = '/partials';
+    }
+    if(options.indexOf('--modal') > -1) {
+      extraPath = '/modals';
+    }
+    if(options.indexOf('--path') > -1) {
+      console.log(options);
+      console.log(options.indexOf('--path'));
+      extraPath = options[options.indexOf('--path') + 1];
+    }
+
+    var params = {
+      name: options[1].toLowerCase(),
+      view_path: cwd + '/app/' + options[0] + '/app/views' + extraPath
+    };
+
+    _view.copy(params, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+      console.log('');
+      console.log(success.green);
+      console.log('');
+    });
   };
 
   return $scope;
