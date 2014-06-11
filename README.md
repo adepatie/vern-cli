@@ -62,7 +62,7 @@ In `vern` is the back-end server component of your application. This is where th
 
 In `vern_admin` is the frontend admin portal for your site and the access point in which site administrators can manage data on the site.
 
-In `vern-assets` is
+In `vern_assets` is
 
 In `vern_frontend` is the entire front user-end of your site where your views, scripts, and styles are. VERN frontend is mainly written in AngularJS. AngularJS is HTML with behaviors and allows you to create reusable javascript tags as well and allows the views to function as controllers. So, just like with NodeJS, if you've never used it before then it's time to take a break from vern and check out some of these resources.  We will get into a little more detail later but if you've never used this stuff then it's time to start practicing:
 
@@ -84,14 +84,16 @@ This command will generate an HTMl file, a LESS style sheet, and an AngularJS co
 The first thing to do is to set up your view. Good ole' HTML:
 
 ```html
-<div class="blog">
+<div class="blog" ng-controller="BlogCtrl">
   <div class="blog-header">
     <div class="image-holder">
       <img src="" />
     </div>
-    <h2 class="title"></h2>
-    <div class="author"></div>
-    <div class="timestamp"></div>
+    <div class="header-text">
+      <h2 class="title"></h2>
+      <div class="author"></div>
+      <div class="timestamp"></div>
+    </div>
   </div>
   <div class="blog-content"></div>
 </div>
@@ -100,8 +102,96 @@ The first thing to do is to set up your view. Good ole' HTML:
 
 Now that the DOM is set up, it's time to add some data. We don't have any data set up on the server-side yet so for now we are going to add placeholder data to the controller.
 
+```javascript
+angular.module('vernApp')
+  .controller('BlogCtrl', function($scope) {
+    $scope.blog = {
+      author: 'Type Foo',
+      created_at: 'Jun 11, 10:30AM',
+      thumbnail: 'images/thumbnail.jpg',
+      title: 'My First Blog Post',
+      textContent: 'Hey, welcome to the first post on this wonderful site. This is the first step of a long and abundant career in VERN web design. '
+    }
+  });
+```
 
- If you are just getting started and just want to design an easily expandable front-end website then this is your first step. We will go into greater detail about routes later. However, if you wish to take advantage of VERN's true capabilities then we recommend moving on to the next step...
+*Be sure to add an image your `/images` folder and rename the path to match it*
+
+Now that we've got some placeholder data in our controller, let's go back to our DOM and use Angular Directives to bind data to our elements like this:
+
+```html
+<div class="blog" ng-controller="BlogCtrl">
+  <div class="blog-header">
+    <div class="image-holder">
+      <img src="{{blog.thumbnail}}" />
+    </div>
+    <div class="header-text">
+      <h2 class="title" ng-bind="blog.title"></h2>
+      <div class="author" ng-bind="blog.author"></div>
+      <div class="timestamp" ng-bind="blog.created_at"></div>
+    </div>
+  </div>
+  <div class="blog-content" ng-bind="blog.textContent"></div>
+</div>
+```
+At this point you we can load up our server with `vern start all` (make sure you get those dependencies installed when it asks), load up `localhost:<port-number>/#!/blog`, and see a nice page of black and white text awkwardly positioned in your browser. Let's go ahead and play around with our `blog.less` file till it looks somewhat impressive:
+
+```less
+.blog {
+  font-family: "Comic Sans MS";
+  width: 440px;
+  background: #fff;
+  padding: 15px;
+  .blog-header {
+    .image-holder {
+      display: inline-block;
+      img {
+        height: 100px;
+        width: 75px;
+      }
+    }
+    .header-text {
+      display: inline-block;
+      padding: 10px 0 10px 15px;
+      .title {
+        font-size: 36px;
+        margin-bottom: 5px;
+      }
+      .author {
+        display: inline-block;
+        width: 100px;
+        font-size: 15px;
+      }
+      .timestamp {
+        display: inline-block;
+      }
+    }
+  }
+  .blog-content {
+    font-size: 14px;
+    padding: 10px 0;
+  }
+}
+```
+
+*Make sure you change your image height to match the aspect ratio of the image you added earlier*
+
+Right on! You've got a super rad blog post that you can show all your friends while they gasp in amazement... What? Ok so it isn't much but it's getting there. There's still a whole lot we have to work with here. First let's discuss how to get some big boy data from the server-side.
+
+### Where does data come from?
+
+That's a great question! I mean, we can't just expect all our clients to open up their front-end controllers (to which they know nothing about) and keep adding more data. That's silly! VERN has a comprehensive set of tools and processes for handling your data from the database. The default database system for VERN is MongoDB. You aren't required to use MongoDB, but for this tutorial's sake we are going to stick to the default. If you are unfamiliar with MongoDB take a moment to look some of these resources:
+
+   [Introduction to MongoDB](http://www.mongodb.org/about/introduction/) - Mongo's own introduction to their JSON based [NoSQL Database](http://www.mongodb.com/nosql-explained)
+
+
+Data in VERN is structured by Models in the back-end server, pulled and posted to and from the database by the server, called to and from the front-end with services, and passed to our views by  Angular Controllers.
+
+##IMAGE
+
+/////////
+
+Now that we understand how this data is to be managed in VERN, it's time to build our Models and back-end Controllers to make it happen.
 
 
 ### Create a Model
@@ -110,7 +200,7 @@ Models are object classes that define the structure of your data.
 
 `vern create model <name>` - Should allow you to configure some stuff
 
-Models are pretty straight-forward and involve simply defining the objects that you are going to have in your project. For example, if you want to create a blogging application and require a blog model it would go something like this :
+Models are pretty straight-forward and involve simply defining the objects that you are going to have in your project. For example, if you want to create a blogging application and require a blog model it would go something like this:
 
     var validator = require('validator');
 
