@@ -213,7 +213,6 @@ function Starter(options) {
   };
 
   $scope.startAPI = function(install, nostart, callback) {
-    console.log(arguments);
     if(arguments.length === 1 && typeof arguments[0] === 'function') {
       callback = arguments[0];
     }
@@ -226,7 +225,8 @@ function Starter(options) {
           return console.log(err);
         }
         console.log(success);
-        if(nostart === false) {
+
+        if(nostart !== true) {
           $scope.vernExec({project: 'vern', env: 'development'});
         }
         if(callback) {
@@ -262,7 +262,7 @@ function Starter(options) {
           }
 
           console.log(success);
-          if(nostart === false) {
+          if(nostart !== true) {
             $scope.gruntExec({project: 'frontend'});
           }
           if(callback) {
@@ -299,7 +299,7 @@ function Starter(options) {
           }
 
           console.log(success);
-          if(nostart === false) {
+          if(nostart !== true) {
             $scope.gruntExec({project: 'admin'});
           }
           if(callback) {
