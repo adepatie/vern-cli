@@ -21,7 +21,7 @@ module.exports = {
         .on('data', function(buf) { out += buf.toString(); })
         .on('end', function() {
           fs.writeFileSync(params.service_path + '/' + params.name + '.js', out);
-          callback(null, 'Directive created in ' + params.service_path);
+          callback(null, 'Service created in ' + params.service_path);
         })
         .on('error', function(err) {
           callback(err, null);

@@ -28,7 +28,7 @@ module.exports = {
       mustache.render(compiled, view)
         .on('data', function(buf) { out += buf.toString(); })
         .on('end', function() {
-          var fileName = params.view_path + '/index.html';
+          var fileName = params.view_path + '/' + params.action + '.html';
           fs.writeFileSync(fileName, out);
           log.push('HTML View file created in ' + fileName);
           mustache.compileText('controller', controller_tpl, function(err, compiled) {

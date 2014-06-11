@@ -29,6 +29,8 @@ new vern().then(function($vern) {
   $vern.controllers.index = new $vern.controllers.IndexController($vern).init({
     publicRoute: '/index'
   });
+
+  // buildpoint
 }).fail(function(err) {
     console.log(err);
     console.log(err.stack);
