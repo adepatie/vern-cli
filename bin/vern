@@ -501,6 +501,52 @@ function Builds() {
 
   $scope.buildService = function(options) {
     var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 2) {
+      console.log('');
+      console.log('You must specify admin or frontend'.red);
+      console.log('');
+      return;
+    }
+
+    var type = 'service';
+    if(options.indexOf('--use-factory') > -1) {
+      type = 'factory';
+    }
+    if(options.indexOf('--use-provider') > -1) {
+      type = 'provider';
+    }
+
+    options[0] = 'vern_' + options[0];
+
+    var name = options[1].toLowerCase().replace(/[-_](.)/g, function(match, group) {
+      return group.toUpperCase();
+    });
+
+    var params = {
+      name: name,
+      type: type,
+      service_path: cwd + '/app/' + options[0] + '/app/scripts/services'
+    };
+
+    _service.copy(params, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+
+      utils.rewrite({
+        path: cwd + '/app/' + options[0] + '/app/index.html',
+        needle: '<!-- endbuild -->',
+        insertions: [
+            '<script type="text/javascript" src="scripts/services/' + params.name + '.js"></script>'
+        ]
+      });
+
+      console.log('');
+      console.log(success.green);
+      console.log('');
+    });
   };
 
   $scope.buildDirective = function(options) {
@@ -577,7 +623,7 @@ function Builds() {
 
     var params = {
       name: name,
-      filter_path: cwd + '/app/' + options[0] + '/app/scripts/filters'
+      filter_path: cwd + '/app/' + options[0] + '/app/scripts/services'
     };
 
     _filter.copy(params, function(err, success) {
