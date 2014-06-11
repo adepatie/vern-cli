@@ -73,15 +73,32 @@ In `vern_frontend` is the entire front user-end of your site where your views, s
  [AngularJS-Learning](https://github.com/jmcunningham/AngularJS-Learning) - A GitHub Repository full of great Angular learning resources
 
 
-### Create a View
+### Create a Route
 
-The views of your project are the HTML files which control the look and structure of your frontend
+Routes are the main components of the front-end of your site. They are the main views, which are tied together by the styles and the front-end javascript which manages data being passed to the view (such as names, paragraphs, and pictures).
 
-`vern create view <admin|frontend> <name>`
+`vern create route <admin|frontend> <name>`
 
 This command will generate an HTMl file, a LESS style sheet, and an AngularJS controller. Use the `admin` option to add the view to the admin portal of your project. Otherwise just enter `frontend` as your parameter.
 
- If you are just getting started and just want to design an easily expandable front-end website then this is your first step. We will go into greater detail about views later. However, if you wish to take advantage of VERN's true capabilities then we recommend moving on to the next step...
+The first thing to do is to set up your view. Good ole' HTML:
+
+    <div class="blog">
+      <div class="blog-header">
+        <div class="image-holder">
+          <img src="" />
+        </div>
+        <h2 class="title"></h2>
+        <div class="author"></div>
+        <div class="timestamp"></div>
+      </div>
+      <div class="blog-content"></div>
+    </div>
+
+Now that the DOM is set up, it's time to add some data. We don't have any data set up on the server-side yet so for now we are going to add placeholder data to the controller.
+
+
+ If you are just getting started and just want to design an easily expandable front-end website then this is your first step. We will go into greater detail about routes later. However, if you wish to take advantage of VERN's true capabilities then we recommend moving on to the next step...
 
 
 ### Create a Model
@@ -154,7 +171,7 @@ This command will generate a directive javascript file, an HTML file, and a LESS
             '<div class="blog-object">' +
             '   <div class="image-holder">' +
             '       <img src="{{blog.thumbnail}}"/>
-            '    </div>' +
+            '   </div>' +
             '   <h2 class="title" ng-bind="blog.title"></h2>' +
             '   <div class="author" ng-bind="blog.author"></div>' +
             '   <div class="timestamp" ng-bind="blog.created_at"></div>' +
@@ -178,17 +195,19 @@ Services are used to retrieve data for the front-end from the backend.
 
 `vern create service <admin|frontend> <name> [--use-factory || --use-provider]`
 
-These come in three flavors (services, factories, and providers)[http://stackoverflow.com/questions/15666048/angular-js-service-vs-provider-vs-factory]. For this example we will just be using factories (which require a return value). This service will use a pre-built service `apiRequest` to get data from the server based on parameters given.
+These come in three flavors [services, factories, and providers](http://stackoverflow.com/questions/15666048/angular-js-service-vs-provider-vs-factory). For this example we will just be using factories (which require a return value). This service will use a pre-built service `apiRequest` to get data from the server based on parameters given.
 
     angular.module('BlogApp')
-        .factory('blogManager', function(apiRequest) {
-            var blogs = null;
-             apiRequest.get({
-             path: 'account/blogs',
-             success : function(res) {
-                blogs = res.pkg.data;
-             }
-             return blogs;
+        .factory('blogManager', function($scope, apiRequest) {
+            this = $scope;
+            $scope.blogs = null;
+            apiRequest.get({
+                path: '/blogs',
+                success : function(res) {
+                    $scope.blogs = res.pkg.data;
+                }
+            });
+            return $scope;
         });
 
 From this point we can go into our front-end BlogController that you created earlier (when you created the view) and pass that service into the view.
@@ -196,7 +215,7 @@ From this point we can go into our front-end BlogController that you created ear
     angular.module('BlogApp')
         .controller('BlogController', function(blogManager) {
             $scope.blogs = blogmanager.blogs;
-        }
+        });
 
 
 ### Create a Filter
