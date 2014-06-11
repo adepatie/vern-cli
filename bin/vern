@@ -494,8 +494,18 @@ function Builds() {
         return console.log(err);
       }
 
+      utils.rewrite({
+        path: cwd + '/app/vern/server.js',
+        needle: '// buildpoint',
+        insertions: [
+          '$vern.controllers.' + options[0].toLowerCase() + ' = new $vern.controllers.' + params.name + '(scope).init({',
+          '  publicRoute: \'/' + options[0].toLowerCase() + '\'',
+          '});'
+        ]
+      });
+
       console.log('');
-      console.log(success);
+      console.log(success.green);
       console.log('');
     });
   };
@@ -668,7 +678,7 @@ function Builds() {
       }
 
       console.log('');
-      console.log(success);
+      console.log(success.green);
       console.log('');
     });
   };
@@ -892,7 +902,7 @@ function Installs(opts) {
       cwd: dir,
       stdio: 'inherit'
     });
-    
+
     var error = false;
     runner.on('close', function(code) {
       if(error) {

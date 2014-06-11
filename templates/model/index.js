@@ -35,7 +35,7 @@ module.exports = {
         .on('data', function(buf) { out += buf.toString(); })
         .on('end', function() {
           fs.writeFileSync(params.path + '/' + params.name + '.js', out);
-          callback(null, out);
+          callback(null, 'Model created in ' + params.path);
         })
         .on('error', function(err) {
           callback(err, null);
