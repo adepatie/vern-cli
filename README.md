@@ -115,6 +115,11 @@ angular.module('vernApp')
   });
 ```
 
+        In case you were wondering:
+          VERN uses two types of Controllers. AngularJS Controllers (like this one) are used to manage data on the front-end while
+          NodeJS Controllers are used to manage the data on the back-end. Two controllers with similar functions that work in completely
+          different ways, and in completely different places.
+
 *Be sure to add an image your `/images` folder and rename the path to match it*
 
 Now that we've got some placeholder data in our controller, let's go back to our DOM and use Angular Directives to bind data to our elements like this:
@@ -184,8 +189,9 @@ That's a great question! I mean, we can't just expect all our clients to open up
 
    [Introduction to MongoDB](http://www.mongodb.org/about/introduction/) - Mongo's own introduction to their JSON based [NoSQL Database](http://www.mongodb.com/nosql-explained)
 
+Once you are more familiar with how MongoDB works and have it installed go ahead and run `mongod` in a new terminal. This will start the database server.
 
-Data in VERN is structured by Models in the back-end server, pulled and posted to and from the database by the server, called to and from the front-end with services, and passed to our views by  Angular Controllers.
+Data in VERN is structured by Models in the back-end server, created and managed in the back-end by Controllers, pulled and posted to and from the database by the server, called to and from the front-end with services, and passed to our views by Angular Controllers.
 
 ##IMAGE
 
@@ -200,34 +206,40 @@ Models are object classes that define the structure of your data.
 
 `vern create model <name>` - Should allow you to configure some stuff
 
+This will generate a `BlogModel.js` file in your `app/vern/models/` folder.
+
 Models are pretty straight-forward and involve simply defining the objects that you are going to have in your project. For example, if you want to create a blogging application and require a blog model it would go something like this:
 
-    var validator = require('validator');
+```javascript
+var validator = require('validator');
 
-    function Model(scope) {
-      function BlogModel() {
-        this.author = null;
-        this.created_at = null;
-        this.title = null;
-        this.thumbnail = null;
-        this.text_content = null;
+function Model(scope) {
+  function BlogModel() {
+    this.author = null;
+    this.created_at = null;
+    this.title = null;
+    this.thumbnail = null;
+    this.text_content = null;
 
-        return this.update(arguments[0]);
-      }
+    return this.update(arguments[0]);
+  }
 
-      new scope.model().extend(BlogModel, {
-        collection: 'blog',
-        indexes: [],
-        exclude: [],
-        validations: {},
-        validation_exceptions: {},
-        non_editable: []
-      }, null);
+  new scope.model().extend(BlogModel, {
+    collection: 'blog',
+    indexes: [],
+    exclude: [],
+    validations: {},
+    validation_exceptions: {},
+    non_editable: []
+  }, null);
 
-      return BlogModel;
-    }
+  return BlogModel;
+}
 
-    module.exports = Model;
+module.exports = Model;
+```
+
+    
 
 ### Create a Controller
 
