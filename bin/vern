@@ -63,19 +63,19 @@ function parseStart(server) {
   var projectConfig = require(process.cwd() + '/vern.json');
   switch(server) {
     case 'api':
-      new Starter(projectConfig).startAPI(params);
+      new Starter(projectConfig).startAPI(true);
       break;
     case 'frontend':
-      new Starter(projectConfig).startFrontend(params);
+      new Starter(projectConfig).startFrontend(true);
       break;
     case 'admin':
-      new Starter(projectConfig).startAdmin(params);
+      new Starter(projectConfig).startAdmin(true);
       break;
     case 'default':
     case 'all':
-      new Starter(projectConfig).startAPI(params, function() {
-        new Starter(projectConfig).startFrontend(params, function () {
-          new Starter(projectConfig).startAdmin(params);
+      new Starter(projectConfig).startAPI(true, function() {
+        new Starter(projectConfig).startFrontend(true, function () {
+          new Starter(projectConfig).startAdmin(true);
         });
       });
       break;
@@ -225,7 +225,8 @@ function Starter(options) {
           return console.log(err);
         }
         console.log(success);
-        if(!nostart) {
+
+        if(nostart !== true) {
           $scope.vernExec({project: 'vern', env: 'development'});
         }
         if(callback) {
@@ -261,7 +262,7 @@ function Starter(options) {
           }
 
           console.log(success);
-          if(!nostart) {
+          if(nostart !== true) {
             $scope.gruntExec({project: 'frontend'});
           }
           if(callback) {
@@ -298,7 +299,7 @@ function Starter(options) {
           }
 
           console.log(success);
-          if(!nostart) {
+          if(nostart !== true) {
             $scope.gruntExec({project: 'admin'});
           }
           if(callback) {
@@ -700,7 +701,7 @@ function Builds() {
       return;
     }
 
-    options[0] = 'vern_' + options[0];
+    var env = 'vern_' + options[0];
 
     var extraPath = '/main';
     if(options.indexOf('--partial') > -1) {
@@ -729,9 +730,9 @@ function Builds() {
       name: name,
       action: action,
       controller_name: controller_name,
-      view_path: cwd + '/app/' + options[0] + '/app/views' + extraPath + '/' + name,
-      style_path: cwd + '/app/' + options[0] + '/app/styles/less',
-      controller_path: cwd + '/app/' + options[0] + '/app/scripts/controllers',
+      view_path: cwd + '/app/' + env + '/app/views' + extraPath + '/' + name,
+      style_path: cwd + '/app/' + env + '/app/styles/less',
+      controller_path: cwd + '/app/' + env + '/app/scripts/controllers',
       controller: true,
       stylesheet: true
     };
@@ -742,7 +743,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/' + options[0] + '/app/index.html',
+        path: cwd + '/app/' + env + '/app/index.html',
         needle: '<!-- endbuild -->',
         insertions: [
           '<script type="text/javascript" src="scripts/controllers/' + params.name + '.js"></script>'
@@ -750,7 +751,7 @@ function Builds() {
       });
 
       utils.rewrite({
-        path: cwd + '/app/' + options[0] + '/app/styles/less/main.less',
+        path: cwd + '/app/' + env + '/app/styles/less/main.less',
         needle: '// buildpoint',
         insertions: [
           '@import "' + params.name + '.less";'
@@ -774,7 +775,7 @@ function Builds() {
       return;
     }
 
-    options[0] = 'vern_' + options[0];
+    var env = 'vern_' + options[0];
 
     var extraPath = '/main';
     if(options.indexOf('--partial') > -1) {
@@ -800,7 +801,7 @@ function Builds() {
     var params = {
       name: name,
       action: action,
-      view_path: cwd + '/app/' + options[0] + '/app/views' + extraPath + '/' + name
+      view_path: cwd + '/app/' + env + '/app/views' + extraPath + '/' + name
     };
 
     _view.copy(params, function(err, success) {
