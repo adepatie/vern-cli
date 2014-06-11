@@ -5,10 +5,8 @@ var fs = require('fs-extra');
 var mustache = require('mu2');
 module.exports = {
   copy: function(params, callback) {
-    if(!params.path === '.') {
-      if(!fs.statSync(params.path).isDirectory()) {
-        fs.mkdirpSync(params.path, '0644');
-      }
+    if(!fs.existsSync(params.view_path)) {
+      fs.mkdirpSync(params.view_path);
     }
 
     var view_tpl = fs.readFileSync(__dirname + '/template/view.html').toString();

@@ -505,10 +505,98 @@ function Builds() {
 
   $scope.buildDirective = function(options) {
     var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 2) {
+      console.log('');
+      console.log('You must specify admin or frontend'.red);
+      console.log('');
+      return;
+    }
+
+    prompt.get({
+      name: 'restrictions',
+      message: 'Which restrictions would you like? [AEC] (Default is "A")',
+      validator: function(line) {
+        return (line.match(/(AEC)/) instanceof Array);
+      },
+      default: 'A'
+    }, function(err, res) {
+      if(err) {
+        console.log(err.red);
+        return;
+      }
+      options[0] = 'vern_' + options[0];
+
+      var name = options[1].toLowerCase();
+      var directive_name = options[1].toLowerCase().replace(/[-_](.)/g, function(match, group) {
+        return group.toUpperCase();
+      });
+
+      var params = {
+        name: name,
+        directive_name: directive_name,
+        restrictions: res.restrictions.toUpperCase(),
+        directive_path: cwd + '/app/' + options[0] + '/app/scripts/directives'
+      };
+
+      _directive.copy(params, function(err, success) {
+        if(err) {
+          return console.log(err);
+        }
+
+        utils.rewrite({
+          path: cwd + '/app/' + options[0] + '/app/index.html',
+          needle: '<!-- endbuild -->',
+          insertions: [
+              '<script type="text/javascript" src="scripts/directives/' + params.name + '.js"></script>'
+          ]
+        });
+
+        console.log('');
+        console.log(success.green);
+        console.log('');
+      });
+    });
   };
 
   $scope.buildFilter = function(options) {
     var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 2) {
+      console.log('');
+      console.log('You must specify admin or frontend'.red);
+      console.log('');
+      return;
+    }
+
+    options[0] = 'vern_' + options[0];
+
+    var name = options[1].toLowerCase();
+
+    var params = {
+      name: name,
+      filter_path: cwd + '/app/' + options[0] + '/app/scripts/filters'
+    };
+
+    _filter.copy(params, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+
+      utils.rewrite({
+        path: cwd + '/app/' + options[0] + '/app/index.html',
+        needle: '<!-- endbuild -->',
+        insertions: [
+            '<script type="text/javascript" src="scripts/filters/' + params.name + '.js"></script>'
+        ]
+      });
+
+      console.log('');
+      console.log(success.green);
+      console.log('');
+    });
   };
 
   $scope.buildModel = function(options) {
@@ -565,7 +653,7 @@ function Builds() {
     }
 
     var name = options[1].toLowerCase();
-    var controller_name = options[1].charAt(0).toUpperCase() + options[1].slice(1).toLowerCase().replace(/-_(.)/g, function(match, group) {
+    var controller_name = options[1].charAt(0).toUpperCase() + options[1].slice(1).toLowerCase().replace(/[-_](.)/g, function(match, group) {
       return group.toUpperCase();
     }) + 'Ctrl';
 
@@ -632,9 +720,11 @@ function Builds() {
       extraPath = options[options.indexOf('--path') + 1];
     }
 
+    var name = options[1].toLowerCase();
+
     var params = {
-      name: options[1].toLowerCase(),
-      view_path: cwd + '/app/' + options[0] + '/app/views' + extraPath
+      name: name,
+      view_path: cwd + '/app/' + options[0] + '/app/views' + extraPath + '/' + name
     };
 
     _view.copy(params, function(err, success) {

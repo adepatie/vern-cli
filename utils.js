@@ -30,9 +30,6 @@ function rewrite(args) {
     }
   }
 
-  console.log(lineIndex);
-  console.log(lines[lineIndex]);
-
   var spaces = [];
   while(lines[lineIndex].charAt(spaces.length) === ' ') {
     spaces.push(' ');
