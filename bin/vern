@@ -844,14 +844,74 @@ function Installs(opts) {
       cwd: dir,
       stdio: 'inherit'
     });
-    runner.on('close', function() {
+
+    var error = false;
+    runner.on('close', function(code) {
+      if(error) {
+        return;
+      }
+
+      if(code > 0) {
+        console.log('');
+        console.log('npm ' + type + ' of ' + options[1].red + ' unsuccessful, exit code: ' + code);
+        console.log('');
+        return;
+      }
       console.log('');
       console.log('npm ' + type + ' of ' + options[1].green + ' complete');
       console.log('');
-    });
-    runner.on('error', function(err) {
+    }).on('error', function(err) {
+      error = true;
       console.log('');
-      console.log(err.red);
+      console.log(err.toString().red);
+      console.log('');
+    });
+  }
+
+  function bowerCommand(type, options) {
+    var projectConfig = new Builds().loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 2) {
+      console.log('');
+      console.log('You must specify an environment modules: admin, frontend'.red);
+      console.log('');
+      return;
+    }
+
+    var save = '--save';
+    if(options.indexOf('--no-save') > -1) {
+      save = null;
+    }
+
+    var env = 'vern_' + options[0];
+
+    var dir = projectConfig.cwd + '/appa/' + env;
+
+    var runner = spawn('bower', [type, options[1], save], {
+      cwd: dir,
+      stdio: 'inherit'
+    });
+    
+    var error = false;
+    runner.on('close', function(code) {
+      if(error) {
+        return;
+      }
+
+      if(code > 0) {
+        console.log('');
+        console.log('bower ' + type + ' of ' + options[1].red + ' unsuccessful, exit code: ' + code);
+        console.log('');
+        return;
+      }
+      console.log('');
+      console.log('bower ' + type + ' of ' + options[1].green + ' complete');
+      console.log('');
+    }).on('error', function(err) {
+      error = true;
+      console.log('');
+      console.log(err.toString().red);
       console.log('');
     });
   }
@@ -864,12 +924,24 @@ function Installs(opts) {
     npmCommand('uninstall', options);
   };
 
-  $scope.installBower = function(params) {
-
+  $scope.installBower = function(options) {
+    bowerCommand('install', options);
   };
 
-  $scope.installContainer = function(params) {
+  $scope.uninstallBower = function(options) {
+    bowerCommand('uninstall', options);
+  };
 
+  $scope.installContainer = function(options) {
+    console.log('');
+    console.log('Coming soon...');
+    console.log('');
+  };
+
+  $scope.uninstallContainer = function(params) {
+    console.log('');
+    console.log('Coming soon...');
+    console.log('');
   };
 
   return $scope;
