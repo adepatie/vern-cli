@@ -28,6 +28,7 @@ program
   .option('stop --stop [server]', 'Stop a server module (api, frontend, admin)', parseStop)
   .option('restart --restart [server]', 'Restart a server module (api, frontend, admin)', parseRestart)
   .option('install, --install [module.spec] [options]', 'Install a module into your project', parseInstall)
+  .option('uninstall, --uninstall [module.spec] [options]', 'Uninstall a module from your project', parseUninstall)
   .option('package, --package [module.spec] [options]', 'Start the package builder', parsePackage)
   .option('deploy, --deploy [stage]', 'Create a view when inside a project folder', deployApp)
   .option('config, --config', 'Configure your app when inside a project folder', configApp)
@@ -460,7 +461,7 @@ function Builds() {
     while(!done) {
       if (fs.existsSync(project_path)) {
         cwd = path.dirname(project_path);
-        return require(cwd + '/vern.json');
+        return {options: require(cwd + '/vern.json'), cwd: cwd};
       }
       if(path.dirname(project_path) === '/') {
         done = true;
@@ -799,10 +800,77 @@ function Builds() {
 function parseInstall() {
   var i = process.argv.indexOf('install');
   var params = process.argv.slice(i + 1);
+
+  var installName = params[0];
+  installName = installName.charAt(0).toUpperCase() + installName.slice(1).toLowerCase();
+  new Installs()['install' + installName](params.slice(1));
 }
 
-function Installs() {
+function parseUninstall() {
+  var i = process.argv.indexOf('uninstall');
+  var params = process.argv.slice(i + 1);
+
+  var installName = params[0];
+  installName = installName.charAt(0).toUpperCase() + installName.slice(1).toLowerCase();
+  new Installs()['uninstall' + installName](params.slice(1));
+}
+
+function Installs(opts) {
   var $scope = this;
+
+  var cwd = process.cwd();
+
+  function npmCommand(type, options) {
+    var projectConfig = new Builds().loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 2) {
+      console.log('');
+      console.log('You must specify an environment modules: api, admin, frontend'.red);
+      console.log('');
+      return;
+    }
+
+    var save = '--save';
+    if(options.indexOf('--no-save') > -1) {
+      save = null;
+    }
+
+    var env = options[0] === 'api' ? 'vern' : 'vern_' + options[0];
+
+    var dir = projectConfig.cwd + '/app/' + env;
+
+    var runner = spawn('npm', [type, options[1], save], {
+      cwd: dir,
+      stdio: 'inherit'
+    });
+    runner.on('close', function() {
+      console.log('');
+      console.log('npm ' + type + ' of ' + options[1].green + ' complete');
+      console.log('');
+    });
+    runner.on('error', function(err) {
+      console.log('');
+      console.log(err.red);
+      console.log('');
+    });
+  }
+
+  $scope.installNpm = function(options) {
+    npmCommand('install', options);
+  };
+
+  $scope.uninstallNpm = function(options) {
+    npmCommand('uninstall', options);
+  };
+
+  $scope.installBower = function(params) {
+
+  };
+
+  $scope.installContainer = function(params) {
+
+  };
 
   return $scope;
 }
