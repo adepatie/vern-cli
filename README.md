@@ -83,17 +83,20 @@ This command will generate an HTMl file, a LESS style sheet, and an AngularJS co
 
 The first thing to do is to set up your view. Good ole' HTML:
 
-    <div class="blog">
-      <div class="blog-header">
-        <div class="image-holder">
-          <img src="" />
-        </div>
-        <h2 class="title"></h2>
-        <div class="author"></div>
-        <div class="timestamp"></div>
-      </div>
-      <div class="blog-content"></div>
+```html
+<div class="blog">
+  <div class="blog-header">
+    <div class="image-holder">
+      <img src="" />
     </div>
+    <h2 class="title"></h2>
+    <div class="author"></div>
+    <div class="timestamp"></div>
+  </div>
+  <div class="blog-content"></div>
+</div>
+```
+
 
 Now that the DOM is set up, it's time to add some data. We don't have any data set up on the server-side yet so for now we are going to add placeholder data to the controller.
 
