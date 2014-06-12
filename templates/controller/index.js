@@ -14,8 +14,13 @@ module.exports = {
     var tpl = fs.readFileSync(__dirname + '/template/Controller.js').toString();
 
     var view = {
-      controller_name: params.name
+      controller_name: params.name,
+      model_declaration: '$scope.model = $vern.models.IndexModel;'
     };
+
+    if(params.model_declaration) {
+      view.model_declaration = params.model_declaration;
+    }
 
     mustache.compileText('controller', tpl, function(err, compiled) {
       if(err) {

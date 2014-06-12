@@ -4,10 +4,12 @@
  * @class {{controller_name}}
  * @constructor
  */
-function {{controller_name}}($parent) {
+function {{controller_name}}($vern) {
   var validator      = require('validator');
 
-  var $scope = new $parent.controller({{controller_name}});
+  var $scope = new $vern.controller({{controller_name}});
+  {{model_declaration}}
+
   return $scope;
 }
 
