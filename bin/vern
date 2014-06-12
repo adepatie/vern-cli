@@ -504,7 +504,7 @@ function Builds() {
         path: cwd + '/app/vern/server.js',
         needle: '// buildpoint',
         insertions: [
-          '$vern.controllers.' + options[0].toLowerCase() + ' = new $vern.controllers.' + params.name + '(scope).init({',
+          '$vern.controllers.' + options[0].toLowerCase() + ' = new $vern.controllers.' + params.name + '($vern).init({',
           model ? '  model: $vern.models.' + model + ',' : '',
           '  publicRoute: \'/' + options[0].toLowerCase() + '\'',
           '});'
