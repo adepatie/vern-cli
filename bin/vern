@@ -490,6 +490,26 @@ function Builds() {
       model = options[options.indexOf('--model') + 1];
     }
 
+    if(!model) {
+      prompt.get({
+        name: 'model',
+        message: 'Would you like to create ' + options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Model?',
+        validator: /y[es]*|n[o]?/,
+        warning: 'Must respond yes or no',
+        default: 'yes'
+      }, function(err, res) {
+        if(res.model.charAt(0) === 'y') {
+          model = options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Model';
+          $scope.buildModel([options[0]]);
+        }
+        finishControllerBuild(options, model);
+      });
+    } else {
+      finishControllerBuild(options, model);
+    }
+  };
+
+  function finishControllerBuild(options, model) {
     var params = {
       name: options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Controller',
       path: cwd + '/app/vern/controllers'
@@ -508,9 +528,9 @@ function Builds() {
         path: cwd + '/app/vern/server.js',
         needle: '// buildpoint',
         insertions: [
-          '$vern.controllers.' + options[0].toLowerCase() + ' = new $vern.controllers.' + params.name + '($vern).init({',
+            '$vern.controllers.' + options[0].toLowerCase() + ' = new $vern.controllers.' + params.name + '($vern).init({',
           model ? '  model: $vern.models.' + model + ',' : '',
-          '  publicRoute: \'/' + options[0].toLowerCase() + '\'',
+            '  publicRoute: \'/' + options[0].toLowerCase() + '\'',
           '});'
         ]
       });
@@ -519,7 +539,7 @@ function Builds() {
       console.log(success.green);
       console.log('');
     });
-  };
+  }
 
   $scope.buildService = function(options) {
     var projectConfig = $scope.loadProjectConfig();

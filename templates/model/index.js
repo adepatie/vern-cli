@@ -15,7 +15,7 @@ module.exports = {
 
     var view = {
       model_name: params.name,
-      vars: 'this.name = null',
+      vars: 'this.name = null;',
       collection: params.collection,
       indexes: JSON.stringify(params.indexes),
       exclude: JSON.stringify(params.exclude),
