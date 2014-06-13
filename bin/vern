@@ -586,7 +586,7 @@ function Builds() {
       name: 'restrictions',
       message: 'Which restrictions would you like? [AEC] (Default is "A")',
       validator: function(line) {
-        return (line.match(/(AEC)/) instanceof Array);
+        return (line.match(/^[AEC]*$/) instanceof Array);
       },
       default: 'A'
     }, function(err, res) {
