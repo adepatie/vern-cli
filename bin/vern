@@ -5,7 +5,8 @@ var program        = require('commander'),
     path           = require('path'),
     fs             = require('fs-extra'),
     spawn          = require('child_process').spawn,
-    prompt         = require('prompt'),
+    inquirer       = require('inquirer'),
+    colors         = require('colors'),
     template_dir   = '../templates',
     _project       = require(template_dir + '/project'),
     _container     = require(template_dir + '/container'),
@@ -16,7 +17,7 @@ var program        = require('commander'),
     _filter        = require(template_dir + '/filter'),
     _route         = require(template_dir + '/route'),
     _view          = require(template_dir + '/view'),
-    utils          = require('../utils');
+    utils          = require('../utils'),
     default_config = require(template_dir + '/vern_config.json'),
     pkg            = require('../package.json');
 
@@ -33,9 +34,6 @@ program
   .option('deploy, --deploy [stage]', 'Create a view when inside a project folder', deployApp)
   .option('config, --config', 'Configure your app when inside a project folder', configApp)
   .parse(process.argv);
-
-prompt.message = '';
-prompt.start();
 
 if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
@@ -361,9 +359,16 @@ function Builds() {
     var project_path = options[0];
     var project = null;
     if(!project_path) {
-      prompt.get({name: 'project', message: 'Enter a project name (use . for current directory):'.green}, function(err, res) {
-        build(res.project, res.project);
-      });
+      inquirer.prompt([
+        {
+          type: 'input',
+          name: 'project',
+          message: 'Enter a project name (use . for current directory)'
+        }
+      ], function(answers) {
+        build(answers.project, answers.project);
+      })
+
     } else {
       if(project_path === '.') {
         project = cwd.split('/').pop();
@@ -377,18 +382,13 @@ function Builds() {
       default_config.module = project;
       console.log('Setting up ' + project.green + ' now!');
       if((fs.existsSync(project_path) && project_path !== '.') || (project_path === '.' && fs.readdirSync(project_path).length > 0)) {
-        prompt.get({
+        inquirer.prompt({
+          type: 'confirm',
           name: 'overwrite',
           message: 'Overwrite the existing directory?',
-          validator: /y[es]*|n[o]?/,
-          warning: 'Must respond yes or no',
-          default: 'no'
-        }, function(err, res) {
-          if(err) {
-            return console.log(err);
-          }
-
-          if(res.overwrite.charAt(0) === 'y') {
+          default: false
+        }, function(answers) {
+          if(answers.overwrite === true) {
             copyProject(project_path);
           } else {
             console.log('Not going to overwrite. Good bye!'.red);
@@ -411,14 +411,13 @@ function Builds() {
         console.log('Created ' + (project_path + '/vern.json').green);
         // Now we will prompt the user to start adding base routes, controllers, and models.
         // We can also setup a deployment strategy(ies)
-        prompt.get({
+        inquirer.prompt({
+          type: 'confirm',
           name: 'install',
           message: 'Would you like to install all dependencies now? It will take a few minutes.',
-          validator: /y[es]*|n[o]?/,
-          warning: 'Must respond yes or no',
-          default: 'no'
-        }, function(err, res) {
-          if(res.install.charAt(0) === 'y') {
+          default: false
+        }, function(answers) {
+          if(answers.install === true) {
             var newCWD = path.join(cwd, project_path);
             new Starter({cwd: newCWD}).startAPI(true, true, function(err, success) {
               if(err) {
@@ -490,15 +489,14 @@ function Builds() {
       model = options[options.indexOf('--model') + 1];
     }
 
-    if(!model) {
-      prompt.get({
+    if(!model && options.indexOf('--no-model') < 0) {
+      inquirer.prompt({
+        type: 'confirm',
         name: 'model',
         message: 'Would you like to create ' + options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Model?',
-        validator: /y[es]*|n[o]?/,
-        warning: 'Must respond yes or no',
-        default: 'yes'
-      }, function(err, res) {
-        if(res.model.charAt(0) === 'y') {
+        default: true
+      }, function(res) {
+        if(res.model === true) {
           model = options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Model';
           $scope.buildModel([options[0]]);
         }
@@ -602,18 +600,15 @@ function Builds() {
       return;
     }
 
-    prompt.get({
+    inquirer.prompt({
+      type: 'input',
       name: 'restrictions',
       message: 'Which restrictions would you like? [AEC] (Default is "A")',
-      validator: function(line) {
+      validate: function(line) {
         return (line.match(/^[AEC]*$/) instanceof Array);
       },
       default: 'A'
-    }, function(err, res) {
-      if(err) {
-        console.log(err.red);
-        return;
-      }
+    }, function(res) {
       options[0] = 'vern_' + options[0];
 
       var name = options[1].toLowerCase();

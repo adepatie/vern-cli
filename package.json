@@ -1,6 +1,6 @@
 {
   "name": "vern-cli",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Vern module and project management",
   "main": "bin/vern",
   "bin": {
@@ -37,9 +37,9 @@
   "dependencies": {
     "commander": "latest",
     "fs-extra": "latest",
+    "inquirer": "latest",
     "mu2": "latest",
-    "optimist": "latest",
-    "prompt": "latest",
+    "colors": "latest",
     "validator": "latest",
     "vern-core": "latest"
   }
