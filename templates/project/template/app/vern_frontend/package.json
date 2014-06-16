@@ -1,5 +1,5 @@
 {
-  "name": "VernAdminApp",
+  "name": "VernApp",
   "version": "0.0.0",
   "devDependencies": {
     "grunt": "latest",

@@ -15,4 +15,3 @@ grunt build
 
 # Developing
 
-Needs to be updated
