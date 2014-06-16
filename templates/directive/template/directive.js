@@ -8,8 +8,9 @@
 angular.module('VernApp')
   .directive('{{directive_name}}', function() {
     return {
-      scope: {},
+      {{scope}}
       restrict: '{{restrictions}}',
+{{#templateCache}}
       templateUrl: function(tElement, tAttrs) {
         var url = '{{template_url}}';
         if(tAttrs.templateUrl) {
@@ -18,15 +19,22 @@ angular.module('VernApp')
 
         return url;
       },
+{{/templateCache}}
+      controller: function($scope, $element, $attrs) {
+
+      },
       link: function(scope, element, attrs) {
 
       }
     }
   });
 
+{{#templateCache}}
 angular.module('VernApp').run(['$templateCache', function($templateCache) {
   $templateCache.put('{{template_url}}',
       '<div class="{{name}}">' +
       '</div>'
   );
 }]);
+
+{{/templateCache}}

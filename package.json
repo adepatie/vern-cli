@@ -1,6 +1,6 @@
 {
   "name": "vern-cli",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Vern module and project management",
   "main": "bin/vern",
   "bin": {

@@ -600,15 +600,20 @@ function Builds() {
       return;
     }
 
-    inquirer.prompt({
-      type: 'input',
-      name: 'restrictions',
-      message: 'Which restrictions would you like? [AEC] (Default is "A")',
-      validate: function(line) {
-        return (line.match(/^[AEC]*$/) instanceof Array);
-      },
-      default: 'A'
-    }, function(res) {
+    inquirer.prompt([{
+      type: 'checkbox',
+      name: 'needs',
+      message: 'Select directive needs and press ENTER',
+      choices: [
+        {name: 'Element Restriction', checked: true},
+        {name: 'Attribute Restriction', checked: true},
+        {name: 'Class Restriction', checked: true},
+        {name: 'Isolated Scope', checked: true},
+        {name: 'Inherited Scope', checked: false},
+        {name: '$templateCache', checked: true},
+        {name: 'LESS File', checked: true}
+      ]
+    }], function(res) {
       options[0] = 'vern_' + options[0];
 
       var name = options[1].toLowerCase();
@@ -616,12 +621,26 @@ function Builds() {
         return group.toUpperCase();
       });
 
+      var restrictions = (res.needs.indexOf('Element Restrictions') > -1) ? 'E' : '';
+      restrictions += (res.needs.indexOf('Attribute Restrictions') > -1) ? 'A' : '';
+      restrictions += (res.needs.indexOf('Class Restrictions') > -1) ? 'C' : '';
+
       var params = {
         name: name,
         directive_name: directive_name,
-        restrictions: res.restrictions.toUpperCase(),
-        directive_path: cwd + '/app/' + options[0] + '/app/scripts/directives'
+        directive_path: cwd + '/app/' + options[0] + '/app/scripts/directives',
+        less_path: cwd + '/app/' + options[0] + '/app/styles/less/directives',
+        scope: (res.needs.indexOf('Inherited Scope') > -1),
+        restrictions: restrictions,
+        templateCache: (res.needs.indexOf('$templateCache') > -1),
+        lessFile: (res.needs.indexOf('LESS File') > -1)
       };
+
+      if(res.needs.indexOf('Isolated Scope') > -1) {
+        params.scope = 'scope: {},';
+      } else if(params.scope === true) {
+        params.scope = 'scope: true,';
+      }
 
       _directive.copy(params, function(err, success) {
         if(err) {
@@ -729,8 +748,15 @@ function Builds() {
     if(options.indexOf('--modal') > -1) {
       extraPath = '/modals';
     }
+    /*
+     Create a view in a path relative to /app/views
+     */
     if(options.indexOf('--path') > -1) {
       extraPath = options[options.indexOf('--path') + 1];
+    }
+
+    if(extraPath.charAt(0) !== '/') {
+      extraPath = '/' + extraPath;
     }
 
     var name = options[1].toLowerCase();
@@ -803,10 +829,15 @@ function Builds() {
     if(options.indexOf('--modal') > -1) {
       extraPath = '/modals';
     }
+    /*
+      Create a view in a path relative to /app/views
+     */
     if(options.indexOf('--path') > -1) {
-      console.log(options);
-      console.log(options.indexOf('--path'));
       extraPath = options[options.indexOf('--path') + 1];
+    }
+
+    if(extraPath.charAt(0) !== '/') {
+      extraPath = '/' + extraPath;
     }
 
     var name = options[1].toLowerCase();
