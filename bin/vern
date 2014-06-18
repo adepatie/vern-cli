@@ -904,7 +904,14 @@ function Installs(opts) {
     var projectConfig = new Builds().loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 2) {
+    if(options.length < 1) {
+      console.log('');
+      console.log('You must specify an environment modules: api, admin, frontend'.red);
+      console.log('');
+      return;
+    }
+
+    if(['api', 'admin', 'frontend'].indexOf(options[0]) <= -1) {
       console.log('');
       console.log('You must specify an environment modules: api, admin, frontend'.red);
       console.log('');
@@ -916,11 +923,21 @@ function Installs(opts) {
       save = null;
     }
 
+    var params = [type, options[1], save];
+    if(type === 'uninstall' && options.length < 2) {
+      console.log('');
+      console.log('You must specify a package name: `vern '.red + type.red + ' npm <environment> <package_name>`'.red);
+      console.log('');
+    } else if(options.length < 2 && type === 'install') {
+      options[1] = '';
+      params.splice(1, 2);
+    }
+
     var env = options[0] === 'api' ? 'vern' : 'vern_' + options[0];
 
     var dir = projectConfig.cwd + '/app/' + env;
 
-    var runner = spawn('npm', [type, options[1], save], {
+    var runner = spawn('npm', params, {
       cwd: dir,
       stdio: 'inherit'
     });
@@ -929,6 +946,10 @@ function Installs(opts) {
     runner.on('close', function(code) {
       if(error) {
         return;
+      }
+
+      if(!options[1].length) {
+        options[1] = 'all modules';
       }
 
       if(code > 0) {
@@ -952,7 +973,14 @@ function Installs(opts) {
     var projectConfig = new Builds().loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 2) {
+    if(options.length < 1) {
+      console.log('');
+      console.log('You must specify an environment modules: admin, frontend'.red);
+      console.log('');
+      return;
+    }
+
+    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
       console.log('');
       console.log('You must specify an environment modules: admin, frontend'.red);
       console.log('');
@@ -964,11 +992,21 @@ function Installs(opts) {
       save = null;
     }
 
+    var params = [type, options[1], save];
+    if(type === 'uninstall' && options.length < 2) {
+      console.log('');
+      console.log('You must specify a package name: `vern '.red + type.red + ' bower <environment> <package_name>`'.red);
+      console.log('');
+    } else if(options.length < 2 && type === 'install') {
+      options[1] = '';
+      params.splice(1, 2);
+    }
+
     var env = 'vern_' + options[0];
 
-    var dir = projectConfig.cwd + '/appa/' + env;
+    var dir = projectConfig.cwd + '/app/' + env;
 
-    var runner = spawn('bower', [type, options[1], save], {
+    var runner = spawn('bower', params, {
       cwd: dir,
       stdio: 'inherit'
     });
@@ -977,6 +1015,10 @@ function Installs(opts) {
     runner.on('close', function(code) {
       if(error) {
         return;
+      }
+
+      if(!options[1]) {
+        options[1] = 'all modules';
       }
 
       if(code > 0) {
