@@ -593,11 +593,15 @@ function Builds() {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 2) {
+    if(options.length < 1) {
       console.log('');
-      console.log('You must specify admin or frontend'.red);
+      console.log('You must specify a name'.red);
       console.log('');
       return;
+    }
+    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+      options[1] = options[0];
+      options[0] = 'frontend';
     }
 
     inquirer.prompt([{
@@ -614,7 +618,7 @@ function Builds() {
         {name: 'LESS File', checked: true}
       ]
     }], function(res) {
-      options[0] = 'vern_' + options[0];
+      var env = options[0] = 'vern_' + options[0];
 
       var name = options[1].toLowerCase();
       var directive_name = options[1].toLowerCase().replace(/[-_](.)/g, function(match, group) {
@@ -628,8 +632,8 @@ function Builds() {
       var params = {
         name: name,
         directive_name: directive_name,
-        directive_path: cwd + '/app/' + options[0] + '/app/scripts/directives',
-        less_path: cwd + '/app/' + options[0] + '/app/styles/less/directives',
+        directive_path: cwd + '/app/' + env + '/app/scripts/directives',
+        less_path: cwd + '/app/' + env + '/app/styles/less/directives',
         scope: (res.needs.indexOf('Inherited Scope') > -1),
         restrictions: restrictions,
         templateCache: (res.needs.indexOf('$templateCache') > -1),
@@ -648,12 +652,22 @@ function Builds() {
         }
 
         utils.rewrite({
-          path: cwd + '/app/' + options[0] + '/app/index.html',
+          path: cwd + '/app/' + env + '/app/index.html',
           needle: '<!-- endbuild -->',
           insertions: [
               '<script type="text/javascript" src="scripts/directives/' + params.name + '.js"></script>'
           ]
         });
+
+        if(params.lessFile) {
+          utils.rewrite({
+            path: cwd + '/app/' + env + '/app/styles/less/main.less',
+            needle: '// buildpoint',
+            insertions: [
+                '@import "directives/' + params.name + '.less";'
+            ]
+          });
+        }
 
         console.log('');
         console.log(success.green);
@@ -673,13 +687,13 @@ function Builds() {
       return;
     }
 
-    options[0] = 'vern_' + options[0];
+    var env = options[0] = 'vern_' + options[0];
 
     var name = options[1].toLowerCase();
 
     var params = {
       name: name,
-      filter_path: cwd + '/app/' + options[0] + '/app/scripts/services'
+      filter_path: cwd + '/app/' + env + '/app/scripts/services'
     };
 
     _filter.copy(params, function(err, success) {
@@ -688,7 +702,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/' + options[0] + '/app/index.html',
+        path: cwd + '/app/' + env + '/app/index.html',
         needle: '<!-- endbuild -->',
         insertions: [
             '<script type="text/javascript" src="scripts/filters/' + params.name + '.js"></script>'
