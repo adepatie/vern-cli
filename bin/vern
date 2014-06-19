@@ -22,23 +22,31 @@ var program        = require('commander'),
     default_config = require(template_dir + '/vern_config.json'),
     pkg            = require('../package.json');
 
-program
-  .version(pkg.version)
-  .usage('<command> [options]')
-  .option('create, --create [object] [options]', 'Create a new module', parseCreate)
-  .option('start --start [server] [--no-install]', 'Start a server module (api, frontend, admin)', parseStart)
-  .option('stop --stop [server] [options]', 'Stop a server module (api, frontend, admin)', parseStop)
-  .option('restart --restart [server] [options]', 'Restart a server module (api, frontend, admin)', parseRestart)
-  .option('install, --install [module.spec] [options]', 'Install a module into your project', parseInstall)
-  .option('uninstall, --uninstall [module.spec] [options]', 'Uninstall a module from your project', parseUninstall)
-  .option('package, --package [module.spec] [options]', 'Start the package builder', parsePackage)
-  .option('deploy, --deploy [stage]', 'Create a view when inside a project folder', deployApp)
-  .option('config, --config', 'Configure your app when inside a project folder', configApp)
-  .parse(process.argv);
+var installs = true;
 
 if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
 }
+
+// This is so weird, must be a bug in commander or in child_process, when spawning a node process it seems to include the parameters from the vern cli call...
+if(process.argv.indexOf('--no-install') > -1) {
+  process.argv.splice(process.argv.indexOf('--no-install'), 1);
+  installs = false;
+}
+
+program
+  .version(pkg.version)
+  .usage('<command> [options]')
+  .option('create, --create <object> <name> [options]', 'Create a new module', parseCreate)
+  .option('start, --start <server>', 'Start a server module (api, frontend, admin)', parseStart)
+  .option('stop, --stop <server>', 'Stop a server module (api, frontend, admin)', parseStop)
+  .option('restart, --restart <server>', 'Restart a server module (api, frontend, admin)', parseRestart)
+  .option('install, --install [module.spec] [options]', 'Install a module into your project', parseInstall)
+  .option('uninstall, --uninstall <module.spec> [options]', 'Uninstall a module from your project', parseUninstall)
+  .option('package, --package [module.spec] [options]', 'Start the package builder', parsePackage)
+  .option('deploy, --deploy [stage]', 'Create a view when inside a project folder', deployApp)
+  .option('config, --config', 'Configure your app when inside a project folder', configApp)
+  .parse(process.argv);
 
 /*
  *
@@ -59,11 +67,6 @@ function parseStart(server) {
 
   var i = process.argv.indexOf('start');
   var params = process.argv.slice(i + 1);
-
-  var installs = true;
-  if(params.indexOf('--no-install') > -1) {
-    installs = false;
-  }
 
   var projectConfig = require(process.cwd() + '/vern.json');
   switch(server) {
@@ -238,7 +241,7 @@ function Starter(options) {
   };
 
   $scope.vernExec = function(opts) {
-    var env = opts.environment || opts.env || 'development';
+    var env = opts.env || 'development';
     var project = opts.project || 'vern';
 
     $scope.processes[project] = spawn('node', ['server', '-e', env], {
@@ -599,7 +602,7 @@ function Builds() {
         path: cwd + '/app/vern/server.js',
         needle: '// buildpoint',
         insertions: [
-            '$vern.controllers.' + util.toCamelCase(options[0], true) + ' = new $vern.controllers.' + params.name + '($vern).init({',
+            '$vern.controllers.' + utils.toCamelCase(options[0], true) + ' = new $vern.controllers.' + params.name + '($vern).init({',
           model ? '  model: $vern.models.' + model + ',' : '',
             '  publicRoute: \'/' + options[0].toLowerCase() + '\'',
           '});'
