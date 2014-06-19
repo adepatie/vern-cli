@@ -4,10 +4,7 @@
  *
  */
 
-var argv = require('optimist')
-  .usage('Usage: $0 -e [string]')
-  .default('e', 'development')
-  .argv;
+var argv = require('minimist')(process.argv);
 
 var vern = require('vern-core');
 

@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "validator": "latest",
-    "optimist": "latest",
+    "minimist": "latest",
     "vern-core": "latest"
   },
   "devDependencies": {
