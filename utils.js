@@ -55,7 +55,11 @@ function rewrite(args) {
 }
 
 function toCamelCase(text, pascal) {
+  if(!text) {
+    return undefined;
+  }
   if(pascal) {
+    // first letter is lowercase
     return text.toLowerCase().replace(/[-_](.)/g, function(match, group) {
       return group.toUpperCase();
     });
@@ -67,6 +71,9 @@ function toCamelCase(text, pascal) {
 }
 
 function toHyphenated(text) {
+  if(!text) {
+    return undefined;
+  }
   return text.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
 

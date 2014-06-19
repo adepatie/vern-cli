@@ -653,6 +653,9 @@ function Builds() {
       return;
     }
 
+    options[0] = utils.toHyphenated(options[0]);
+    options[1] = utils.toHyphenated(options[1]);
+
     options[0] = options[0].toLowerCase();
     if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
       options[1] = options[0];
@@ -706,6 +709,9 @@ function Builds() {
       console.log('');
       return;
     }
+
+    options[0] = utils.toHyphenated(options[0]);
+    options[1] = utils.toHyphenated(options[1]);
 
     options[0] = options[0].toLowerCase();
     if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
@@ -794,6 +800,9 @@ function Builds() {
       return;
     }
 
+    options[0] = utils.toHyphenated(options[0]);
+    options[1] = utils.toHyphenated(options[1]);
+
     options[0] = options[0].toLowerCase();
     if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
       options[1] = options[0];
@@ -840,6 +849,9 @@ function Builds() {
       console.log('');
       return;
     }
+
+    options[0] = utils.toHyphenated(options[0]);
+    options[1] = utils.toHyphenated(options[1]);
 
     options[0] = options[0].toLowerCase();
     if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
@@ -925,6 +937,9 @@ function Builds() {
       console.log('');
       return;
     }
+
+    options[0] = utils.toHyphenated(options[0]);
+    options[1] = utils.toHyphenated(options[1]);
 
     options[0] = options[0].toLowerCase();
     if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
