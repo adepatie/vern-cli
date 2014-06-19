@@ -489,16 +489,18 @@ function Builds() {
       model = options[options.indexOf('--model') + 1];
     }
 
+    var name = utils.toCamelCase(options[0]);
+
     if(!model && options.indexOf('--no-model') < 0) {
       inquirer.prompt({
         type: 'confirm',
         name: 'model',
-        message: 'Would you like to create ' + options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Model?',
+        message: 'Would you like to create ' + name + 'Model?',
         default: true
       }, function(res) {
         if(res.model === true) {
-          model = options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Model';
-          $scope.buildModel([options[0]]);
+          model = name + 'Model';
+          $scope.buildModel([options[0].toLowerCase()]);
         }
         finishControllerBuild(options, model);
       });
@@ -509,7 +511,7 @@ function Builds() {
 
   function finishControllerBuild(options, model) {
     var params = {
-      name: options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Controller',
+      name: utils.toCamelCase(options[0]) + 'Controller',
       path: cwd + '/app/vern/controllers'
     };
 
@@ -543,11 +545,16 @@ function Builds() {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 2) {
+    if(options.length < 1) {
       console.log('');
-      console.log('You must specify admin or frontend'.red);
+      console.log('You must specify a name'.red);
       console.log('');
       return;
+    }
+
+    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+      options[1] = options[0];
+      options[0] = 'frontend';
     }
 
     var type = 'service';
@@ -558,16 +565,14 @@ function Builds() {
       type = 'provider';
     }
 
-    options[0] = 'vern_' + options[0];
+    var env = options[0] = 'vern_' + options[0];
 
-    var name = options[1].toLowerCase().replace(/[-_](.)/g, function(match, group) {
-      return group.toUpperCase();
-    });
+    var name = utils.toCamelCase(options[1], true);
 
     var params = {
       name: name,
       type: type,
-      service_path: cwd + '/app/' + options[0] + '/app/scripts/services'
+      service_path: cwd + '/app/' + env + '/app/scripts/services'
     };
 
     _service.copy(params, function(err, success) {
@@ -576,7 +581,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/' + options[0] + '/app/index.html',
+        path: cwd + '/app/' + env + '/app/index.html',
         needle: '<!-- endbuild -->',
         insertions: [
             '<script type="text/javascript" src="scripts/services/' + params.name + '.js"></script>'
@@ -621,9 +626,7 @@ function Builds() {
       var env = options[0] = 'vern_' + options[0];
 
       var name = options[1].toLowerCase();
-      var directive_name = options[1].toLowerCase().replace(/[-_](.)/g, function(match, group) {
-        return group.toUpperCase();
-      });
+      var directive_name = utils.toCamelCase(options[1], true);
 
       var restrictions = (res.needs.indexOf('Element Restrictions') > -1) ? 'E' : '';
       restrictions += (res.needs.indexOf('Attribute Restrictions') > -1) ? 'A' : '';
@@ -680,20 +683,27 @@ function Builds() {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 2) {
+    if(options.length < 1) {
       console.log('');
-      console.log('You must specify admin or frontend'.red);
+      console.log('You must specify a name'.red);
       console.log('');
       return;
+    }
+
+    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+      options[1] = options[0];
+      options[0] = 'frontend';
     }
 
     var env = options[0] = 'vern_' + options[0];
 
     var name = options[1].toLowerCase();
+    var filter_name = utils.toCamelCase(options[1], true);
 
     var params = {
       name: name,
-      filter_path: cwd + '/app/' + env + '/app/scripts/services'
+      filter_name: filter_name,
+      filter_path: cwd + '/app/' + env + '/app/scripts/filters'
     };
 
     _filter.copy(params, function(err, success) {
@@ -720,7 +730,7 @@ function Builds() {
     if(!projectConfig) return;
 
     var params = {
-      name: options[0].charAt(0).toUpperCase() + options[0].slice(1) + 'Model',
+      name: utils.toCamelCase(options[0]) + 'Model',
       path: cwd + '/app/vern/models',
       collection: options[0].toLowerCase(),
       indexes: [],
@@ -746,11 +756,16 @@ function Builds() {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 2) {
+    if(options.length < 1) {
       console.log('');
-      console.log('You must specify admin or frontend'.red);
+      console.log('You must specify a name'.red);
       console.log('');
       return;
+    }
+
+    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+      options[1] = options[0];
+      options[0] = 'frontend';
     }
 
     var env = 'vern_' + options[0];
@@ -781,9 +796,7 @@ function Builds() {
       action = parts[1];
     }
 
-    var controller_name = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase().replace(/[-_](.)/g, function(match, group) {
-      return group.toUpperCase();
-    }) + 'Ctrl';
+    var controller_name = utils.toCamelCase(name, true);
 
     var params = {
       name: name,
@@ -827,11 +840,16 @@ function Builds() {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 2) {
+    if(options.length < 1) {
       console.log('');
-      console.log('You must specify admin or frontend'.red);
+      console.log('You must specify a name'.red);
       console.log('');
       return;
+    }
+
+    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+      options[1] = options[0];
+      options[0] = 'frontend';
     }
 
     var env = 'vern_' + options[0];

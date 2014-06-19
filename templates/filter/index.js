@@ -8,7 +8,8 @@ module.exports = {
     var filter_tpl = fs.readFileSync(__dirname + '/template/filter.js').toString();
 
     var view = {
-      filter_name: params.name
+      name: params.name,
+      filter_name: params.filter_name
     };
 
     mustache.compileText('filter', filter_tpl, function(err, compiled) {

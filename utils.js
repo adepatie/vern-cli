@@ -54,6 +54,24 @@ function rewrite(args) {
   return args;
 }
 
+function toCamelCase(text, pascal) {
+  if(pascal) {
+    return text.toLowerCase().replace(/[-_](.)/g, function(match, group) {
+      return group.toUpperCase();
+    });
+  } else {
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase().replace(/[-_](.)/g, function(match, group) {
+      return group.toUpperCase();
+    });
+  }
+}
+
+function toHyphenated(text) {
+  return text.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+}
+
 module.exports = {
-  rewrite: rewrite
+  rewrite: rewrite,
+  toCamelCase: toCamelCase,
+  toHyphenated: toHyphenated
 };
