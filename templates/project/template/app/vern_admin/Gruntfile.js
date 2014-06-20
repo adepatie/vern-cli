@@ -14,36 +14,36 @@ module.exports = function (grunt) {
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
 
   // configurable paths
-  var yeomanConfig = {
+  var vernConfig = {
     app: 'app',
     dist: 'dist'
   };
 
   try {
-    yeomanConfig.app = require('./component.json').appPath || yeomanConfig.app;
+    vernConfig.app = require('./component.json').appPath || vernConfig.app;
   } catch (e) {}
 
   grunt.initConfig({
-    yeoman: yeomanConfig,
+    vern: vernConfig,
     watch: {
       less: {
-        files: ['<%= yeoman.app %>/styles/less/**/*.less'],
+        files: ['<%= vern.app %>/styles/less/**/*.less'],
         tasks: ['less:dev'],
         options: {
           livereload: false
         }
       },
       css: {
-        files: ['{.tmp,<%= yeoman.app %>}/styles/**/*.css'],
+        files: ['{.tmp,<%= vern.app %>}/styles/**/*.css'],
         tasks: []
       },
       site: {
         files: [
-          '<%= yeoman.app %>/*.html',
-          '<%= yeoman.app %>/templates/**/*.html',
-          '<%= yeoman.app %>/views/**/*.html',
-          '{.tmp,<%= yeoman.app %>}/scripts/**/*.js',
-          '<%= yeoman.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
+          '<%= vern.app %>/*.html',
+          '<%= vern.app %>/templates/**/*.html',
+          '<%= vern.app %>/views/**/*.html',
+          '{.tmp,<%= vern.app %>}/scripts/**/*.js',
+          '<%= vern.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
       },
       options: {
@@ -59,7 +59,7 @@ module.exports = function (grunt) {
             return [
               mountFolder(connect, '../assets/scripts'),
               mountFolder(connect, '.tmp'),
-              mountFolder(connect, yeomanConfig.app)
+              mountFolder(connect, vernConfig.app)
             ];
           }
         }
@@ -76,8 +76,8 @@ module.exports = function (grunt) {
           dot: true,
           src: [
             '.tmp',
-            '<%= yeoman.dist %>/*',
-            '!<%= yeoman.dist %>/.git*'
+            '<%= vern.dist %>/*',
+            '!<%= vern.dist %>/.git*'
           ]
         }]
       },
@@ -89,7 +89,7 @@ module.exports = function (grunt) {
       },
       all: [
         'Gruntfile.js',
-        '<%= yeoman.app %>/scripts/{,*/}*.js'
+        '<%= vern.app %>/scripts/{,*/}*.js'
       ]
     },
     karma: {
@@ -101,12 +101,12 @@ module.exports = function (grunt) {
     less: {
       dev: {
         files: {
-          '.tmp/styles/main.css': '<%= yeoman.app %>/styles/less/main.less'
+          '.tmp/styles/main.css': '<%= vern.app %>/styles/less/main.less'
         }
       },
       dist: {
         files: {
-          '<%= yeoman.dist %>/styles/main.css': '<%= yeoman.app %>/styles/less/main.less'
+          '<%= vern.dist %>/styles/main.css': '<%= vern.app %>/styles/less/main.less'
         }
       }
     },
@@ -114,39 +114,39 @@ module.exports = function (grunt) {
       dist: {
         basic: {
           src: ['.tmp/concat/scripts/scripts.js'],
-          dest: '<%= yeoman.dist %>/scripts/scripts.js'
+          dest: '<%= vern.dist %>/scripts/scripts.js'
         },
         extras: {
           src: ['.tmp/concat/lib/lib.js'],
-          dest: '<%= yeoman.dist %>/lib/lib.js'
+          dest: '<%= vern.dist %>/lib/lib.js'
         }
       }
     },
     useminPrepare: {
-      html: '<%= yeoman.app %>/index.html',
+      html: '<%= vern.app %>/index.html',
       options: {
-        dest: '<%= yeoman.dist %>'
+        dest: '<%= vern.dist %>'
       }
     },
     usemin: {
       html: [
-        '<%= yeoman.dist %>/index.html',
-        '<%= yeoman.dist %>/404.html',
-        '<%= yeoman.dist %>/views/**/*.html'
+        '<%= vern.dist %>/index.html',
+        '<%= vern.dist %>/404.html',
+        '<%= vern.dist %>/views/**/*.html'
       ],
       css: [
         '.tmp/concat/styles/*.css',
-        '<%= yeoman.dist %>/styles/**/*.css'
+        '<%= vern.dist %>/styles/**/*.css'
       ],
       options: {
-        dirs: ['.tmp', '<%= yeoman.dist %>']
+        dirs: ['.tmp', '<%= vern.dist %>']
       }
     },
     cssmin: {
       dist: {
         files: {
-          '<%= yeoman.dist %>/styles/main.css': [
-            '<%= yeoman.dist %>/styles/**/*.css'
+          '<%= vern.dist %>/styles/main.css': [
+            '<%= vern.dist %>/styles/**/*.css'
           ]
         }
       }
@@ -155,7 +155,7 @@ module.exports = function (grunt) {
       dist: {
         options: {
           /*removeCommentsFromCDATA: true,
-           // https://github.com/yeoman/grunt-usemin/issues/44
+           // https://github.com/vern/grunt-usemin/issues/44
            //collapseWhitespace: true,
            collapseBooleanAttributes: true,
            removeAttributeQuotes: true,
@@ -166,15 +166,15 @@ module.exports = function (grunt) {
         },
         files: [{
           expand: true,
-          cwd: '<%= yeoman.app %>',
+          cwd: '<%= vern.app %>',
           src: ['*.html', 'views/**/*.html'],
-          dest: '<%= yeoman.dist %>'
+          dest: '<%= vern.dist %>'
         }]
       }
     },
     cdnify: {
       dist: {
-        html: ['<%= yeoman.dist %>/*.html']
+        html: ['<%= vern.dist %>/*.html']
       }
     },
     ngmin: {
@@ -183,15 +183,15 @@ module.exports = function (grunt) {
           expand: true,
           cwd: '.tmp/concat/scripts',
           src: '*.js',
-          dest: '<%= yeoman.dist %>/scripts'
+          dest: '<%= vern.dist %>/scripts'
         }]
       }
     },
     uglify: {
       dist: {
         files: {
-          '<%= yeoman.dist %>/scripts/scripts.js': [
-            '<%= yeoman.dist %>/scripts/scripts.js'
+          '<%= vern.dist %>/scripts/scripts.js': [
+            '<%= vern.dist %>/scripts/scripts.js'
           ]
         }
       }
@@ -200,11 +200,11 @@ module.exports = function (grunt) {
       dist: {
         files: {
           src: [
-            '<%= yeoman.dist %>/scripts/**/*.js',
-            '<%= yeoman.dist %>/lib/**/*.js',
-            '<%= yeoman.dist %>/styles/**/*.css'
-            //'<%= yeoman.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
-            //'<%= yeoman.dist %>/styles/fonts/*'
+            '<%= vern.dist %>/scripts/**/*.js',
+            '<%= vern.dist %>/lib/**/*.js',
+            '<%= vern.dist %>/styles/**/*.css'
+            //'<%= vern.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
+            //'<%= vern.dist %>/styles/fonts/*'
           ]
         }
       }
@@ -214,8 +214,8 @@ module.exports = function (grunt) {
         files: [{
           expand: true,
           dot: true,
-          cwd: '<%= yeoman.app %>',
-          dest: '<%= yeoman.dist %>',
+          cwd: '<%= vern.app %>',
+          dest: '<%= vern.dist %>',
           src: [
             '*.{ico,txt,png}',
             '.htaccess',
@@ -232,7 +232,7 @@ module.exports = function (grunt) {
             expand: true,
             dot: true,
             cwd: '.tmp/concat',
-            dest: '<%= yeoman.dist %>',
+            dest: '<%= vern.dist %>',
             src: [
               'lib/**/*'
             ]
