@@ -35,11 +35,12 @@
   "homepage": "https://github.com/uh-sem-blee/vern-cli",
   "devDependencies": {},
   "dependencies": {
+    "colors": "latest",
     "commander": "latest",
     "fs-extra": "latest",
     "inquirer": "latest",
     "mu2": "latest",
-    "colors": "latest",
+    "q": "^1.0.1",
     "validator": "latest",
     "vern-core": "latest"
   }

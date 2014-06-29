@@ -475,8 +475,29 @@ function Builds() {
   };
 
   function copyProject(project_path, project) {
-    _project.copy(project_path, function(err, res) {
-      console.log('Created project in: ' + project_path.green);
+    var params = {
+      path: project_path,
+      appName: 'VernApp',
+      adminAppName: 'VernAdminApp',
+      apiName: 'vern',
+      adminName: 'vern_admin',
+      assetsName: 'vern_assets',
+      frontendName: 'vern_frontend'
+    };
+
+    console.log('Trying to create project in: ' + project_path.green);
+    _project.copy(params, function(err, res) {
+      if(err) {
+        console.log('');
+        console.log(err);
+        return;
+      }
+
+      console.log(res.green);
+
+      fs.copySync(project_path + '/app/' + params.apiName + '/vern_config.sample.js'
+        , project_path + '/app/' + params.apiName + '/vern_config.js');
+
       fs.outputJson(project_path + '/vern.json', default_config, function(err) {
         if(err) {
           return console.log(err);
