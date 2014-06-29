@@ -7,7 +7,7 @@
 
 angular.module('VernApp')
   .factory('{{service_name}}', function () {
-    $scope = this;
+    var $scope = this;
 
     return $scope;
   });

@@ -738,9 +738,9 @@ function Builds() {
       var name = options[1].toLowerCase();
       var directive_name = utils.toCamelCase(options[1], true);
 
-      var restrictions = (res.needs.indexOf('Element Restrictions') > -1) ? 'E' : '';
-      restrictions += (res.needs.indexOf('Attribute Restrictions') > -1) ? 'A' : '';
-      restrictions += (res.needs.indexOf('Class Restrictions') > -1) ? 'C' : '';
+      var restrictions = (res.needs.indexOf('Element Restriction') > -1) ? 'E' : '';
+      restrictions += (res.needs.indexOf('Attribute Restriction') > -1) ? 'A' : '';
+      restrictions += (res.needs.indexOf('Class Restriction') > -1) ? 'C' : '';
 
       var params = {
         name: name,
