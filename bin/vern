@@ -607,6 +607,22 @@ function Builds() {
     });
   }
 
+  $scope.ensureOptions = function(options, starting) {
+    if(!starting) {
+      starting = default_config;
+    }
+    for(var i in starting) {
+      if(typeof options[i] === 'undefined') {
+        options[i] = starting[i];
+      }
+      if(typeof starting[i] === 'object') {
+        options[i] = $scope.ensureOptions(options[i], starting[i]);
+      }
+    }
+
+    return options;
+  };
+
   $scope.loadProjectConfig = function(project_path) {
     if(!project_path) {
       project_path = cwd + '/vern.json';
@@ -617,7 +633,12 @@ function Builds() {
     while(!done) {
       if (fs.existsSync(project_path)) {
         cwd = path.dirname(project_path);
-        return {options: require(cwd + '/vern.json'), cwd: cwd};
+        var options = require(cwd + '/vern.json');
+        console.log(options);
+        options = $scope.ensureOptions(options);
+        console.log(options);
+        fs.outputJsonSync(cwd + '/vern.json', options);
+        return {options: options, cwd: cwd};
       }
       if(path.dirname(project_path) === '/') {
         done = true;
