@@ -634,9 +634,7 @@ function Builds() {
       if (fs.existsSync(project_path)) {
         cwd = path.dirname(project_path);
         var options = require(cwd + '/vern.json');
-        console.log(options);
         options = $scope.ensureOptions(options);
-        console.log(options);
         fs.outputJsonSync(cwd + '/vern.json', options);
         return {options: options, cwd: cwd};
       }
