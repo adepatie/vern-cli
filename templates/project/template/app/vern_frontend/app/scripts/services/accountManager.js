@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .factory('accountManager', function (apiRequest, localStorageService, $compile, $rootScope) {
     var $scope = this;
 

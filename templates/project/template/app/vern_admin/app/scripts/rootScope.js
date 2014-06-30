@@ -1,4 +1,4 @@
-var app = angular.module('VernApp')
+var app = angular.module('{{adminAppName}}')
   .run(function($rootScope, config, localStorageService, $route, $routeParams, $location, accountManager, dataManager) {
     $rootScope.page_title = '';
     $rootScope.controller = '';

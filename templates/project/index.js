@@ -26,13 +26,13 @@ module.exports = {
       var projectFiles = fs.readdirSync(dir);
       for(var i = 0; i < projectFiles.length; i++) {
         if (projectFiles[i] === 'vern') {
-          promises.push(walkTemplate(path.join(dir, params.apiName), path.join(appDir, params.apiName)));
+          promises.push(walkTemplate(path.join(dir, 'vern'), path.join(appDir, params.apiName)));
         } else if (projectFiles[i] === 'vern_admin') {
-          promises.push(walkTemplate(path.join(dir, params.adminName), path.join(appDir, params.adminName)));
+          promises.push(walkTemplate(path.join(dir, 'vern_admin'), path.join(appDir, params.adminName)));
         } else if (projectFiles[i] === 'vern_assets') {
-          promises.push(walkTemplate(path.join(dir, params.assetsName), path.join(appDir, params.assetsName)));
+          promises.push(walkTemplate(path.join(dir, 'vern_assets'), path.join(appDir, params.assetsName)));
         } else if (projectFiles[i] === 'vern_frontend') {
-          promises.push(walkTemplate(path.join(dir, params.frontendName), path.join(appDir, params.frontendName)));
+          promises.push(walkTemplate(path.join(dir, 'vern_frontend'), path.join(appDir, params.frontendName)));
         } else {
           fs.copySync(path.join(dir, projectFiles[i]), path.join(appDir, projectFiles[i]));
         }

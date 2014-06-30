@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{adminAppName}}')
   .controller('UsersCtrl', function ($scope, dataManager, apiRequest, $rootScope) {
     $scope.users = [];
     dataManager.setAdmin(true);

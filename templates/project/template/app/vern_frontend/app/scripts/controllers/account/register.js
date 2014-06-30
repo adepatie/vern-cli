@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .controller('RegisterCtrl', function($scope, apiRequest, $rootScope, $location, $modalInstance) {
     $scope.registerData = {
       email: null

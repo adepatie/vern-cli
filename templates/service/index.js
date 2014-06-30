@@ -8,6 +8,7 @@ module.exports = {
     var service_tpl = fs.readFileSync(__dirname + '/template/' + params.type + '.js').toString();
 
     var view = {
+      appName: params.appName,
       service_name: params.name
     };
 

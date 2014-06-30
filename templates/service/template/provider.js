@@ -5,7 +5,7 @@
  */
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .provider('{{service_name}}', function () {
     this.$get = function() {
       return {

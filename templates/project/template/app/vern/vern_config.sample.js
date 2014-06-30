@@ -1,5 +1,5 @@
 module.exports = {
-  name: 'Vern API',
+  name: '{{appName}} API',
   use_ssl: false, // generally better to use a proxy service on nginx/apache than to direct
   ssl_key: '',
   ssl_crt: '',
@@ -18,7 +18,7 @@ module.exports = {
       dbdriver: 'mongodb',
       databases: {
         mongodb: {
-          db: 'mongodb://localhost/vern-test',
+          db: 'mongodb://localhost/{{apiName}}',
           user: '',
           password: ''
         }
@@ -35,7 +35,7 @@ module.exports = {
       dbdriver: 'mongodb',
       databases: {
         mongodb: {
-          db: 'mongodb://localhost/vern-test',
+          db: 'mongodb://localhost/{{apiName}}',
           user: '',
           password: ''
         }

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .controller('OAuthCtrl', function ($scope, apiRequest, localStorageService, $location, $rootScope, $routeParams) {
     $scope.oAuthData = {};
   });

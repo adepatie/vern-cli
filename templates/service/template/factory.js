@@ -5,7 +5,7 @@
  */
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .factory('{{service_name}}', function () {
     var $scope = this;
 

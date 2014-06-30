@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{adminAppName}}')
   .controller('AccountMainCtrl', function ($scope, apiRequest, ngDictionary, $rootScope, $location) {
     $scope.dashboard = {};
     $rootScope.ensureLogin('/');

@@ -12,6 +12,7 @@ module.exports = {
     var view_tpl = fs.readFileSync(__dirname + '/template/view.html').toString();
 
     var view = {
+      appName: params.appName,
       name: params.name
     };
 

@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .controller('PasswordCtrl', function ($scope, apiRequest, localStorageService, $location, $rootScope, $routeParams) {
     $scope.success = false;
     

@@ -1,5 +1,5 @@
 'use strict';
-angular.module('VernApp')
+angular.module('{{appName}}')
   .directive('tokenInput', function($rootScope, $compile) {
     return {
       restrict: 'AE',

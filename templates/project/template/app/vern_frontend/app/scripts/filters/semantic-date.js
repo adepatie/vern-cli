@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp.filters', [])
+angular.module('{{appName}}.filters', [])
   .filter('semanticDate', function() {
     return function(input, options) {
       var out = '';

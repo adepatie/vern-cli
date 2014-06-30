@@ -1,5 +1,5 @@
 'use strict';
-angular.module('VernApp')
+angular.module('{{appName}}')
   .directive('ngValidate', function($rootScope, $compile) {
     return {
       restrict: 'A',

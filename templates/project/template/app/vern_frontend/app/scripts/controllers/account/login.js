@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .controller('LoginCtrl', function($scope, apiRequest, $rootScope, $modalInstance) {
     $scope.loginData = {
       username: null,

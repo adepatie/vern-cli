@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{adminAppName}}')
   .factory('dataManager', function(apiRequest, localStorageService, $rootScope, $q) {
     var $scope = this;
     var controller = '';

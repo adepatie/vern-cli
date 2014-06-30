@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .factory('apiRequest', function ($rootScope, config, $http, $location, localStorageService) {
     var baseUrl = ($location.host() === '0.0.0.0' || $location.host() === 'localhost') ? config.devHost : config.productionHost;
 

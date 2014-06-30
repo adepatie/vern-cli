@@ -173,11 +173,14 @@ function Starter(options) {
     frontend: null
   };
 
+  var projectConfig = new Builds().loadProjectConfig();
+  if(!projectConfig) return;
+
   var project_dirs = {
-    vern: '/app/vern',
-    admin: '/app/vern_admin',
-    assets: '/app/vern_assets',
-    frontend: '/app/vern_frontend'
+    vern: '/app/' + projectConfig.options.folders.api,
+    admin: '/app/' + projectConfig.options.folders.admin,
+    assets: '/app/' + projectConfig.options.folders.assets,
+    frontend: '/app/' + projectConfig.options.folders.frontend
   };
 
   process.on('exit', function(code) {
@@ -432,6 +435,7 @@ function Builds() {
   $scope.buildProject = function(options) {
     var project_path = options[0];
     var project = null;
+
     if(!project_path) {
       inquirer.prompt([
         {
@@ -440,7 +444,8 @@ function Builds() {
           message: 'Enter a project name (use . for current directory)'
         }
       ], function(answers) {
-        build(answers.project, answers.project);
+        var project_name = answers.project;
+        build(project_name, project_name);
       })
 
     } else {
@@ -453,39 +458,95 @@ function Builds() {
     }
 
     function build(project_path, project) {
+      project_path = utils.toHyphenated(project_path);
+      project = utils.toCamelCase(project);
       default_config.module = project;
-      console.log('Setting up ' + project.green + ' now!');
-      if((fs.existsSync(project_path) && project_path !== '.') || (project_path === '.' && fs.readdirSync(project_path).length > 0)) {
-        inquirer.prompt({
+
+      var params = {
+        path: project_path,
+        projectName: project,
+        appName: project + 'App',
+        adminAppName: project + 'AdminApp',
+        apiName: 'vern',
+        adminName: 'vern_admin',
+        assetsName: 'vern_assets',
+        frontendName: 'vern_frontend'
+      };
+
+      inquirer.prompt([
+        {
           type: 'confirm',
-          name: 'overwrite',
-          message: 'Overwrite the existing directory?',
+          name: 'customize',
+          message: 'Do you want to customize your project folders?',
           default: false
-        }, function(answers) {
-          if(answers.overwrite === true) {
-            copyProject(project_path);
-          } else {
-            console.log('Not going to overwrite. Good bye!'.red);
-          }
-        });
-      } else {
-        copyProject(project_path);
-      }
+        }
+      ], function(answers) {
+        if(answers.customize === true) {
+          inquirer.prompt([
+            {
+              type: 'input',
+              name: 'api_name',
+              message: 'Name your API server',
+              default: 'vern'
+            },
+            {
+              type: 'input',
+              name: 'admin_name',
+              message: 'Name your Admin web portal',
+              default: 'vern_admin'
+            },
+            {
+              type: 'input',
+              name: 'assets_name',
+              message: 'Name your Assets directory',
+              default: 'vern_assets'
+            },
+            {
+              type: 'input',
+              name: 'frontend_name',
+              message: 'Name your Frontend',
+              default: 'vern_frontend'
+            }
+          ], function (answers) {
+            params.projectName = project;
+            params.appName = project + 'App';
+            params.adminAppName = project + 'AdminApp';
+            params.apiName = utils.toHyphenated(answers.api_name);
+            params.adminName = utils.toHyphenated(answers.admin_name);
+            params.assetsName = utils.toHyphenated(answers.assets_name);
+            params.frontendName = utils.toHyphenated(answers.frontend_name);
+
+            console.log('Setting up ' + project.green + ' now!');
+            if ((fs.existsSync(project_path) && project_path !== '.') || (project_path === '.' && fs.readdirSync(project_path).length > 0)) {
+              inquirer.prompt({
+                type: 'confirm',
+                name: 'overwrite',
+                message: 'Overwrite the existing directory?',
+                default: false
+              }, function (answers) {
+                if (answers.overwrite === true) {
+                  copyProject(project_path, params);
+                } else {
+                  console.log('Not going to overwrite. Good bye!'.red);
+                }
+              });
+            } else {
+              copyProject(project_path, params);
+            }
+          });
+        } else {
+          copyProject(project_path, params);
+        }
+      });
     }
   };
 
-  function copyProject(project_path, project) {
-    var params = {
-      path: project_path,
-      appName: 'VernApp',
-      adminAppName: 'VernAdminApp',
-      apiName: 'vern',
-      adminName: 'vern_admin',
-      assetsName: 'vern_assets',
-      frontendName: 'vern_frontend'
-    };
-
+  function copyProject(project_path, params) {
     console.log('Trying to create project in: ' + project_path.green);
+    default_config.folders.api = params.apiName;
+    default_config.folders.admin = params.adminName;
+    default_config.folders.assets = params.assetsName;
+    default_config.folders.frontend = params.frontendName;
     _project.copy(params, function(err, res) {
       if(err) {
         console.log('');
@@ -576,9 +637,6 @@ function Builds() {
   };
 
   $scope.buildController = function(options) {
-    var projectConfig = $scope.loadProjectConfig();
-    if(!projectConfig) return;
-
     var model = null;
     if(options.indexOf('--model') > -1) {
       model = options[options.indexOf('--model') + 1];
@@ -605,9 +663,12 @@ function Builds() {
   };
 
   function finishControllerBuild(options, model) {
+    var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
     var params = {
       name: utils.toCamelCase(options[0]) + 'Controller',
-      path: cwd + '/app/vern/controllers'
+      path: cwd + '/app/' + projectConfig.options.folders.api + '/controllers'
     };
 
     if(model) {
@@ -620,7 +681,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/vern/server.js',
+        path: cwd + '/app/' + projectConfig.options.folders.api + '/server.js',
         needle: '// buildpoint',
         insertions: [
             '$vern.controllers.' + utils.toCamelCase(options[0], true) + ' = new $vern.controllers.' + params.name + '($vern).init({',
@@ -642,7 +703,7 @@ function Builds() {
 
     var params = {
       name: utils.toCamelCase(options[0]) + 'Model',
-      path: cwd + '/app/vern/models',
+      path: cwd + '/app/' + projectConfig.options.folders.api + '/models',
       collection: options[0].toLowerCase(),
       indexes: [],
       exclude: [],
@@ -691,11 +752,12 @@ function Builds() {
       type = 'provider';
     }
 
-    var env = options[0] = 'vern_' + options[0];
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
 
     var name = utils.toCamelCase(options[1], true);
 
     var params = {
+      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       type: type,
       service_path: cwd + '/app/' + env + '/app/scripts/services'
@@ -754,7 +816,7 @@ function Builds() {
         {name: 'LESS File', checked: true}
       ]
     }], function(res) {
-      var env = options[0] = 'vern_' + options[0];
+      var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
 
       var name = options[1].toLowerCase();
       var directive_name = utils.toCamelCase(options[1], true);
@@ -764,6 +826,7 @@ function Builds() {
       restrictions += (res.needs.indexOf('Class Restriction') > -1) ? 'C' : '';
 
       var params = {
+        appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
         name: name,
         directive_name: directive_name,
         directive_path: cwd + '/app/' + env + '/app/scripts/directives',
@@ -830,12 +893,13 @@ function Builds() {
       options[0] = 'frontend';
     }
 
-    var env = options[0] = 'vern_' + options[0];
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
 
     var name = options[1].toLowerCase();
     var filter_name = utils.toCamelCase(options[1], true);
 
     var params = {
+      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       filter_name: filter_name,
       filter_path: cwd + '/app/' + env + '/app/scripts/filters'
@@ -880,7 +944,7 @@ function Builds() {
       options[0] = 'frontend';
     }
 
-    var env = 'vern_' + options[0];
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
 
     var extraPath = '/main';
     if(options.indexOf('--partial') > -1) {
@@ -911,6 +975,7 @@ function Builds() {
     var controller_name = utils.toCamelCase(name, true);
 
     var params = {
+      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       action: action,
       controller_name: controller_name,
@@ -968,7 +1033,7 @@ function Builds() {
       options[0] = 'frontend';
     }
 
-    var env = 'vern_' + options[0];
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
 
     var extraPath = '/main';
     if(options.indexOf('--partial') > -1) {
@@ -997,6 +1062,7 @@ function Builds() {
     }
 
     var params = {
+      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       action: action,
       view_path: cwd + '/app/' + env + '/app/views' + extraPath + '/' + name
@@ -1081,7 +1147,7 @@ function Installs(opts) {
       params.splice(1, 2);
     }
 
-    var env = options[0] === 'api' ? 'vern' : 'vern_' + options[0];
+    var env = options[0] === 'api' ? projectConfig.options.folders.api : (options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend);
 
     var dir = projectConfig.cwd + '/app/' + env;
 
@@ -1150,7 +1216,7 @@ function Installs(opts) {
       params.splice(1, 2);
     }
 
-    var env = 'vern_' + options[0];
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
 
     var dir = projectConfig.cwd + '/app/' + env;
 

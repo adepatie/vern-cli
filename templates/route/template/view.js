@@ -9,7 +9,7 @@
  */
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .controller('{{controller_name}}', function($scope) {
     $scope.data = {};
   });

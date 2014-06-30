@@ -1,5 +1,5 @@
 'use strict';
-angular.module('VernApp')
+angular.module('{{adminAppName}}')
   .directive('assetUpload', function($compile, accountManager, apiRequest, localStorageService, $rootScope) {
     return {
       restrict: 'AE',

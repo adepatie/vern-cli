@@ -5,7 +5,7 @@
  */
 'use strict';
 
-angular.module('VernApp.filters', [])
+angular.module('{{appName}}.filters', [])
   .filter('{{filter_name}}', function() {
     return function(input, options) {
       var out = '';

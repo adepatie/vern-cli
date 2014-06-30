@@ -1,5 +1,5 @@
 'use strict';
-angular.module('VernApp')
+angular.module('{{adminAppName}}')
   .directive('openModal', function($modal, $parse, $rootScope) {
     return {
       restrict: 'A',

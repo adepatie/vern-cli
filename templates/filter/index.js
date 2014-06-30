@@ -8,6 +8,7 @@ module.exports = {
     var filter_tpl = fs.readFileSync(__dirname + '/template/filter.js').toString();
 
     var view = {
+      appName: params.appName,
       name: params.name,
       filter_name: params.filter_name
     };

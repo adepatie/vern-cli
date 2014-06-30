@@ -1,5 +1,5 @@
 'use strict';
-angular.module('VernApp')
+angular.module('{{adminAppName}}')
   .directive('displayDataSet', function($rootScope, dataManager) {
     return {
       scope: {schema: '=', dataSet: '=displayDataSet', className: '@', displayType: '@', title: '@'},
@@ -211,42 +211,42 @@ angular.module('VernApp')
     }
   });
 
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/editor.html',
       '<div class="editor-data"><h3>{{verb}}</h3><div class="editor-actions"><a href class="save btn btn-primary" ng-click="saveData()"><span class="glyphicon glyphicon-save"></span> Save</a> <a href class="btn btn-default" ng-click="closeData()"><span class="glyphicon glyphicon-remove"></span></a></div><div class="editor-data-holder"></div><div class="delete-holder" ng-show="verb == \'Edit\'"><button class="delete btn btn-danger" ng-click="deleteConfirm()"><span ng-class="{active: isDeleting == false}">Delete</span><span ng-class="{active: isDeleting == true}">Click again to confirm</span></button> <button class="btn btn-default" ng-show="isDeleting == true" ng-click="cancelDelete()">Cancel</button></div></div>');
 }]);
 
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/text.html',
     '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="text" ng-model="data"></div>');
 }]);
 
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/email.html',
     '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="email" ng-model="data"></div>');
 }]);
 
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/password.html',
     '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="password" ng-model="data" ng-init="data = \'\'"></div>');
 }]);
 
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/currency.html',
     '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="text" ng-model="data"></div>');
 }]);
 
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/toggle.html',
     '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><input type="checkbox" ng-model="data" id="{{id}}"><label for="{{id}}" ng-bind="label"></label></div>');
 }]);
 
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/select.html',
     '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><select class="form-control" ng-model="data" ng-options="option.value as option.name for option in scheme.options"><option value>Select One</option></select></div>');
 }]);
 
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/button.html',
     '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><button class="btn btn-default" ng-click="doCallback()">{{label}}</button></div>');
 }]);

@@ -1,5 +1,5 @@
 'use strict';
-angular.module('VernApp')
+angular.module('{{adminAppName}}')
   .directive('ngToggle', function($modal, $rootScope) {
     return {
       scope: {value: '=ngModel'},

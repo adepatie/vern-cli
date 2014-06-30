@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .controller('MenuCtrl', function ($scope, config, ngDictionary, $location, $rootScope) {
     $scope.lang = ngDictionary[config.language].header;
     $scope.menu = [];

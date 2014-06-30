@@ -5,7 +5,7 @@
  */
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{appName}}')
   .directive('{{directive_name}}', function() {
     return {
       {{scope}}
@@ -30,7 +30,7 @@ angular.module('VernApp')
   });
 
 {{#templateCache}}
-angular.module('VernApp').run(['$templateCache', function($templateCache) {
+angular.module('{{appName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('{{template_url}}',
       '<div class="{{name}}">' +
       '</div>'

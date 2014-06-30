@@ -6,5 +6,11 @@
   "requires": {},
   "author": "",
   "license": "",
-  "repository": ""
+  "repository": "",
+  "folders": {
+    "api": "vern",
+    "admin": "vern_admin",
+    "assets": "vern_assets",
+    "frontend": "vern_frontend"
+  }
 }

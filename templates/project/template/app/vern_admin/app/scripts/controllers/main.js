@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('VernApp')
+angular.module('{{adminAppName}}')
   .controller('MainCtrl', function ($scope, apiRequest, ngDictionary, $rootScope, $location) {
     $scope.homeData = {};
     $scope.lang = ngDictionary.home;
