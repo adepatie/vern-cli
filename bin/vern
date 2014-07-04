@@ -423,6 +423,12 @@ function parseCreate() {
   var i = process.argv.indexOf('create');
   var params = process.argv.slice(i + 1);
 
+  for(var j = 0; j < params.length; j++) {
+    if(!params[j].length) {
+      params.splice(j, 1);
+      j--;
+    }
+  }
   var buildName = params[0];
   buildName = buildName.charAt(0).toUpperCase() + buildName.slice(1).toLowerCase();
   new Builds()['build' + buildName](params.slice(1));
@@ -445,7 +451,7 @@ function Builds() {
           message: 'Enter a project name (use . for current directory)'
         }
       ], function(answers) {
-        var project_name = answers.project;
+        var project_name = answers.project.length ? answers.project : '.';
         build(project_name, project_name);
       })
 
