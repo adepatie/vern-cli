@@ -11,6 +11,6 @@
     "api": "vern",
     "admin": "vern_admin",
     "assets": "vern_assets",
-    "frontend": "vern_frontend"
+    "public": "vern_public"
   }
 }

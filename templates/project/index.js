@@ -31,8 +31,8 @@ module.exports = {
           promises.push(walkTemplate(path.join(dir, 'vern_admin'), path.join(appDir, params.adminName)));
         } else if (projectFiles[i] === 'vern_assets') {
           promises.push(walkTemplate(path.join(dir, 'vern_assets'), path.join(appDir, params.assetsName)));
-        } else if (projectFiles[i] === 'vern_frontend') {
-          promises.push(walkTemplate(path.join(dir, 'vern_frontend'), path.join(appDir, params.frontendName)));
+        } else if (projectFiles[i] === 'vern_public') {
+          promises.push(walkTemplate(path.join(dir, 'vern_public'), path.join(appDir, params.publicName)));
         } else {
           fs.copySync(path.join(dir, projectFiles[i]), path.join(appDir, projectFiles[i]));
         }

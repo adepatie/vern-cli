@@ -38,11 +38,12 @@ program
   .version(pkg.version)
   .usage('<command> [options]')
   .option('create, --create <object> <name> [options]', 'Create a new module', parseCreate)
-  .option('start, --start <server>', 'Start a server module (api, frontend, admin)', parseStart)
-  .option('stop, --stop <server>', 'Stop a server module (api, frontend, admin)', parseStop)
-  .option('restart, --restart <server>', 'Restart a server module (api, frontend, admin)', parseRestart)
+  .option('start, --start <server>', 'Start a server module (api, public, admin)', parseStart)
+  .option('stop, --stop <server>', 'Stop a server module (api, public, admin)', parseStop)
+  .option('restart, --restart <server>', 'Restart a server module (api, public, admin)', parseRestart)
   .option('install, --install [module.spec] [options]', 'Install a module into your project', parseInstall)
   .option('uninstall, --uninstall <module.spec> [options]', 'Uninstall a module from your project', parseUninstall)
+  .option('build, --build [env]', 'Build for distribution, defaults to public', parseBuild)
   .option('package, --package [module.spec] [options]', 'Start the package builder', parsePackage)
   .option('deploy, --deploy [stage]', 'Create a view when inside a project folder', deployApp)
   .option('config, --config', 'Configure your app when inside a project folder', configApp)
@@ -52,7 +53,7 @@ program
  *
  * Starter functions
  *
- * These methods will start the api, admin, and frontend servers for development
+ * These methods will start the api, admin, and public servers for development
  *
  * For a production deployment the process is different, but could be very similar
  *
@@ -73,8 +74,8 @@ function parseStart(server) {
     case 'api':
       new Starter(projectConfig).startAPI(installs);
       break;
-    case 'frontend':
-      new Starter(projectConfig).startFrontend(installs);
+    case 'public':
+      new Starter(projectConfig).startPublic(installs);
       break;
     case 'admin':
       new Starter(projectConfig).startAdmin(installs);
@@ -82,7 +83,7 @@ function parseStart(server) {
     case 'default':
     case 'all':
       new Starter(projectConfig).startAPI(installs, function() {
-        new Starter(projectConfig).startFrontend(installs, function () {
+        new Starter(projectConfig).startPublic(installs, function () {
           new Starter(projectConfig).startAdmin(installs);
         });
       });
@@ -118,7 +119,7 @@ function parseStop(server) {
     case 'api':
 
       break;
-    case 'frontend':
+    case 'public':
 
       break;
     case 'admin':
@@ -155,7 +156,7 @@ function parseRestart(server) {
     case 'api':
 
       break;
-    case 'frontend':
+    case 'public':
 
       break;
     case 'admin':
@@ -170,7 +171,7 @@ function Starter(options) {
   $scope.processes = {
     vern: null,
     admin: null,
-    frontend: null
+    public: null
   };
 
   var projectConfig = new Builds().loadProjectConfig();
@@ -180,7 +181,7 @@ function Starter(options) {
     vern: '/app/' + projectConfig.options.folders.api,
     admin: '/app/' + projectConfig.options.folders.admin,
     assets: '/app/' + projectConfig.options.folders.assets,
-    frontend: '/app/' + projectConfig.options.folders.frontend
+    public: '/app/' + projectConfig.options.folders.public
   };
 
   process.on('exit', function(code) {
@@ -192,8 +193,8 @@ function Starter(options) {
       $scope.processes.admin.kill();
     }
 
-    if($scope.processes.frontend) {
-      $scope.processes.frontend.kill();
+    if($scope.processes.public) {
+      $scope.processes.public.kill();
     }
   });
 
@@ -268,7 +269,7 @@ function Starter(options) {
   };
 
   $scope.gruntExec = function(opts) {
-    var project = opts.project || 'frontend';
+    var project = opts.project || 'public';
 
     $scope.processes[project] = spawn('grunt', ['server'], {
       cwd: cwd + project_dirs[project],
@@ -316,7 +317,7 @@ function Starter(options) {
     }
   };
 
-  $scope.startFrontend = function(install, nostart, callback) {
+  $scope.startPublic = function(install, nostart, callback) {
     if(arguments.length === 1 && typeof arguments[0] === 'function') {
       callback = arguments[0];
     }
@@ -324,21 +325,21 @@ function Starter(options) {
       callback = arguments[1];
     }
     if(install === true) {
-      $scope.runNpm(cwd + project_dirs['frontend'], function(err, success) {
+      $scope.runNpm(cwd + project_dirs['public'], function(err, success) {
         if(err) {
           return console.log(err);
         }
 
         console.log(success);
         console.log('');
-        $scope.runBower(cwd + project_dirs['frontend'], function(err, success) {
+        $scope.runBower(cwd + project_dirs['public'], function(err, success) {
           if(err) {
             return console.log(err);
           }
 
           console.log(success);
           if(nostart !== true) {
-            $scope.gruntExec({project: 'frontend'});
+            $scope.gruntExec({project: 'public'});
           }
           if(callback) {
             callback(null, 'api started');
@@ -346,7 +347,7 @@ function Starter(options) {
         });
       });
     } else {
-      $scope.gruntExec({project: 'frontend'});
+      $scope.gruntExec({project: 'public'});
       if(callback) {
         callback(null, 'api started');
       }
@@ -409,7 +410,7 @@ function Starter(options) {
  * Controller - Set up a vern route/data controller
  * Model - Set up a vern data model
  *
- * ANGULAR LEVEL (specify admin or frontend)
+ * ANGULAR LEVEL (specify admin or public)
  * ===
  * View - Sets up an angular view + stylesheet + controller
  * Directive - Sets up an angular directive
@@ -470,7 +471,7 @@ function Builds() {
         apiName: 'vern',
         adminName: 'vern_admin',
         assetsName: 'vern_assets',
-        frontendName: 'vern_frontend'
+        publicName: 'vern_public'
       };
 
       inquirer.prompt([
@@ -503,9 +504,9 @@ function Builds() {
             },
             {
               type: 'input',
-              name: 'frontend_name',
-              message: 'Name your Frontend',
-              default: 'vern_frontend'
+              name: 'public_name',
+              message: 'Name your public',
+              default: 'vern_public'
             }
           ], function (answers) {
             params.projectName = project;
@@ -514,7 +515,7 @@ function Builds() {
             params.apiName = utils.toHyphenated(answers.api_name);
             params.adminName = utils.toHyphenated(answers.admin_name);
             params.assetsName = utils.toHyphenated(answers.assets_name);
-            params.frontendName = utils.toHyphenated(answers.frontend_name);
+            params.publicName = utils.toHyphenated(answers.public_name);
 
             console.log('Setting up ' + project.green + ' now!');
             if ((fs.existsSync(project_path) && project_path !== '.') || (project_path === '.' && fs.readdirSync(project_path).length > 0)) {
@@ -546,7 +547,7 @@ function Builds() {
     default_config.folders.api = params.apiName;
     default_config.folders.admin = params.adminName;
     default_config.folders.assets = params.assetsName;
-    default_config.folders.frontend = params.frontendName;
+    default_config.folders.public = params.publicName;
     _project.copy(params, function(err, res) {
       if(err) {
         console.log('');
@@ -579,7 +580,7 @@ function Builds() {
               if(err) {
                 return console.log(err);
               }
-              new Starter({cwd: newCWD}).startFrontend(true, true, function (err, success) {
+              new Starter({cwd: newCWD}).startPublic(true, true, function (err, success) {
                 if(err) {
                   return console.log(err);
                 }
@@ -758,9 +759,9 @@ function Builds() {
     options[1] = utils.toHyphenated(options[1]);
 
     options[0] = options[0].toLowerCase();
-    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+    if(['admin', 'public'].indexOf(options[0]) <= -1) {
       options[1] = options[0];
-      options[0] = 'frontend';
+      options[0] = 'public';
     }
 
     var type = 'service';
@@ -771,7 +772,7 @@ function Builds() {
       type = 'provider';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
     var name = utils.toCamelCase(options[1], true);
 
@@ -816,9 +817,9 @@ function Builds() {
     options[1] = utils.toHyphenated(options[1]);
 
     options[0] = options[0].toLowerCase();
-    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+    if(['admin', 'public'].indexOf(options[0]) <= -1) {
       options[1] = options[0];
-      options[0] = 'frontend';
+      options[0] = 'public';
     }
 
     inquirer.prompt([{
@@ -835,7 +836,7 @@ function Builds() {
         {name: 'LESS File', checked: true}
       ]
     }], function(res) {
-      var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
+      var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
       var name = options[1].toLowerCase();
       var directive_name = utils.toCamelCase(options[1], true);
@@ -907,12 +908,12 @@ function Builds() {
     options[1] = utils.toHyphenated(options[1]);
 
     options[0] = options[0].toLowerCase();
-    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+    if(['admin', 'public'].indexOf(options[0]) <= -1) {
       options[1] = options[0];
-      options[0] = 'frontend';
+      options[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
     var name = options[1].toLowerCase();
     var filter_name = utils.toCamelCase(options[1], true);
@@ -958,12 +959,12 @@ function Builds() {
     options[1] = utils.toHyphenated(options[1]);
 
     options[0] = options[0].toLowerCase();
-    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+    if(['admin', 'public'].indexOf(options[0]) <= -1) {
       options[1] = options[0];
-      options[0] = 'frontend';
+      options[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
     var extraPath = '/main';
     if(options.indexOf('--partial') > -1) {
@@ -1047,12 +1048,12 @@ function Builds() {
     options[1] = utils.toHyphenated(options[1]);
 
     options[0] = options[0].toLowerCase();
-    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+    if(['admin', 'public'].indexOf(options[0]) <= -1) {
       options[1] = options[0];
-      options[0] = 'frontend';
+      options[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
     var extraPath = '/main';
     if(options.indexOf('--partial') > -1) {
@@ -1107,7 +1108,7 @@ function Builds() {
  * These methods are used to install npm/bower modules AND vern containers
  *
  * Installs for npm/bower should specify which vern component they are
- * installing to (vern, admin, assets, frontend)
+ * installing to (vern, admin, assets, public)
  *
  */
 function parseInstall() {
@@ -1139,14 +1140,14 @@ function Installs(opts) {
 
     if(options.length < 1) {
       console.log('');
-      console.log('You must specify an environment modules: api, admin, frontend'.red);
+      console.log('You must specify an environment modules: api, admin, public'.red);
       console.log('');
       return;
     }
 
-    if(['api', 'admin', 'frontend'].indexOf(options[0]) <= -1) {
+    if(['api', 'admin', 'public'].indexOf(options[0]) <= -1) {
       console.log('');
-      console.log('You must specify an environment modules: api, admin, frontend'.red);
+      console.log('You must specify an environment modules: api, admin, public'.red);
       console.log('');
       return;
     }
@@ -1166,7 +1167,7 @@ function Installs(opts) {
       params.splice(1, 2);
     }
 
-    var env = options[0] === 'api' ? projectConfig.options.folders.api : (options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend);
+    var env = options[0] === 'api' ? projectConfig.options.folders.api : (options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public);
 
     var dir = projectConfig.cwd + '/app/' + env;
 
@@ -1208,14 +1209,14 @@ function Installs(opts) {
 
     if(options.length < 1) {
       console.log('');
-      console.log('You must specify an environment modules: admin, frontend'.red);
+      console.log('You must specify an environment modules: admin, public'.red);
       console.log('');
       return;
     }
 
-    if(['admin', 'frontend'].indexOf(options[0]) <= -1) {
+    if(['admin', 'public'].indexOf(options[0]) <= -1) {
       console.log('');
-      console.log('You must specify an environment modules: admin, frontend'.red);
+      console.log('You must specify an environment modules: admin, public'.red);
       console.log('');
       return;
     }
@@ -1235,7 +1236,7 @@ function Installs(opts) {
       params.splice(1, 2);
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.frontend;
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
     var dir = projectConfig.cwd + '/app/' + env;
 
@@ -1302,13 +1303,92 @@ function Installs(opts) {
   return $scope;
 }
 
+function parseBuild() {
+  var i = process.argv.indexOf('build');
+  var params = process.argv.slice(i + 1);
+
+  var env = 'public';
+  if(params[0]) {
+    env = params[0];
+  }
+  new Distribution()['build' + utils.toCamelCase(env)](params);
+}
+
+function Distribution(opts) {
+  var $scope = this;
+  var projectConfig = new Builds().loadProjectConfig();
+
+  function execBuild(env, dir) {
+    var runner = spawn('grunt', ['build'], {
+      cwd: dir,
+      stdio: 'inherit'
+    });
+
+    runner.on('close', function(code) {
+      if(code > 0) {
+        console.log('');
+        console.log('build of ' + env.red + ' unsuccessful, exit code: ' + code);
+        console.log('');
+        return;
+      }
+      console.log('');
+      console.log('build of ' + env.green + ' complete');
+      console.log('');
+    }).on('error', function(err) {
+      console.log('');
+      console.log(err.toString().red);
+      console.log('');
+    });
+  }
+
+  $scope.buildPublic = function(params) {
+    if(!projectConfig) return;
+    var env = projectConfig.options.folders.public;
+    var dir = projectConfig.cwd + '/app/' + env;
+
+    if(!fs.existsSync(path.join(dir, 'node_modules'))) {
+      new Starter({cwd: projectConfig.cwd}).startPublic(true, true, function (err, success) {
+        if(err) {
+          return console.log(err);
+        }
+
+        execBuild(env, dir);
+      });
+      return;
+    }
+
+    execBuild(env, dir);
+  };
+
+  $scope.buildAdmin = function(params) {
+    if(!projectConfig) return;
+    var env = projectConfig.options.folders.admin;
+    var dir = projectConfig.cwd + '/app/' + env;
+
+    if(!fs.existsSync(path.join(dir, 'node_modules'))) {
+      new Starter({cwd: projectConfig.cwd}).startPublic(true, true, function (err, success) {
+        if(err) {
+          return console.log(err);
+        }
+
+        execBuild(env, dir);
+      });
+      return;
+    }
+
+    execBuild(env, dir);
+  };
+
+  return $scope;
+}
+
 /*
  *
  * Package functions
  *
  * These are used to package containers which can be deployed into a project.
  *
- * Packages can be specified for vern/api, admin, assets, or frontend projects
+ * Packages can be specified for vern/api, admin, assets, or public projects
  *
  */
 function parsePackage() {

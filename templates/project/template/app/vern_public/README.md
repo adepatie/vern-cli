@@ -1,6 +1,6 @@
-# Vern Frontend
+# Vern Public
 
-To get started change to the vern_frontend directory and
+To get started change to the vern_public directory and
 
 ```
 npm install && bower install
