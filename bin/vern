@@ -1,26 +1,28 @@
 #!/usr/bin/env node
 
-var program        = require('commander'),
-    os             = require('os'),
-    path           = require('path'),
-    fs             = require('fs-extra'),
-    spawn          = require('child_process').spawn,
-    fork           = require('child_process').fork,
-    inquirer       = require('inquirer'),
-    colors         = require('colors'),
-    template_dir   = '../templates',
-    _project       = require(template_dir + '/project'),
-    _container     = require(template_dir + '/container'),
-    _controller    = require(template_dir + '/controller'),
-    _model         = require(template_dir + '/model'),
-    _directive     = require(template_dir + '/directive'),
-    _service       = require(template_dir + '/service'),
-    _filter        = require(template_dir + '/filter'),
-    _route         = require(template_dir + '/route'),
-    _view          = require(template_dir + '/view'),
-    utils          = require('../utils'),
-    default_config = require(template_dir + '/vern_config.json'),
-    pkg            = require('../package.json');
+var program          = require('commander'),
+    os               = require('os'),
+    path             = require('path'),
+    fs               = require('fs-extra'),
+    spawn            = require('child_process').spawn,
+    fork             = require('child_process').fork,
+    inquirer         = require('inquirer'),
+    colors           = require('colors'),
+    template_dir     = '../templates',
+    _project         = require(template_dir + '/project'),
+    _container       = require(template_dir + '/container'),
+    _controller      = require(template_dir + '/controller'),
+    _model           = require(template_dir + '/model'),
+    _directive       = require(template_dir + '/directive'),
+    _service         = require(template_dir + '/service'),
+    _filter          = require(template_dir + '/filter'),
+    _route           = require(template_dir + '/route'),
+    _view            = require(template_dir + '/view'),
+    _view_controller = require(template_dir + '/view_controller'),
+    _stylesheet      = require(template_dir + '/stylesheet'),
+    utils            = require('../utils'),
+    default_config   = require(template_dir + '/vern_config.json'),
+    pkg              = require('../package.json');
 
 var installs = true;
 
@@ -430,7 +432,7 @@ function parseCreate() {
     }
   }
   var buildName = params[0];
-  buildName = buildName.charAt(0).toUpperCase() + buildName.slice(1).toLowerCase();
+  buildName = utils.toCamelCase(buildName);
   new Builds()['build' + buildName](params.slice(1));
 }
 
@@ -712,7 +714,9 @@ function Builds() {
         insertions: [
             '$vern.controllers.' + utils.toCamelCase(options[0], true) + ' = new $vern.controllers.' + params.name + '($vern).init({',
           model ? '  model: $vern.models.' + model + ',' : '',
-            '  publicRoute: \'/' + options[0].toLowerCase() + '\'',
+            '  publicRoute: \'/' + utils.toHyphenated(options[0]) + '\',',
+            '  //publicPostRoute: \'/' + utils.toHyphenated(options[0]) + '\',',
+            '  //publicDeleteRoute: \'/' + utils.toHyphenated(options[0]) + '\',',
           '});'
         ]
       });
@@ -951,92 +955,9 @@ function Builds() {
   };
 
   $scope.buildRoute = function(options) {
-    var projectConfig = $scope.loadProjectConfig();
-    if(!projectConfig) return;
-
-    if(options.length < 1) {
-      console.log('');
-      console.log('You must specify a name'.red);
-      console.log('');
-      return;
-    }
-
-    options[0] = utils.toHyphenated(options[0]);
-    options[1] = utils.toHyphenated(options[1]);
-
-    options[0] = options[0].toLowerCase();
-    if(['admin', 'public'].indexOf(options[0]) <= -1) {
-      options[1] = options[0];
-      options[0] = 'public';
-    }
-
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
-
-    var extraPath = '/main';
-    if(options.indexOf('--partial') > -1) {
-      extraPath = '/partials';
-    }
-    if(options.indexOf('--modal') > -1) {
-      extraPath = '/modals';
-    }
-    /*
-     Create a view in a path relative to /app/views
-     */
-    if(options.indexOf('--path') > -1) {
-      extraPath = options[options.indexOf('--path') + 1];
-    }
-
-    if(extraPath.charAt(0) !== '/') {
-      extraPath = '/' + extraPath;
-    }
-
-    var name = options[1].toLowerCase();
-    var action = 'index';
-    if(name.indexOf(':') > -1) {
-      var parts = name.split(':');
-      name = parts[0];
-      action = parts[1];
-    }
-
-    var controller_name = utils.toCamelCase(name, true);
-
-    var params = {
-      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
-      name: name,
-      action: action,
-      controller_name: controller_name,
-      view_path: cwd + '/app/' + env + '/app/views' + extraPath + '/' + name,
-      style_path: cwd + '/app/' + env + '/app/styles/less',
-      controller_path: cwd + '/app/' + env + '/app/scripts/controllers',
-      controller: true,
-      stylesheet: true
-    };
-
-    _route.copy(params, function(err, success) {
-      if(err) {
-        return console.log(err);
-      }
-
-      utils.rewrite({
-        path: cwd + '/app/' + env + '/app/index.html',
-        needle: '<!-- endbuild -->',
-        insertions: [
-          '<script type="text/javascript" src="scripts/controllers/' + params.name + '.js"></script>'
-        ]
-      });
-
-      utils.rewrite({
-        path: cwd + '/app/' + env + '/app/styles/less/main.less',
-        needle: '// buildpoint',
-        insertions: [
-          '@import "' + params.name + '.less";'
-        ]
-      });
-
-      console.log('');
-      console.log(success.green);
-      console.log('');
-    });
+    $scope.buildView(options);
+    $scope.buildViewController(options);
+    $scope.buildStylesheet(options);
   };
 
   $scope.buildView = function(options) {
@@ -1098,6 +1019,109 @@ function Builds() {
       if(err) {
         return console.log(err);
       }
+      console.log('');
+      console.log(success.green);
+      console.log('');
+    });
+  };
+
+  $scope.buildViewController = function(options) {
+    var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 1) {
+      console.log('');
+      console.log('You must specify a name'.red);
+      console.log('');
+      return;
+    }
+
+    options[0] = utils.toHyphenated(options[0]);
+    options[1] = utils.toHyphenated(options[1]);
+
+    options[0] = options[0].toLowerCase();
+    if(['admin', 'public'].indexOf(options[0]) <= -1) {
+      options[1] = options[0];
+      options[0] = 'public';
+    }
+
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+
+    var name = options[1].toLowerCase();
+
+    var controller_name = utils.toCamelCase(name, true);
+
+    var params = {
+      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
+      name: name,
+      controller_name: controller_name,
+      controller_path: cwd + '/app/' + env + '/app/scripts/controllers'
+    };
+
+    _view_controller.copy(params, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+
+      utils.rewrite({
+        path: cwd + '/app/' + env + '/app/index.html',
+        needle: '<!-- endbuild -->',
+        insertions: [
+            '<script type="text/javascript" src="scripts/controllers/' + params.name + '.js"></script>'
+        ]
+      });
+
+      console.log('');
+      console.log(success.green);
+      console.log('');
+    });
+  };
+
+  $scope.buildStylesheet = function(options) {
+    var projectConfig = $scope.loadProjectConfig();
+    if(!projectConfig) return;
+
+    if(options.length < 1) {
+      console.log('');
+      console.log('You must specify a name'.red);
+      console.log('');
+      return;
+    }
+
+    options[0] = utils.toHyphenated(options[0]);
+    options[1] = utils.toHyphenated(options[1]);
+
+    options[0] = options[0].toLowerCase();
+    if(['admin', 'public'].indexOf(options[0]) <= -1) {
+      options[1] = options[0];
+      options[0] = 'public';
+    }
+
+    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+
+    var name = options[1].toLowerCase();
+
+    var controller_name = utils.toCamelCase(name, true);
+
+    var params = {
+      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
+      name: name,
+      style_path: cwd + '/app/' + env + '/app/styles/less'
+    };
+
+    _stylesheet.copy(params, function(err, success) {
+      if(err) {
+        return console.log(err);
+      }
+
+      utils.rewrite({
+        path: cwd + '/app/' + env + '/app/styles/less/main.less',
+        needle: '// buildpoint',
+        insertions: [
+            '@import "' + params.name + '.less";'
+        ]
+      });
+
       console.log('');
       console.log(success.green);
       console.log('');
