@@ -154,6 +154,7 @@ function parseRestart() {
 
 function Starter(options) {
   var $scope = this;
+  var restarting = false;
 
   if(!options) {
     options = {};
@@ -256,6 +257,34 @@ function Starter(options) {
     });
     $scope.processes[project].on('error', function() {
       console.dir(arguments);
+    });
+
+    fs.watch(cwd + project_dirs[project], function(evt, filename) {
+      if(!filename) {
+        console.log('vern: ' + evt + ' occurred but filename was not provided.');
+      }
+      if(filename) {
+        console.log('vern: ' + (cwd + project_dirs[project] + '/' + filename).green + ' was ' + (evt + 'd').green);
+        var ext = filename.split('.').pop();
+        if(['js', 'json', 'coffee'].indexOf(ext) <= -1) {
+          return console.log('vern: not restarting');
+        }
+      }
+
+      if(restarting) {
+        return console.log('server is already restarting');
+      }
+
+      restarting = true;
+      var npm_install = false;
+      if(filename && filename === 'package.json') {
+        npm_install = true;
+      }
+      $scope.processes.vern.kill();
+      $scope.startAPI(npm_install, function() {
+        console.log('vern: API Server restarting');
+        restarting = false;
+      });
     });
   };
 
