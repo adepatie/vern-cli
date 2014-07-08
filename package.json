@@ -36,12 +36,12 @@
   "devDependencies": {},
   "dependencies": {
     "colors": "latest",
-    "commander": "latest",
     "fs-extra": "latest",
     "inquirer": "latest",
     "mu2": "latest",
+    "nodemon": "^1.2.1",
+    "nomnom": "^1.8.0",
     "q": "^1.0.1",
-    "validator": "latest",
-    "vern-core": "latest"
+    "validator": "latest"
   }
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var program          = require('commander'),
+var program          = require('nomnom'),
     os               = require('os'),
     path             = require('path'),
     fs               = require('fs-extra'),
@@ -24,32 +24,30 @@ var program          = require('commander'),
     default_config   = require(template_dir + '/vern_config.json'),
     pkg              = require('../package.json');
 
-var installs = true;
-
 if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
 }
 
-// This is so weird, must be a bug in commander or in child_process, when spawning a node process it seems to include the parameters from the vern cli call...
-if(process.argv.indexOf('--no-install') > -1) {
-  process.argv.splice(process.argv.indexOf('--no-install'), 1);
-  installs = false;
-}
-
-program
-  .version(pkg.version)
-  .usage('<command> [options]')
-  .option('create, --create <object> <name> [options]', 'Create a new module', parseCreate)
-  .option('start, --start <server>', 'Start a server module (api, public, admin)', parseStart)
-  .option('stop, --stop <server>', 'Stop a server module (api, public, admin)', parseStop)
-  .option('restart, --restart <server>', 'Restart a server module (api, public, admin)', parseRestart)
-  .option('install, --install [module.spec] [options]', 'Install a module into your project', parseInstall)
-  .option('uninstall, --uninstall <module.spec> [options]', 'Uninstall a module from your project', parseUninstall)
-  .option('build, --build [env]', 'Build for distribution, defaults to public', parseBuild)
-  .option('package, --package [module.spec] [options]', 'Start the package builder', parsePackage)
-  .option('deploy, --deploy [stage]', 'Create a view when inside a project folder', deployApp)
-  .option('config, --config', 'Configure your app when inside a project folder', configApp)
-  .parse(process.argv);
+program.script('vern');
+program.option('version', {
+    abbr: 'v',
+    flag: true,
+    help: 'print version and exit',
+    callback: function() {
+      return "VERN CLI version " + pkg.version;
+    }
+  });
+program.command('create').callback(parseCreate).help('Create a new component (controller, model, route, view, view_controller, stylesheet, directive, service, or filter) or project');
+program.command('start').callback(parseStart).help('Start a server module (api, public, admin, all)');
+program.command('stop').callback(parseStop).help('Stop a server module');
+program.command('restart').callback(parseRestart).help('Restart a server module');
+program.command('install').callback(parseInstall).help('Install a module to your project');
+program.command('uninstall').callback(parseUninstall).help('Uninstall a module from your project');
+program.command('build').callback(parseBuild).help('Build environment for distribution (default public)');
+program.command('package').callback(parsePackage).help('Start the package builder');
+program.command('deploy').callback(parseDeploy).help('Perform deployment commands');
+program.command('config').callback(parseConfig).help('Configure your application options');
+program.parse();
 
 /*
  *
@@ -60,33 +58,32 @@ program
  * For a production deployment the process is different, but could be very similar
  *
  */
-function parseStart(server) {
-  if(!fs.existsSync(process.cwd() + '/vern.json')) {
-    console.log('');
-    console.log('No ' + 'vern.json'.red + ' found');
-    console.log('');
-    return;
-  }
-
+function parseStart() {
   var i = process.argv.indexOf('start');
   var params = process.argv.slice(i + 1);
 
-  var projectConfig = require(process.cwd() + '/vern.json');
+  var installs = true;
+  if(params.indexOf('--no-install') > -1) {
+    installs = false;
+  }
+
+  var server = params[0];
+
   switch(server) {
     case 'api':
-      new Starter(projectConfig).startAPI(installs);
+      new Starter().startAPI(installs);
       break;
     case 'public':
-      new Starter(projectConfig).startPublic(installs);
+      new Starter().startPublic(installs);
       break;
     case 'admin':
-      new Starter(projectConfig).startAdmin(installs);
+      new Starter().startAdmin(installs);
       break;
     case 'default':
     case 'all':
-      new Starter(projectConfig).startAPI(installs, function() {
-        new Starter(projectConfig).startPublic(installs, function () {
-          new Starter(projectConfig).startAdmin(installs);
+      new Starter().startAPI(installs, function() {
+        new Starter().startPublic(installs, function () {
+          new Starter().startAdmin(installs);
         });
       });
       break;
@@ -100,14 +97,7 @@ function parseStart(server) {
  * TODO
  *
  */
-function parseStop(server) {
-  if(!fs.existsSync(process.cwd() + '/vern.json')) {
-    console.log('');
-    console.log('No ' + 'vern.json'.red + ' found');
-    console.log('');
-    return;
-  }
-
+function parseStop() {
   var i = process.argv.indexOf('stop');
   var params = process.argv.slice(i + 1);
 
@@ -116,7 +106,8 @@ function parseStop(server) {
     installs = false;
   }
 
-  var projectConfig = require(process.cwd() + '/vern.json');
+  var server = params[0];
+
   switch(server) {
     case 'api':
 
@@ -137,14 +128,7 @@ function parseStop(server) {
  * TODO
  *
  */
-function parseRestart(server) {
-  if(!fs.existsSync(process.cwd() + '/vern.json')) {
-    console.log('');
-    console.log('No ' + 'vern.json'.red + ' found');
-    console.log('');
-    return;
-  }
-
+function parseRestart() {
   var i = process.argv.indexOf('restart');
   var params = process.argv.slice(i + 1);
 
@@ -153,7 +137,8 @@ function parseRestart(server) {
     installs = false;
   }
 
-  var projectConfig = require(process.cwd() + '/vern.json');
+  var server = params[0];
+
   switch(server) {
     case 'api':
 
@@ -169,6 +154,10 @@ function parseRestart(server) {
 
 function Starter(options) {
   var $scope = this;
+
+  if(!options) {
+    options = {};
+  }
 
   $scope.processes = {
     vern: null,
@@ -200,7 +189,7 @@ function Starter(options) {
     }
   });
 
-  var cwd = options.cwd || process.cwd();
+  var cwd = options.cwd || projectConfig.cwd;
 
   $scope.handleRunner = function(task, runner, callback) {
     runner.on('close', function(code) {
@@ -212,7 +201,7 @@ function Starter(options) {
     });
 
     runner.on('error', function(message) {
-      console.log('here');
+      console.log(message);
     });
   };
 
@@ -955,6 +944,12 @@ function Builds() {
   };
 
   $scope.buildRoute = function(options) {
+    if(options.length < 1) {
+      console.log('');
+      console.log('You must specify a name'.red);
+      console.log('');
+      return;
+    }
     $scope.buildView(options);
     $scope.buildViewController(options);
     $scope.buildStylesheet(options);
@@ -1432,12 +1427,14 @@ function Packages() {
   return $scope;
 }
 
-function deployApp(stage) {
+function parseDeploy() {
   console.log('');
   console.log('Upgrade to enterprise for access to deployment services'.red);
   console.log('');
 }
 
-function configApp() {
-
+function parseConfig() {
+  console.log('');
+  console.log('Configuration methods not built yet'.red);
+  console.log('');
 }
