@@ -37,6 +37,12 @@ program.option('version', {
       return "VERN CLI version " + pkg.version;
     }
   });
+program.option('model', {help: 'Create a controller with specified model. Does not create the model.'});
+program.option('use-factory', {flag: true, help: 'Create service as a factory'});
+program.option('use-provider', {flag: true, help: 'Create service as a provider'});
+program.option('partial', {flag: true, help: 'Create view as a partial'});
+program.option('modal', {flag: true, help: 'Create service as a modal'});
+program.option('no-install', {flag: true, help: 'Start server without performing installs'});
 program.command('create').callback(parseCreate).help('Create a new component (controller, model, route, view, view_controller, stylesheet, directive, service, or filter) or project');
 program.command('start').callback(parseStart).help('Start a server module (api, public, admin, all)');
 program.command('stop').callback(parseStop).help('Stop a server module');
@@ -79,7 +85,7 @@ function parseStart() {
     case 'admin':
       new Starter().startAdmin(installs);
       break;
-    case 'default':
+    default:
     case 'all':
       new Starter().startAPI(installs, function() {
         new Starter().startPublic(installs, function () {
@@ -783,14 +789,11 @@ function Builds() {
       return;
     }
 
-    options[0] = utils.toHyphenated(options[0]);
-    options[1] = utils.toHyphenated(options[1]);
-
-    options[0] = options[0].toLowerCase();
-    if(['admin', 'public'].indexOf(options[0]) <= -1) {
-      options[1] = options[0];
-      options[0] = 'public';
+    if(['admin', 'public'].indexOf(options[0].toLowerCase()) <= -1) {
+      options.splice(0, 0, 'public');
     }
+
+    options[1] = utils.toHyphenated(options[1]);
 
     var type = 'service';
     if(options.indexOf('--use-factory') > -1) {
@@ -1431,6 +1434,10 @@ function Distribution(opts) {
     }
 
     execBuild(env, dir);
+  };
+
+  $scope.deploymentSetup = function(params) {
+
   };
 
   return $scope;

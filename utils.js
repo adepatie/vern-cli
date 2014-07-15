@@ -60,11 +60,11 @@ function toCamelCase(text, pascal) {
   }
   if(pascal) {
     // first letter is lowercase
-    return text.toLowerCase().replace(/[-_](.)/g, function(match, group) {
+    return text.toLowerCase().replace(/[-_\s](.)/g, function(match, group) {
       return group.toUpperCase();
     });
   } else {
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase().replace(/[-_](.)/g, function(match, group) {
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase().replace(/[-_\s](.)/g, function(match, group) {
       return group.toUpperCase();
     });
   }
