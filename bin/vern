@@ -31,8 +31,8 @@ if(process.argv.length <= 2) {
 function safeSpawn(command, params, options) {
   var proc = null;
   var platform = os.platform();
-  if(platform.indexOf('win') <= -1) {
-    proc = spawn(process.env.comspec, [].concat(['\c'], [command], params), options);
+  if(platform.indexOf('win') === 0) { // if windows, win32, win64, but not darwin
+    proc = spawn(process.env.comspec, [].concat(['/c'], [command], params), options);
   } else {
     proc = spawn(command, params, options);
   }
