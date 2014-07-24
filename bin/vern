@@ -28,6 +28,18 @@ if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
 }
 
+function safeSpawn(command, params, options) {
+  var proc = null;
+  var platform = os.platform();
+  if(platform.indexOf('win') <= -1) {
+    proc = spawn(process.env.comspec, [].concat(['\c'], [command], params), options);
+  } else {
+    proc = spawn(command, params, options);
+  }
+
+  return proc;
+}
+
 program.script('vern');
 program.option('version', {
     abbr: 'v',
@@ -214,7 +226,7 @@ function Starter(options) {
 
   $scope.runNpm = function(cmd_path, callback) {
     console.log('running npm in ' + cmd_path);
-    var runner = spawn('npm', ['install'], {
+    var runner = safeSpawn('npm', ['install'], {
       cwd: cmd_path,
       stdio: 'inherit'
     });
@@ -229,7 +241,7 @@ function Starter(options) {
 
   $scope.runBower = function(cmd_path, callback) {
     console.log('running bower in ' + cmd_path);
-    var runner = spawn('bower', ['install'], {
+    var runner = safeSpawn('bower', ['install'], {
       cwd: cmd_path,
       stdio: 'inherit'
     });
@@ -246,7 +258,7 @@ function Starter(options) {
     var env = opts.env || 'development';
     var project = opts.project || 'vern';
 
-    $scope.processes[project] = spawn('node', ['server', '-e', env], {
+    $scope.processes[project] = safeSpawn('node', ['server', '-e', env], {
       cwd: path.join(cwd, project_dirs[project]),
       stdio: 'pipe'
     });
