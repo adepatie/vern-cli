@@ -8,7 +8,7 @@ var path = require('path');
 module.exports = {
   copy: function(params, callback) {
     var project_path = params.path;
-    var baseDir = __dirname + '/template';
+    var baseDir = path.join(__dirname, 'template');
     var log = [];
     var valid_ext = ['txt', 'md', 'js', 'css', 'less', 'html', 'json'];
 
@@ -121,7 +121,7 @@ module.exports = {
     }
 
     //fs.copySync(baseDir, project_path);
-    var topFiles = fs.readdirSync(__dirname + '/template');
+    var topFiles = fs.readdirSync(path.join(__dirname, 'template'));
     for(var i = 0; i < topFiles.length; i++) {
       if(topFiles[i] === 'app') {
         applyTemplates(path.join(baseDir, topFiles[i]), path.join(project_path, topFiles[i])).then(function(result) {

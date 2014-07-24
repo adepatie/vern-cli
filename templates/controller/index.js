@@ -3,6 +3,7 @@
  */
 var fs = require('fs-extra');
 var mustache = require('mu2');
+var path = require('path');
 module.exports = {
   copy: function(params, callback) {
     if(!params.path === '.') {
@@ -11,7 +12,7 @@ module.exports = {
       }
     }
 
-    var tpl = fs.readFileSync(__dirname + '/template/Controller.js').toString();
+    var tpl = fs.readFileSync(path.join(__dirname, 'template', 'Controller.js')).toString();
 
     var view = {
       controller_name: params.name,
@@ -31,7 +32,7 @@ module.exports = {
       mustache.render(compiled, view)
         .on('data', function(buf) { out += buf.toString(); })
         .on('end', function() {
-          fs.writeFileSync(params.path + '/' + params.name + '.js', out);
+          fs.writeFileSync(path.join(params.path, params.name + '.js'), out);
           callback(null, 'Controller created in ' + params.path);
         })
         .on('error', function(err) {

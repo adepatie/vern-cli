@@ -3,13 +3,14 @@
  */
 var fs = require('fs-extra');
 var mustache = require('mu2');
+var path = require('path');
 module.exports = {
   copy: function(params, callback) {
     if(!fs.existsSync(params.style_path)) {
       fs.mkdirpSync(params.style_path);
     }
 
-    var stylesheet_tpl = fs.readFileSync(__dirname + '/template/stylesheet.less').toString();
+    var stylesheet_tpl = fs.readFileSync(path.join(__dirname, 'template', 'stylesheet.less')).toString();
 
     var view = {
       appName: params.appName,
@@ -30,7 +31,7 @@ module.exports = {
           out += buf.toString();
         })
         .on('end', function () {
-          var fileName = params.style_path + '/' + params.name + '.less';
+          var fileName = path.join(params.style_path, params.name + '.less');
           fs.writeFileSync(fileName, out);
           log.push('LESS Stylesheet created in ' + fileName);
           callback(null, log.join('\n'));

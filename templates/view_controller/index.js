@@ -3,13 +3,14 @@
  */
 var fs = require('fs-extra');
 var mustache = require('mu2');
+var path = require('path');
 module.exports = {
   copy: function(params, callback) {
     if(!fs.existsSync(params.controller_path)) {
       fs.mkdirpSync(params.controller_path);
     }
 
-    var controller_tpl = fs.readFileSync(__dirname + '/template/controller.js').toString();
+    var controller_tpl = fs.readFileSync(path.join(__dirname, 'template', 'controller.js')).toString();
 
     var view = {
       appName: params.appName,
@@ -30,7 +31,7 @@ module.exports = {
           out += buf.toString();
         })
         .on('end', function () {
-          var fileName = params.controller_path + '/' + params.name + '.js';
+          var fileName = path.join(params.controller_path, params.name + '.js');
           fs.writeFileSync(fileName, out);
           log.push('JavaScript View Controller created in ' + fileName);
           callback(null, log.join('\n'));

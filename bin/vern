@@ -8,21 +8,21 @@ var program          = require('nomnom'),
     fork             = require('child_process').fork,
     inquirer         = require('inquirer'),
     colors           = require('colors'),
-    template_dir     = '../templates',
-    _project         = require(template_dir + '/project'),
-    _container       = require(template_dir + '/container'),
-    _controller      = require(template_dir + '/controller'),
-    _model           = require(template_dir + '/model'),
-    _directive       = require(template_dir + '/directive'),
-    _service         = require(template_dir + '/service'),
-    _filter          = require(template_dir + '/filter'),
-    _route           = require(template_dir + '/route'),
-    _view            = require(template_dir + '/view'),
-    _view_controller = require(template_dir + '/view_controller'),
-    _stylesheet      = require(template_dir + '/stylesheet'),
-    utils            = require('../utils'),
-    default_config   = require(template_dir + '/vern_config.json'),
-    pkg              = require('../package.json');
+    template_dir     = path.resolve(__dirname, '..', 'templates'),
+    _project         = require(path.join(template_dir, 'project')),
+    _container       = require(path.join(template_dir, 'container')),
+    _controller      = require(path.join(template_dir, 'controller')),
+    _model           = require(path.join(template_dir, 'model')),
+    _directive       = require(path.join(template_dir, 'directive')),
+    _service         = require(path.join(template_dir, 'service')),
+    _filter          = require(path.join(template_dir, 'filter')),
+    _route           = require(path.join(template_dir, 'route')),
+    _view            = require(path.join(template_dir, 'view')),
+    _view_controller = require(path.join(template_dir, 'view_controller')),
+    _stylesheet      = require(path.join(template_dir, 'stylesheet')),
+    utils            = require(path.join(__dirname, '..', 'utils')),
+    default_config   = require(path.join(template_dir, 'vern_config.json')),
+    pkg              = require(path.join(__dirname, '..', 'package.json'));
 
 if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
@@ -176,10 +176,10 @@ function Starter(options) {
   if(!projectConfig) return;
 
   var project_dirs = {
-    vern: '/app/' + projectConfig.options.folders.api,
-    admin: '/app/' + projectConfig.options.folders.admin,
-    assets: '/app/' + projectConfig.options.folders.assets,
-    public: '/app/' + projectConfig.options.folders.public
+    vern: path.join('app', projectConfig.options.folders.api),
+    admin: path.join('app', projectConfig.options.folders.admin),
+    assets: path.join('app', projectConfig.options.folders.assets),
+    public: path.join('app', projectConfig.options.folders.public)
   };
 
   process.on('exit', function(code) {
@@ -247,7 +247,7 @@ function Starter(options) {
     var project = opts.project || 'vern';
 
     $scope.processes[project] = spawn('node', ['server', '-e', env], {
-      cwd: cwd + project_dirs[project],
+      cwd: path.join(cwd, project_dirs[project]),
       stdio: 'pipe'
     });
 
@@ -265,12 +265,12 @@ function Starter(options) {
       console.dir(arguments);
     });
 
-    fs.watch(cwd + project_dirs[project], function(evt, filename) {
+    fs.watch(path.join(cwd, project_dirs[project]), function(evt, filename) {
       if(!filename) {
         console.log('vern: ' + evt + ' occurred but filename was not provided.');
       }
       if(filename) {
-        console.log('vern: ' + (cwd + project_dirs[project] + '/' + filename).green + ' was ' + (evt + 'd').green);
+        console.log('vern: ' + path.join(cwd, project_dirs[project], filename).green + ' was ' + (evt + 'd').green);
         var ext = filename.split('.').pop();
         if(['js', 'json', 'coffee'].indexOf(ext) <= -1) {
           return console.log('vern: not restarting');
@@ -298,7 +298,7 @@ function Starter(options) {
     var project = opts.project || 'public';
 
     $scope.processes[project] = spawn('grunt', ['server'], {
-      cwd: cwd + project_dirs[project],
+      cwd: path.join(cwd, project_dirs[project]),
       stdio: 'pipe'
     });
 
@@ -322,7 +322,7 @@ function Starter(options) {
       callback = arguments[1];
     }
     if(install === true) {
-      $scope.runNpm(cwd + project_dirs['vern'], function(err, success) {
+      $scope.runNpm(path.join(cwd, project_dirs['vern']), function(err, success) {
         if(err) {
           return console.log(err);
         }
@@ -351,14 +351,14 @@ function Starter(options) {
       callback = arguments[1];
     }
     if(install === true) {
-      $scope.runNpm(cwd + project_dirs['public'], function(err, success) {
+      $scope.runNpm(path.join(cwd, project_dirs['public']), function(err, success) {
         if(err) {
           return console.log(err);
         }
 
         console.log(success);
         console.log('');
-        $scope.runBower(cwd + project_dirs['public'], function(err, success) {
+        $scope.runBower(path.join(cwd, project_dirs['public']), function(err, success) {
           if(err) {
             return console.log(err);
           }
@@ -388,14 +388,14 @@ function Starter(options) {
       callback = arguments[1];
     }
     if(install === true) {
-      $scope.runNpm(cwd + project_dirs['admin'], function(err, success) {
+      $scope.runNpm(path.join(cwd, project_dirs['admin']), function(err, success) {
         if(err) {
           return console.log(err);
         }
 
         console.log(success);
         console.log('');
-        $scope.runBower(cwd + project_dirs['admin'], function(err, success) {
+        $scope.runBower(path.join(cwd, project_dirs['admin']), function(err, success) {
           if(err) {
             return console.log(err);
           }
@@ -483,9 +483,9 @@ function Builds() {
 
     } else {
       if(project_path === '.') {
-        project = cwd.split('/').pop();
+        project = cwd.split(path.sep).pop();
       } else {
-        project = project_path.split('/').pop();
+        project = project_path.split(path.sep).pop();
       }
       build(project_path, project);
     }
@@ -589,15 +589,15 @@ function Builds() {
 
       console.log(res.green);
 
-      fs.copySync(project_path + '/app/' + params.apiName + '/vern_config.sample.js'
-        , project_path + '/app/' + params.apiName + '/vern_config.js');
+      fs.copySync(path.join(project_path, 'app', params.apiName, 'vern_config.sample.js')
+        , path.join(project_path, 'app', params.apiName, 'vern_config.js'));
 
-      fs.outputJson(project_path + '/vern.json', default_config, function(err) {
+      fs.outputJson(path.join(project_path, 'vern.json'), default_config, function(err) {
         if(err) {
           return console.log(err);
         }
 
-        console.log('Created ' + (project_path + '/vern.json').green);
+        console.log('Created ' + path.join(project_path, 'vern.json').green);
         // Now we will prompt the user to start adding base routes, controllers, and models.
         // We can also setup a deployment strategy(ies)
         inquirer.prompt({
@@ -658,7 +658,7 @@ function Builds() {
 
   $scope.loadProjectConfig = function(project_path) {
     if(!project_path) {
-      project_path = cwd + '/vern.json';
+      project_path = path.join(cwd, 'vern.json');
     }
 
     var done = false;
@@ -666,16 +666,16 @@ function Builds() {
     while(!done) {
       if (fs.existsSync(project_path)) {
         cwd = path.dirname(project_path);
-        var options = require(cwd + '/vern.json');
+        var options = require(path.join(cwd, 'vern.json'));
         options = $scope.ensureOptions(options);
-        fs.outputJsonSync(cwd + '/vern.json', options);
+        fs.outputJsonSync(path.join(cwd, 'vern.json'), options);
         return {options: options, cwd: cwd};
       }
-      if(path.dirname(project_path) === '/') {
+      if(path.dirname(project_path) === path.sep) {
         done = true;
         continue;
       }
-      project_path = path.normalize(path.dirname(project_path) + '/../' + 'vern.json');
+      project_path = path.normalize(path.dirname(project_path) + path.sep + '..' + path.sep + 'vern.json');
     }
 
     console.log('');
@@ -694,6 +694,10 @@ function Builds() {
       model = options[options.indexOf('--model') + 1];
     }
 
+    if(!options.length) {
+      return console.log('Missing controller name'.red);
+    }
+
     var name = utils.toCamelCase(options[0]);
 
     if(!model && options.indexOf('--no-model') < 0) {
@@ -705,7 +709,7 @@ function Builds() {
       }, function(res) {
         if(res.model === true) {
           model = name + 'Model';
-          $scope.buildModel([options[0].toLowerCase()]);
+          $scope.buildModel([options[0]]);
         }
         finishControllerBuild(options, model);
       });
@@ -720,7 +724,7 @@ function Builds() {
 
     var params = {
       name: utils.toCamelCase(options[0]) + 'Controller',
-      path: cwd + '/app/' + projectConfig.options.folders.api + '/controllers'
+      path: path.join(cwd, 'app', projectConfig.options.folders.api, 'controllers')
     };
 
     if(model) {
@@ -733,7 +737,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/' + projectConfig.options.folders.api + '/server.js',
+        path: path.join(cwd, 'app', projectConfig.options.folders.api, 'server.js'),
         needle: '// buildpoint',
         insertions: [
             '$vern.controllers.' + utils.toCamelCase(options[0], true) + ' = new $vern.controllers.' + params.name + '($vern).init({',
@@ -757,7 +761,7 @@ function Builds() {
 
     var params = {
       name: utils.toCamelCase(options[0]) + 'Model',
-      path: cwd + '/app/' + projectConfig.options.folders.api + '/models',
+      path: path.join(cwd, 'app', projectConfig.options.folders.api, 'models'),
       collection: options[0].toLowerCase(),
       indexes: [],
       exclude: [],
@@ -811,7 +815,7 @@ function Builds() {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       type: type,
-      service_path: cwd + '/app/' + env + '/app/scripts/services'
+      service_path: path.join(cwd, 'app', env, 'app', 'scripts', 'services')
     };
 
     _service.copy(params, function(err, success) {
@@ -820,7 +824,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/' + env + '/app/index.html',
+        path: path.join(cwd, 'app', env, 'app', 'index.html'),
         needle: '<!-- endbuild -->',
         insertions: [
             '<script type="text/javascript" src="scripts/services/' + params.name + '.js"></script>'
@@ -880,8 +884,8 @@ function Builds() {
         appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
         name: name,
         directive_name: directive_name,
-        directive_path: cwd + '/app/' + env + '/app/scripts/directives',
-        less_path: cwd + '/app/' + env + '/app/styles/less/directives',
+        directive_path: path.join(cwd, 'app', env, 'app', 'scripts', 'directives'),
+        less_path: path.join(cwd, 'app', env, 'app', 'styles', 'less', 'directives'),
         scope: (res.needs.indexOf('Inherited Scope') > -1),
         restrictions: restrictions,
         templateCache: (res.needs.indexOf('$templateCache') > -1),
@@ -900,7 +904,7 @@ function Builds() {
         }
 
         utils.rewrite({
-          path: cwd + '/app/' + env + '/app/index.html',
+          path: path.join(cwd, 'app', env, 'app', 'index.html'),
           needle: '<!-- endbuild -->',
           insertions: [
               '<script type="text/javascript" src="scripts/directives/' + params.name + '.js"></script>'
@@ -909,7 +913,7 @@ function Builds() {
 
         if(params.lessFile) {
           utils.rewrite({
-            path: cwd + '/app/' + env + '/app/styles/less/main.less',
+            path: path.join(cwd, 'app', env, 'app', 'styles', 'less', 'main.less'),
             needle: '// buildpoint',
             insertions: [
                 '@import "directives/' + params.name + '.less";'
@@ -953,7 +957,7 @@ function Builds() {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       filter_name: filter_name,
-      filter_path: cwd + '/app/' + env + '/app/scripts/filters'
+      filter_path: path.join(cwd, 'app', env, 'app', 'scripts', 'filters')
     };
 
     _filter.copy(params, function(err, success) {
@@ -962,7 +966,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/' + env + '/app/index.html',
+        path: path.join(cwd, 'app', env, 'app', 'index.html'),
         needle: '<!-- endbuild -->',
         insertions: [
             '<script type="text/javascript" src="scripts/filters/' + params.name + '.js"></script>'
@@ -982,12 +986,12 @@ function Builds() {
       console.log('');
       return;
     }
-    $scope.buildView(options);
+    $scope.buildView(options, true);
     $scope.buildViewController(options);
     $scope.buildStylesheet(options);
   };
 
-  $scope.buildView = function(options) {
+  $scope.buildView = function(options, build_controller) {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
@@ -1009,12 +1013,12 @@ function Builds() {
 
     var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
-    var extraPath = '/main';
+    var extraPath = path.sep + 'main';
     if(options.indexOf('--partial') > -1) {
-      extraPath = '/partials';
+      extraPath = path.sep + 'partials';
     }
     if(options.indexOf('--modal') > -1) {
-      extraPath = '/modals';
+      extraPath = path.sep + 'modals';
     }
     /*
       Create a view in a path relative to /app/views
@@ -1023,8 +1027,13 @@ function Builds() {
       extraPath = options[options.indexOf('--path') + 1];
     }
 
-    if(extraPath.charAt(0) !== '/') {
-      extraPath = '/' + extraPath;
+    if(extraPath.charAt(0) !== path.sep) {
+      extraPath = path.sep + extraPath;
+    }
+
+    var controller_name = null;
+    if(build_controller) {
+      controller_name = utils.toCamelCase(options[1]) + 'Ctrl';
     }
 
     var name = options[1].toLowerCase();
@@ -1039,7 +1048,8 @@ function Builds() {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       action: action,
-      view_path: cwd + '/app/' + env + '/app/views' + extraPath + '/' + name
+      view_path: path.join(cwd, 'app', env, 'app', 'views', (extraPath + path.sep + name)),
+      controller_name: controller_name
     };
 
     _view.copy(params, function(err, success) {
@@ -1076,13 +1086,13 @@ function Builds() {
 
     var name = options[1].toLowerCase();
 
-    var controller_name = utils.toCamelCase(name, true);
+    var controller_name = utils.toCamelCase(options[1]) + 'Ctrl';
 
     var params = {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       controller_name: controller_name,
-      controller_path: cwd + '/app/' + env + '/app/scripts/controllers'
+      controller_path: path.join(cwd, 'app', env, 'app', 'scripts', 'controllers')
     };
 
     _view_controller.copy(params, function(err, success) {
@@ -1091,7 +1101,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/' + env + '/app/index.html',
+        path: path.join(cwd, 'app', env, 'app', 'index.html'),
         needle: '<!-- endbuild -->',
         insertions: [
             '<script type="text/javascript" src="scripts/controllers/' + params.name + '.js"></script>'
@@ -1133,7 +1143,7 @@ function Builds() {
     var params = {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
-      style_path: cwd + '/app/' + env + '/app/styles/less'
+      style_path: path.join(cwd, 'app', env, 'app', 'styles', 'less')
     };
 
     _stylesheet.copy(params, function(err, success) {
@@ -1142,7 +1152,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: cwd + '/app/' + env + '/app/styles/less/main.less',
+        path: path.join(cwd, 'app', env, 'app', 'styles', 'less', 'main.less'),
         needle: '// buildpoint',
         insertions: [
             '@import "' + params.name + '.less";'
@@ -1295,7 +1305,7 @@ function Installs(opts) {
 
     var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
-    var dir = projectConfig.cwd + '/app/' + env;
+    var dir = path.join(projectConfig.cwd, 'app', env);
 
     var runner = spawn('bower', params, {
       cwd: dir,
@@ -1401,7 +1411,7 @@ function Distribution(opts) {
   $scope.buildPublic = function(params) {
     if(!projectConfig) return;
     var env = projectConfig.options.folders.public;
-    var dir = projectConfig.cwd + '/app/' + env;
+    var dir = path.join(projectConfig.cwd, 'app', env);
 
     if(!fs.existsSync(path.join(dir, 'node_modules'))) {
       new Starter({cwd: projectConfig.cwd}).startPublic(true, true, function (err, success) {
@@ -1420,7 +1430,7 @@ function Distribution(opts) {
   $scope.buildAdmin = function(params) {
     if(!projectConfig) return;
     var env = projectConfig.options.folders.admin;
-    var dir = projectConfig.cwd + '/app/' + env;
+    var dir = path.join(projectConfig.cwd, 'app', env);
 
     if(!fs.existsSync(path.join(dir, 'node_modules'))) {
       new Starter({cwd: projectConfig.cwd}).startPublic(true, true, function (err, success) {
