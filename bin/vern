@@ -819,7 +819,7 @@ function Builds() {
       type = 'provider';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var env = options[0] === 'admin' ? path.resolve(projectConfig.options.folders.admin) : path.resolve(projectConfig.options.folders.public);
 
     var name = utils.toCamelCase(options[1], true);
 
@@ -883,7 +883,7 @@ function Builds() {
         {name: 'LESS File', checked: true}
       ]
     }], function(res) {
-      var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+      var env = options[0] === 'admin' ? path.resolve(projectConfig.options.folders.admin) : path.resolve(projectConfig.options.folders.public);
 
       var name = options[1].toLowerCase();
       var directive_name = utils.toCamelCase(options[1], true);
@@ -960,7 +960,7 @@ function Builds() {
       options[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var env = options[0] === 'admin' ? path.resolve(projectConfig.options.folders.admin) : path.resolve(projectConfig.options.folders.public);
 
     var name = options[1].toLowerCase();
     var filter_name = utils.toCamelCase(options[1], true);
@@ -1023,7 +1023,7 @@ function Builds() {
       options[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var env = options[0] === 'admin' ? path.resolve(projectConfig.options.folders.admin) : path.resolve(projectConfig.options.folders.public);
 
     var extraPath = path.sep + 'main';
     if(options.indexOf('--partial') > -1) {
@@ -1094,7 +1094,7 @@ function Builds() {
       options[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var env = options[0] === 'admin' ? path.resolve(projectConfig.options.folders.admin) : path.resolve(projectConfig.options.folders.public);
 
     var name = options[1].toLowerCase();
 
@@ -1146,7 +1146,7 @@ function Builds() {
       options[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var env = options[0] === 'admin' ? path.resolve(projectConfig.options.folders.admin) : path.resolve(projectConfig.options.folders.public);
 
     var name = options[1].toLowerCase();
 
@@ -1246,7 +1246,7 @@ function Installs(opts) {
       params.splice(1, 2);
     }
 
-    var env = options[0] === 'api' ? projectConfig.options.folders.api : (options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public);
+    var env = options[0] === 'api' ? path.resolve(projectConfig.options.folders.api) : (options[0] === 'admin' ? path.resolve(projectConfig.options.folders.admin) : path.resolve(projectConfig.options.folders.public));
 
     var dir = projectConfig.cwd + '/app/' + env;
 
@@ -1315,7 +1315,7 @@ function Installs(opts) {
       params.splice(1, 2);
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var env = options[0] === 'admin' ? path.resolve(projectConfig.options.folders.admin) : path.resolve(projectConfig.options.folders.public);
 
     var dir = path.join(projectConfig.cwd, 'app', env);
 
@@ -1422,7 +1422,7 @@ function Distribution(opts) {
 
   $scope.buildPublic = function(params) {
     if(!projectConfig) return;
-    var env = projectConfig.options.folders.public;
+    var env = path.resolve(projectConfig.options.folders.public);
     var dir = path.join(projectConfig.cwd, 'app', env);
 
     if(!fs.existsSync(path.join(dir, 'node_modules'))) {
@@ -1441,7 +1441,7 @@ function Distribution(opts) {
 
   $scope.buildAdmin = function(params) {
     if(!projectConfig) return;
-    var env = projectConfig.options.folders.admin;
+    var env = path.resolve(projectConfig.options.folders.admin);
     var dir = path.join(projectConfig.cwd, 'app', env);
 
     if(!fs.existsSync(path.join(dir, 'node_modules'))) {
