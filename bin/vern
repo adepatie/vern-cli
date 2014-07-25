@@ -309,7 +309,7 @@ function Starter(options) {
   $scope.gruntExec = function(opts) {
     var project = opts.project || 'public';
 
-    $scope.processes[project] = spawn('grunt', ['server'], {
+    $scope.processes[project] = safeSpawn('grunt', ['server'], {
       cwd: path.join(cwd, project_dirs[project]),
       stdio: 'pipe'
     });
@@ -1250,7 +1250,7 @@ function Installs(opts) {
 
     var dir = projectConfig.cwd + '/app/' + env;
 
-    var runner = spawn('npm', params, {
+    var runner = safeSpawn('npm', params, {
       cwd: dir,
       stdio: 'inherit'
     });
@@ -1319,7 +1319,7 @@ function Installs(opts) {
 
     var dir = path.join(projectConfig.cwd, 'app', env);
 
-    var runner = spawn('bower', params, {
+    var runner = safeSpawn('bower', params, {
       cwd: dir,
       stdio: 'inherit'
     });
@@ -1398,7 +1398,7 @@ function Distribution(opts) {
   var projectConfig = new Builds().loadProjectConfig();
 
   function execBuild(env, dir) {
-    var runner = spawn('grunt', ['build'], {
+    var runner = safeSpawn('grunt', ['build'], {
       cwd: dir,
       stdio: 'inherit'
     });
