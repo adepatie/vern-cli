@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('config', []).constant('config', {
-  devHost: 'http://0.0.0.0:3458/',
+  devHost: 'http://localhost:3458/',
   //productionHost: 'https://api.vern.io/',
-  productionHost: 'https://localhost/api',
+  productionHost: 'http://localhost:3458',
   sessionName: 'vernUser',
   defaultLanguage: 'en',
   language: this.defaultLanguage,

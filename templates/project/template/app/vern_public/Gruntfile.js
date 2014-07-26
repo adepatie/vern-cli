@@ -6,14 +6,9 @@
 
 'use strict';
 
-var mountFolder = function (connect, dir) {
-  return connect.static(require('path').resolve(dir));
-};
-
 module.exports = function (grunt) {
-  // load all grunt tasks
-  require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
-
+  // Load grunt tasks automatically
+  require('load-grunt-tasks')(grunt);
   // configurable paths
   var vernConfig = {
     app: 'app',
@@ -21,54 +16,88 @@ module.exports = function (grunt) {
   };
 
   try {
-    vernConfig.app = require('./component.json').appPath || vernConfig.app;
-  } catch (e) {}
+    vernConfig.app = require('./bower.json').appPath || vernConfig.app;
+  } catch (e) {
+    grunt.fail.fatal(e);
+  }
 
   grunt.initConfig({
     vern: vernConfig,
     watch: {
+      bower: {
+        files: ['bower.json'],
+        tasks: ['wiredep']
+      },
+      js: {
+        files: ['<%= vern.app %>/scripts/**/*.js'],
+        options: {
+          livereload: '<%= connect.options.livereload %>'
+        }
+      },
       less: {
         files: ['<%= vern.app %>/styles/less/**/*.less'],
         tasks: ['less:dev'],
         options: {
-          livereload: false
+          livereload: '<%= connect.options.livereload %>'
         }
       },
-      css: {
-        files: ['{.tmp,<%= vern.app %>}/styles/**/*.css'],
-        tasks: []
+      gruntfile: {
+        files: ['Gruntfile.js']
       },
-      site: {
+      livereload: {
+        options: {
+          livereload: '<%= connect.options.livereload %>'
+        },
         files: [
-          '<%= vern.app %>/*.html',
-          '<%= vern.app %>/templates/**/*.html',
-          '<%= vern.app %>/views/**/*.html',
-          '{.tmp,<%= vern.app %>}/scripts/**/*.js',
+          '<%= vern.app %>/**/*.html',
+          '.tmp/styles/**/*.css',
           '<%= vern.app %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}'
         ]
-      },
-      options: {
-        livereload: 35729
       }
     },
     connect: {
-      server: {
+      options: {
+        port: 9000,
+        // Change this to '0.0.0.0' to access the server from outside.
+        hostname: 'localhost',
+        livereload: 35729
+      },
+      livereload: {
         options: {
-          port: 9000,
-          hostname: '0.0.0.0',
+          open: true,
           middleware: function (connect) {
             return [
-              mountFolder(connect, '../assets/scripts'),
-              mountFolder(connect, '.tmp'),
-              mountFolder(connect, vernConfig.app)
+              connect.static('.tmp'),
+              connect().use(
+                '/bower_components',
+                connect.static('./bower_components')
+              ),
+              connect.static(vernConfig.app)
             ];
           }
         }
-      }
-    },
-    open: {
-      server: {
-        url: 'http://0.0.0.0:<%= connect.server.options.port %>'
+      },
+      test: {
+        options: {
+          port: 9001,
+          middleware: function (connect) {
+            return [
+              connect.static('.tmp'),
+              connect.static('test'),
+              connect().use(
+                '/bower_components',
+                connect.static('./bower_components')
+              ),
+              connect.static(vernConfig.app)
+            ];
+          }
+        }
+      },
+      dist: {
+        options: {
+          open: true,
+          base: '<%= vern.dist %>'
+        }
       }
     },
     clean: {
@@ -84,19 +113,13 @@ module.exports = function (grunt) {
       },
       server: '.tmp'
     },
-    jshint: {
+    wiredep: {
       options: {
-        jshintrc: '.jshintrc'
+        cwd: '<%= vern.app %>'
       },
-      all: [
-        'Gruntfile.js',
-        '<%= vern.app %>/scripts/{,*/}*.js'
-      ]
-    },
-    karma: {
-      unit: {
-        configFile: 'karma.conf.js',
-        singleRun: true
+      app: {
+        src: ['<%= vern.app %>/index.html'],
+        ignorePath:  /\.\.\//
       }
     },
     less: {
@@ -111,59 +134,37 @@ module.exports = function (grunt) {
         }
       }
     },
-    concat: {
-      dist: {
-        basic: {
-          src: ['.tmp/concat/scripts/scripts.js'],
-          dest: '<%= vern.dist %>/scripts/scripts.js'
-        },
-        extras: {
-          src: ['.tmp/concat/lib/lib.js'],
-          dest: '<%= vern.dist %>/lib/lib.js'
-        }
-      }
-    },
     useminPrepare: {
       html: '<%= vern.app %>/index.html',
       options: {
-        dest: '<%= vern.dist %>'
-      }
-    },
-    usemin: {
-      html: [
-        '<%= vern.dist %>/index.html',
-        '<%= vern.dist %>/404.html',
-        '<%= vern.dist %>/views/**/*.html'
-      ],
-      css: [
-        '.tmp/concat/styles/*.css',
-        '<%= vern.dist %>/styles/**/*.css'
-      ],
-      options: {
-        dirs: ['.tmp', '<%= vern.dist %>']
-      }
-    },
-    cssmin: {
-      dist: {
-        files: {
-          '<%= vern.dist %>/styles/main.css': [
-            '<%= vern.dist %>/styles/**/*.css'
-          ]
+        dest: '<%= vern.dist %>',
+        flow: {
+          html: {
+            steps: {
+              js: ['concat'],
+              css: ['cssmin']
+            },
+            post: {}
+          }
         }
       }
     },
+    usemin: {
+      html: ['<%= vern.dist %>/**/*.html'],
+      css: ['<%= vern.dist %>/styles/**/*.css'],
+      options: {
+        assetsDirs: ['<%= vern.dist %>','<%= vern.dist %>/images']
+      }
+    },
+
     htmlmin: {
       dist: {
         options: {
-          /*removeCommentsFromCDATA: true,
-           // https://github.com/vern/grunt-usemin/issues/44
-           //collapseWhitespace: true,
-           collapseBooleanAttributes: true,
-           removeAttributeQuotes: true,
-           removeRedundantAttributes: true,
-           useShortDoctype: true,
-           removeEmptyAttributes: true,
-           removeOptionalTags: true*/
+          collapseWhitespace: true,
+          conservativeCollapse: true,
+          collapseBooleanAttributes: true,
+          removeCommentsFromCDATA: true,
+          removeOptionalTags: true
         },
         files: [{
           expand: true,
@@ -188,15 +189,6 @@ module.exports = function (grunt) {
         }]
       }
     },
-    uglify: {
-      dist: {
-        files: {
-          '<%= vern.dist %>/scripts/scripts.js': [
-            '<%= vern.dist %>/scripts/scripts.js'
-          ]
-        }
-      }
-    },
     rev: {
       dist: {
         files: {
@@ -204,8 +196,6 @@ module.exports = function (grunt) {
             '<%= vern.dist %>/scripts/**/*.js',
             '<%= vern.dist %>/lib/**/*.js',
             '<%= vern.dist %>/styles/**/*.css'
-            //'<%= vern.dist %>/images/{,*/}*.{png,jpg,jpeg,gif,webp,svg}',
-            //'<%= vern.dist %>/styles/fonts/*'
           ]
         }
       }
@@ -218,6 +208,7 @@ module.exports = function (grunt) {
           cwd: '<%= vern.app %>',
           dest: '<%= vern.dist %>',
           src: [
+            '*.html',
             '*.{ico,txt,png}',
             '.htaccess',
             'components/**/*',
@@ -226,7 +217,8 @@ module.exports = function (grunt) {
             'styles/fonts/**/*',
             'styles/**/*.{gif,jpg,png}',
             'designer/**/*',
-            'templates/**/*'
+            'templates/**/*',
+            'views/**/*'
           ]
         },
           {
@@ -242,13 +234,27 @@ module.exports = function (grunt) {
     }
   });
 
-  grunt.registerTask('server', [
-    'clean:server',
-    'less:dev',
-    'connect',
-    'open',
-    'watch'
-  ]);
+  grunt.registerTask('serve', 'Compile then start a connect web server', function (target) {
+    if (target === 'dist') {
+      return grunt.task.run(['build', 'connect:dist:keepalive']);
+    }
+
+    grunt.task.run([
+      'clean:server',
+      'less:dev',
+      'wiredep',
+      'connect:livereload',
+      'watch'
+    ]);
+  });
+
+  grunt.registerTask('server', 'DEPRECATED TASK. Use the "serve" task instead', function (target) {
+    grunt.log.warn('The `server` task has been deprecated. Use `grunt serve` to start a server.');
+    if(!target) {
+      target = 'dev';
+    }
+    grunt.task.run(['serve:' + target]);
+  });
 
   grunt.registerTask('test', [
     'clean:server',
@@ -257,15 +263,13 @@ module.exports = function (grunt) {
 
   grunt.registerTask('build', [
     'clean:dist',
-//    'jshint',
+    'wiredep',
     'less',
     'useminPrepare',
-    'htmlmin',
     'concat',
     'cssmin',
     'copy',
     'ngmin',
-//    'uglify',
     'rev',
     'usemin'
   ]);

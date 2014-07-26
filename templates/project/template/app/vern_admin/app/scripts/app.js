@@ -6,7 +6,7 @@
 
 'use strict';
 
-angular.module('{{adminAppName}}', ['ngSanitize', 'ngRoute', 'config', 'LocalStorageModule', 'ui.bootstrap', 'ui.sortable', '{{adminAppName}}.filters', 'ngDictionary'])
+angular.module('{{adminAppName}}', ['ngSanitize', 'ngRoute', 'config', 'LocalStorageModule', 'ui.bootstrap', '{{adminAppName}}.filters', 'ngDictionary'])
   .config(['$httpProvider', function($httpProvider) {
     $httpProvider.defaults.useXDomain = true;
     delete $httpProvider.defaults.headers.common['X-Requested-With'];

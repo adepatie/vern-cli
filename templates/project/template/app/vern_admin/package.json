@@ -3,23 +3,24 @@
   "version": "0.0.0",
   "devDependencies": {
     "grunt": "latest",
+    "grunt-concurrent": "latest",
     "grunt-contrib-copy": "latest",
     "grunt-contrib-concat": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-cssmin": "latest",
     "grunt-contrib-connect": "latest",
-    "connect-livereload": "latest",
     "grunt-contrib-clean": "latest",
     "grunt-contrib-htmlmin": "latest",
     "grunt-contrib-watch": "latest",
+    "grunt-newer": "latest",
     "grunt-usemin": "latest",
     "grunt-rev": "latest",
     "grunt-open": "latest",
-    "matchdep": "latest",
-    "grunt-google-cdn": "latest",
     "grunt-ngmin": "latest",
-    "grunt-contrib-less": "latest"
+    "grunt-contrib-less": "latest",
+    "grunt-wiredep": "latest",
+    "load-grunt-tasks": "latest"
   },
   "engines": {
     "node": ">=0.10.0"

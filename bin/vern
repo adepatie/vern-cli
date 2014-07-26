@@ -309,7 +309,7 @@ function Starter(options) {
   $scope.gruntExec = function(opts) {
     var project = opts.project || 'public';
 
-    $scope.processes[project] = safeSpawn('grunt', ['server'], {
+    $scope.processes[project] = safeSpawn('grunt', ['serve'], {
       cwd: path.join(cwd, project_dirs[project]),
       stdio: 'pipe'
     });
@@ -1445,7 +1445,7 @@ function Distribution(opts) {
     var dir = path.join(projectConfig.cwd, 'app', env);
 
     if(!fs.existsSync(path.join(dir, 'node_modules'))) {
-      new Starter({cwd: projectConfig.cwd}).startPublic(true, true, function (err, success) {
+      new Starter({cwd: projectConfig.cwd}).startAdmin(true, true, function (err, success) {
         if(err) {
           return console.log(err);
         }

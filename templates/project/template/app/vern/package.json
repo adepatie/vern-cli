@@ -9,7 +9,8 @@
   "dependencies": {
     "validator": "latest",
     "minimist": "latest",
-    "vern-core": "latest"
+    "vern-core": "latest",
+    "vern-authentication": "latest"
   },
   "devDependencies": {
     "mocha": "latest",
