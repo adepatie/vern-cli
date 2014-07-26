@@ -3,7 +3,7 @@
 angular.module('config', []).constant('config', {
   devHost: 'http://localhost:3458/',
   //productionHost: 'https://api.vern.io/',
-  productionHost: 'http://localhost:3458',
+  productionHost: 'http://localhost:3458/',
   sessionName: 'vernUser',
   defaultLanguage: 'en',
   language: this.defaultLanguage,
