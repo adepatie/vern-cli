@@ -36,10 +36,7 @@ module.exports = function (grunt) {
       },
       less: {
         files: ['<%= vern.app %>/styles/less/**/*.less'],
-        tasks: ['less:dev'],
-        options: {
-          livereload: '<%= connect.options.livereload %>'
-        }
+        tasks: ['less:dev']
       },
       gruntfile: {
         files: ['Gruntfile.js']
