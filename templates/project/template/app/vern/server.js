@@ -10,8 +10,7 @@ var vern = require('vern-core');
 
 new vern().then(function($vern) {
   // Load vern external modules here
-  // $vern = require('vern-authentication')($vern);
-
+  $vern = require('vern-authentication')($vern);
 
   // Load framework controllers and models
   $vern.loadControllers('./controllers');
