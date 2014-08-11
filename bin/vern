@@ -8,6 +8,7 @@ var program          = require('nomnom'),
     fork             = require('child_process').fork,
     inquirer         = require('inquirer'),
     colors           = require('colors'),
+    validator        = require('validator'),
     template_dir     = path.resolve(__dirname, '..', 'templates'),
     _project         = require(path.join(template_dir, 'project')),
     _container       = require(path.join(template_dir, 'container')),
@@ -515,18 +516,18 @@ function Builds() {
       ], function(answers) {
         var project_name = answers.project.length ? answers.project : '.';
         build(project_name, project_name);
-      })
-
+      });
     } else {
-      if(project_path === '.') {
-        project = cwd.split(path.sep).pop();
-      } else {
-        project = project_path.split(path.sep).pop();
-      }
       build(project_path, project);
     }
 
     function build(project_path, project) {
+      if(project_path === '.') {
+        project = cwd.split(path.sep).pop();
+        project_path = cwd;
+      } else {
+        project = project_path.split(path.sep).pop();
+      }
       project_path = utils.toHyphenated(project_path);
       project = utils.toCamelCase(project);
       default_config.module = project;
@@ -539,7 +540,8 @@ function Builds() {
         apiName: 'vern',
         adminName: 'vern_admin',
         assetsName: 'vern_assets',
-        publicName: 'vern_public'
+        publicName: 'vern_public',
+        dbName: utils.toHyphenated(project)
       };
 
       inquirer.prompt([
@@ -548,8 +550,26 @@ function Builds() {
           name: 'customize',
           message: 'Do you want to customize your project folders?',
           default: false
+        },
+        {
+          type: 'input',
+          name: 'default_admin',
+          message: 'Enter an email address for your administrator',
+          validate: function(input) {
+            return validator.isEmail(input);
+          }
+        },
+        {
+          type: 'password',
+          name: 'default_password',
+          message: 'Enter a password for your administrator',
+          validate: function(input) {
+            return input.length > 6;
+          }
         }
       ], function(answers) {
+        params.defaultAdmin = answers.default_admin;
+        params.defaultPassword = answers.default_password;
         if(answers.customize === true) {
           inquirer.prompt([
             {
