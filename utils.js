@@ -1,6 +1,15 @@
 var path = require('path');
 var fs = require('fs');
 
+
+function generatePassword(len) {
+  if(!len) {
+    len = 9;
+  }
+
+  return (Math.random()*(Math.pow(36, len))).toString(36).slice(0, len);
+}
+
 /*
  *
  * @args
@@ -78,6 +87,7 @@ function toHyphenated(text) {
 }
 
 module.exports = {
+  generatePassword: generatePassword,
   rewrite: rewrite,
   toCamelCase: toCamelCase,
   toHyphenated: toHyphenated

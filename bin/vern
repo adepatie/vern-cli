@@ -555,6 +555,7 @@ function Builds() {
           type: 'input',
           name: 'default_admin',
           message: 'Enter an email address for your administrator',
+          default: 'admin@vern.io',
           validate: function(input) {
             return validator.isEmail(input);
           }
@@ -562,6 +563,7 @@ function Builds() {
         {
           type: 'password',
           name: 'default_password',
+          default: 'Randomly Generated',
           message: 'Enter a password for your administrator',
           validate: function(input) {
             return input.length > 6;
@@ -569,7 +571,12 @@ function Builds() {
         }
       ], function(answers) {
         params.defaultAdmin = answers.default_admin;
-        params.defaultPassword = answers.default_password;
+        if(answers.default_password === 'Randomly Generated') {
+          params.defaultPassword = utils.generatePassword();
+        } else {
+          params.defaultPassword = answers.default_password;
+        }
+
         if(answers.customize === true) {
           inquirer.prompt([
             {
