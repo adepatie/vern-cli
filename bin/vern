@@ -9,6 +9,7 @@ var program          = require('nomnom'),
     inquirer         = require('inquirer'),
     colors           = require('colors'),
     validator        = require('validator'),
+    watchr           = require('watchr'),
     template_dir     = path.resolve(__dirname, '..', 'templates'),
     _project         = require(path.join(template_dir, 'project')),
     _container       = require(path.join(template_dir, 'container')),
@@ -210,6 +211,7 @@ function Starter(options) {
   });
 
   var cwd = options.cwd || projectConfig.cwd;
+  var watching = false;
 
   $scope.handleRunner = function(task, runner, callback) {
     runner.on('close', function(code) {
@@ -290,12 +292,18 @@ function Starter(options) {
       console.dir(arguments);
     });
 
-    fs.watch(path.join(cwd, project_dirs[project]), function(evt, filename) {
+    if(watching) {
+      return;
+    }
+
+    var watchPath = path.join(cwd, project_dirs[project]);
+
+    watchr.watch({path: watchPath, listeners: {change: function(event, filename, stat, prevstat) {
       if(!filename) {
-        console.log('vern: ' + evt + ' occurred but filename was not provided.');
+        console.log('vern: ' + event + ' occurred but filename was not provided.');
       }
       if(filename) {
-        console.log('vern: ' + path.join(cwd, project_dirs[project], filename).green + ' was ' + (evt + 'd').green);
+        console.log('vern: ' + path.join(watchPath, filename).green + ' was ' + (event + 'd').green);
         var ext = filename.split('.').pop();
         if(['js', 'json', 'coffee'].indexOf(ext) <= -1) {
           return console.log('vern: not restarting');
@@ -316,7 +324,11 @@ function Starter(options) {
         console.log('vern: API Server restarting');
         restarting = false;
       });
-    });
+    }},
+    next: function(err, watchers) {
+      console.log('watching ' + watchPath.green);
+      watching = true;
+    }});
   };
 
   $scope.gruntExec = function(opts) {
@@ -927,11 +939,12 @@ function Builds() {
       choices: [
         {name: 'Element Restriction', checked: true},
         {name: 'Attribute Restriction', checked: true},
-        {name: 'Class Restriction', checked: true},
+        {name: 'Class Restriction', checked: false},
         {name: 'Isolated Scope', checked: true},
         {name: 'Inherited Scope', checked: false},
         {name: '$templateCache', checked: true},
-        {name: 'LESS File', checked: true}
+        {name: 'LESS File', checked: true},
+        {name: 'Controller', checked: false}
       ]
     }], function(res) {
       var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
@@ -952,7 +965,8 @@ function Builds() {
         scope: (res.needs.indexOf('Inherited Scope') > -1),
         restrictions: restrictions,
         templateCache: (res.needs.indexOf('$templateCache') > -1),
-        lessFile: (res.needs.indexOf('LESS File') > -1)
+        lessFile: (res.needs.indexOf('LESS File') > -1),
+        controller: res.needs.indexOf('Controller') > -1
       };
 
       if(res.needs.indexOf('Isolated Scope') > -1) {
@@ -1536,10 +1550,46 @@ function Packages() {
   return $scope;
 }
 
+/*
+ * Deploy functions
+ *
+ * These are used to create deployments, and deploy different stages
+ *
+ * Configurations built:
+ *
+ * AWS
+ *
+ */
 function parseDeploy() {
-  console.log('');
-  console.log('Upgrade to enterprise for access to deployment services'.red);
-  console.log('');
+  var i = process.argv.indexOf('deploy');
+  var params = process.argv.slice(i + 1);
+
+  var actionName = params[0];
+
+  switch(actionName) {
+    case 'setup':
+      new Deploy().setup(params);
+      break;
+  }
+}
+
+function Deploy() {
+  var $scope = this;
+
+  $scope.setup = function(params) {
+    inquirer.prompt([
+      {
+        type: 'confirm',
+        name: '',
+        message: 'Enter a project name (use . for current directory)'
+      }
+    ], function(answers) {
+      var project_name = answers.project.length ? answers.project : '.';
+      build(project_name, project_name);
+    });
+  };
+
+  return $scope;
 }
 
 function parseConfig() {

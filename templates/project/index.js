@@ -34,7 +34,8 @@ module.exports = {
         } else if (projectFiles[i] === 'vern_public') {
           promises.push(walkTemplate(path.join(dir, 'vern_public'), path.join(appDir, params.publicName)));
         } else {
-          fs.copySync(path.join(dir, projectFiles[i]), path.join(appDir, projectFiles[i]));
+          promises.push(walkTemplate(path.join(dir, projectFiles[i]), path.join(appDir, projectFiles[i])));
+          //fs.copySync(path.join(dir, projectFiles[i]), path.join(appDir, projectFiles[i]));
         }
       }
 
@@ -132,7 +133,15 @@ module.exports = {
           callback(err, null);
         });
       } else {
-        fs.copySync(path.join(baseDir, topFiles[i]), path.join(project_path, topFiles[i]));
+        (function(templateFile) {
+          applyVariables(path.join(baseDir, templateFile)).then(function (newFile) {
+            fs.writeFileSync(path.join(project_path, templateFile), newFile);
+            log.push('Setting up: ' + path.join(project_path, templateFile));
+          }).fail(function (err) {
+            log.push('ERROR: ' + err);
+          });
+        })(topFiles[i]);
+        //fs.copySync(path.join(baseDir, topFiles[i]), path.join(project_path, topFiles[i]));
       }
     }
   }
