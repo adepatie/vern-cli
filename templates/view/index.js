@@ -6,7 +6,6 @@ var mustache = require('mu2');
 var path = require('path');
 module.exports = {
   copy: function(params, callback) {
-    console.log(params);
     if(!fs.existsSync(params.view_path)) {
       fs.mkdirpSync(params.view_path, '0777');
     }

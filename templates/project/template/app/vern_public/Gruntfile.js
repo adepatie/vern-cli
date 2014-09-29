@@ -112,7 +112,7 @@ module.exports = function (grunt) {
     },
     wiredep: {
       options: {
-        cwd: '<%= vern.app %>'
+        cwd: '.'
       },
       app: {
         src: ['<%= vern.app %>/index.html'],

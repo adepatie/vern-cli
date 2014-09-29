@@ -655,6 +655,7 @@ function Builds() {
     default_config.folders.admin = params.adminName;
     default_config.folders.assets = params.assetsName;
     default_config.folders.public = params.publicName;
+    default_config.vern_version = pkg.version;
     _project.copy(params, function(err, res) {
       if(err) {
         console.log('');

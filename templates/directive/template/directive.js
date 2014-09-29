@@ -9,7 +9,7 @@ angular.module('{{appName}}')
   .directive('{{directive_name}}', function() {
     return { {{#scope}}
       {{scope}}
-{{/scope}}restrict: '{{restrictions}}',{{#templateCache}}
+      {{/scope}}restrict: '{{restrictions}}',{{#templateCache}}
       templateUrl: function(tElement, tAttrs) {
         var url = '{{template_url}}';
         if(tAttrs.templateUrl) {
