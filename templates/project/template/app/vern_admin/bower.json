@@ -3,15 +3,17 @@
   "appPath": "app",
   "version": "0.0.1",
   "dependencies": {
-    "angular": "~1.2.22",
+    "angular": "~1.2.26",
     "angular-local-storage": "https://github.com/grevory/angular-local-storage.git",
-    "angular-route": "~1.2.22",
-    "angular-sanitize": "~1.2.22",
+    "angular-route": "~1.2.26",
+    "angular-sanitize": "~1.2.26",
     "angular-bootstrap": "latest",
-    "bootstrap-css-only": "~3.2.0"
+    "bootstrap-css-only": "~3.2.0",
+    "codemirror": "~4.6.0",
+    "marked": "~0.3.2"
   },
   "devDependencies": {},
   "resolutions": {
-    "angular": "1.2.22"
+    "angular": "1.2.26"
   }
 }

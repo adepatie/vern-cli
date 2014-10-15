@@ -6,6 +6,7 @@
 function Model($vern) {
   function IndexModel() {
     this.name = null;
+    this.tags = [];
 
     return this.update(arguments[0]);
   }
@@ -13,9 +14,19 @@ function Model($vern) {
   new $vern.model().extend(IndexModel, {
     collection: 'test',
     validations: {
-      name: 'notEmpty'
+      name: 'notEmpty',
+      tags: function(val, data) {
+        if(!(val instanceof Array)) {
+          return new Error('Tags should be an array');
+        }
+
+        return val;
+      }
     },
-    indexes: ['name']
+    indexes: ['name'],
+    exclude: [],
+    validation_exceptions: {},
+    non_editable: []
   });
 
   return IndexModel;

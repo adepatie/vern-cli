@@ -33,9 +33,9 @@
     <![endif]-->
 
     <!-- Add your site or application content here -->
-    <div class="api-loading" ng-if="apiLoading"><div class="icon-loader">...</div></div>
+    <div class="api-loading" ng-if="apiLoading"><div class="icon-loader">Loading</div></div>
     <div class="alerts">
-      <alert ng-repeat="alert in rootAlerts" type="alert.type" close="closeAlert($index)"><div ng-bind="alert.content"></div></alert>
+      <alert ng-repeat="alert in rootAlerts" type="{{alert.type}}" close="closeAlert($index)"><div ng-bind="alert.content"></div></alert>
     </div>
         
     <ng-view></ng-view>
@@ -69,6 +69,7 @@
     <script src="scripts/directives/token-input.js"></script>
     <script src="scripts/directives/asset-upload.js"></script>
     <script src="scripts/directives/ng-validate.js"></script>
+    <script src="scripts/directives/ng-enter.js"></script>
     <script src="scripts/directives/display-data-set.js"></script>
 
     <script src="scripts/filters/semantic-date.js"></script>

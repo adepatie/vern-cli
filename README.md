@@ -1,3 +1,11 @@
+# VERN Command Line Interface (CLI)
+
+Vern module and project management
+
+`vern <create|install|package|deploy|config> <options, ...>`
+
+For full documentation, [see the documentation site](http://www.vern.io)
+
 #Copyright Notice
 
 VERN is copyright 2014 uh-sem-blee, Co. Built by typefoo.
@@ -13,11 +21,3 @@ This program is free software: you can redistribute it and/or modify it under th
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
 
 You should have received a copy of the Affero GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
-
-# VERN Command Line Interface (CLI)
-
-Vern module and project management
-
-`vern <create|install|package|deploy|config> <options, ...>`
-
-For full documentation, [see the documentation site](http://typefoo.github.io/vern-docs)

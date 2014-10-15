@@ -44,6 +44,9 @@ angular.module('{{appName}}')
       if(!obj || typeof obj !== 'object') {
         return obj;
       }
+      if(!dots) {
+        return obj;
+      }
       var levels = dots.split('.');
       return levels.reduce(function(obj, p) {
         return obj[p];
@@ -53,6 +56,9 @@ angular.module('{{appName}}')
     $scope.setObjectDotNotation = function(obj, dots, val) {
       if(!obj || typeof obj !== 'object') {
         return obj;
+      }
+      if(!dots) {
+        return null;
       }
       var levels = dots.split('.');
       return levels.reduce(function(obj, p) {

@@ -18,7 +18,15 @@ new vern().then(function($vern) {
 
   // Init your controllers
   $vern.controllers.index = new $vern.controllers.IndexController($vern).init({
-    publicRoute: '/index'
+    model: $vern.models.IndexModel,
+    publicRoute: '/index',
+    adminRoute: '/admin/index'
+  });
+
+  $vern.controllers.tagCloud = new $vern.controllers.TagCloudController($vern).init({
+    model: $vern.models.TagCloudModel,
+    userRoute: '/tags',
+    adminRoute: '/admin/tags'
   });
 
   // buildpoint

@@ -1,4 +1,54 @@
 'use strict';
+
+//https://github.com/django/django/blob/master/django/contrib/admin/static/admin/js/urlify.js
+var charMap = {
+  '€': 'euro', '₢': 'cruzeiro', '₣': 'french franc', '£': 'pound',
+  '₤': 'lira', '₥': 'mill', '₦': 'naira', '₧': 'peseta', '₨': 'rupee',
+  '₩': 'won', '₪': 'new shequel', '₫': 'dong', '₭': 'kip', '₮': 'tugrik',
+  '₯': 'drachma', '₰': 'penny', '₱': 'peso', '₲': 'guarani', '₳': 'austral',
+  '₴': 'hryvnia', '₵': 'cedi', '¢': 'cent', '¥': 'yen', '元': 'yuan',
+  '円': 'yen', '﷼': 'rial', '₠': 'ecu', '¤': 'currency', '฿': 'baht',
+  "$": 'dollar',
+  // symbols
+  '©':'(c)', 'œ': 'oe', 'Œ': 'OE', '∑': 'sum', '®': '(r)', '†': '+',
+  '“': '"', '”': '"', '‘': "'", '’': "'", '∂': 'd', 'ƒ': 'f', '™': 'tm',
+  '℠': 'sm', '…': '...', '˚': 'o', 'º': 'o', 'ª': 'a', '•': '*',
+  '∆': 'delta', '∞': 'infinity', '♥': 'love', '&': 'and', '|': 'or',
+  '<': 'less', '>': 'greater'
+};
+
+function slugify(string, replacement) {
+  if(!string) {
+    return '';
+  }
+  replacement = replacement || '-';
+  var result = '';
+  for (var i=0; i < string.length; i++) {
+    var ch = string[i];
+    if (charMap[ch]) {
+      ch = charMap[ch];
+    }
+    ch = ch.replace(/[^\w\s$\*\_\+~\.\(\)\'\"\!\-:@]/g, '');
+    result += ch;
+  }
+  result = result.replace(/^\s+|\s+$/g, '');
+  result = result.replace(/[-\s]+/g, replacement);
+  result.replace("#{replacement}$", '');
+  return result;
+}
+
+function trim(string, length, ellipsis) {
+  if(!string) {
+    return '';
+  }
+  ellipsis = ellipsis ? ellipsis : '...';
+  if(string.length < length) {
+    return string;
+  } else {
+    return (string.substr(0, length) + ellipsis).replace(/^\s+|\s+$/g, '');
+  }
+}
+
 angular.module('{{adminAppName}}')
   .directive('displayDataSet', function($rootScope, dataManager) {
     return {
@@ -7,7 +57,7 @@ angular.module('{{adminAppName}}')
       template: '<div class="data-wrapper {{displayType}}"><h2>{{title}} <a ng-click="newObject()" href class="btn btn-success"><span class="glyphicon glyphicon-plus"></span></a></h2><div class="data-set"><display-data ng-repeat="data in dataSet" display="data" schema="schema" class-name="{{className}}" display-type="{{displayType}}"></display-data><div class="editor"><div editor-viewer></div></div></div></div>',
       replace: true,
       link: function(scope, element, attrs) {
-        var setElm = element.find('.data-set');
+        var setElm = angular.element(element[0].querySelectorAll('.data-set')[0]);
         if(!scope.title) {
           scope.title = 'Undefined Title';
         }
@@ -31,8 +81,10 @@ angular.module('{{adminAppName}}')
         }
         setElm.prepend(elm);
 
-
         $rootScope.$on('dataRefresh', function(evt, data) {
+          if(!scope.dataSet) {
+            return;
+          }
           for(var i = 0; i < scope.dataSet.length; i++) {
             if(scope.dataSet[i]._id === data._id) {
               scope.dataSet[i] = data;
@@ -66,7 +118,7 @@ angular.module('{{adminAppName}}')
     return {
       scope: {schema: '=', data: '=display', className: '@', displayType: '@'},
       restrict: 'AE',
-      template: '<div class="data-item {{className}}"></div>',
+      template: '<div class="data-item "></div>',
       replace: true,
       link: function(scope, element, attrs) {
         for(var i in scope.schema) {
@@ -80,7 +132,7 @@ angular.module('{{adminAppName}}')
           if(typeof scope.schema[i].display === 'string' && scope.schema[i].display !== scope.displayType) {
             continue;
           }
-          element.append('<span class="' + scope.schema[i].align + '-align ' + scope.schema[i].type + ' ' + i + ' ' + scope.schema[i].className + '" >' + dataManager.getObjectDotNotation(scope.data, i) + '</span>');
+          element.append('<span class="' + scope.schema[i].align + '-align ' + scope.schema[i].type + ' ' + i + ' ' + scope.schema[i].className + '" >' + trim(dataManager.getObjectDotNotation(scope.data, i), 64) + '</span>');
         }
 
         element.on('click', function(evt) {
@@ -103,7 +155,7 @@ angular.module('{{adminAppName}}')
       },
       replace: true,
       link: function(scope, element, attrs) {
-        var dataHolder = element.find('.editor-data-holder');
+        var dataHolder = angular.element(element[0].querySelectorAll('.editor-data-holder')[0]);
         scope.isDeleting = false;
         scope.verb = 'Add';
 
@@ -135,7 +187,7 @@ angular.module('{{adminAppName}}')
             dataManager.deleteData(scope.data).then(function() {
               dataManager.setSelected(null);
               element.parent().removeClass('active');
-            }).fail(function() {
+            }, function() {
               scope.isDeleting = false;
             });
           }
@@ -159,8 +211,13 @@ angular.module('{{adminAppName}}')
             return;
           }
 
+          scope.setupForm(data);
+        });
+
+        scope.setupForm = function(data) {
+          dataHolder = angular.element(element[0].querySelectorAll('.editor-data-holder')[0]);
           scope.isDeleting = false;
-          if(data._id) {
+          if(data && data._id) {
             scope.verb = 'Edit';
           } else {
             scope.verb = 'Add';
@@ -173,18 +230,123 @@ angular.module('{{adminAppName}}')
           scope.schema = dataManager.getSchema();
           var elm = $compile('<div ng-repeat="key in notSorted(schema)" ng-init="d = schema[key]" ng-class="getClass(d)" scheme="d" editor-type="d.type" scheme-object="data" ng-model="data[key]" label="{{d.name}}" id="{{key}}" verb="{{verb}}"></div>')(scope);
           dataHolder.append(elm);
-        });
+        };
+
+        scope.setupForm(dataManager.getSelected());
       }
     }
   })
-  .directive('editorType', function($parse, $http, $templateCache, $compile, dataManager) {
+  .directive('editorType', function($parse, $http, $templateCache, $compile, dataManager, accountManager, $rootScope, $timeout) {
     return {
       scope: {data: '=ngModel', scheme: '=', schemeObject: '=', label: '@', type: '=editorType', id: '@', verb: '@'},
       restrict: 'A',
       link: function(scope, element, attrs) {
+        var cmLoaded = false;
         scope.$watch('type', function(val) {
           if(val) {
             loadTpl(val);
+          }
+        });
+
+        scope.datetimeOpened = false;
+        scope.datetimeOpen = function(evt) {
+          evt.preventDefault();
+          evt.stopPropagation();
+
+          scope.datetimeOpened = true;
+        };
+
+        scope.generateSlug = function() {
+          var slug = slugify(scope.schemeObject[scope.scheme.slug]);
+          slug = trim(slug, 64, ' ');
+          scope.data = slug.toLowerCase();
+        };
+
+        scope.upload = [];
+
+        scope.codeMirrorOutput = '';
+        scope.codeMirrorPreview = false;
+        scope.toggleCodeMirrorPreview = function() {
+          scope.codeMirrorPreview = !scope.codeMirrorPreview;
+        };
+        scope.codeMirrorEditor = null;
+        scope.codeMirrorOptions = {
+          mode: 'gfm',
+          tabMode: 'indent',
+          tabindex: '4',
+          cursorScrollMargin: 10,
+          lineWrapping: true,
+          dragDrop: true
+        };
+
+        function handleUploadSuccess(res) {
+          console.log(res);
+          scope.codeMirrorOptions.codemirror.replaceSelection('![Image Upload](' + res.data.pkg.data.url + ')');
+          scope.codeMirrorOptions.codemirror.execCommand('newlineAndIndent');
+        }
+
+        function handleUploadError(res) {
+          console.log(res);
+          $rootScope.addRootAlert('error', 'An error occurred uploading the file: ' + (res.pkg ? res.pkg.statusMessage : 'Unknown error'));
+        }
+
+        function handleUploadProgress(evt) {
+          console.log(evt);
+        }
+
+        scope.handleUpload = function(evt) {
+          for(var i = 0; i < evt.dataTransfer.files.length; i++) {
+            console.log(evt.dataTransfer.files[i]);
+            accountManager.uploadAsset(evt.dataTransfer.files[i]).then(handleUploadSuccess, handleUploadError, handleUploadProgress);
+          }
+        };
+
+        scope.$watch(function() { return Object.keys(scope.codeMirrorOptions).length; }, function() {
+          if(!scope.codeMirrorOptions.codemirror) {
+            return;
+          }
+
+          if(cmLoaded) {
+            return;
+          }
+
+          cmLoaded = true;
+
+          var cm = scope.codeMirrorOptions.codemirror;
+          cm.on('change', function() {
+            $timeout(function() {
+              scope.data = cm.getValue();
+              marked(cm.getValue(), function (err, content) {
+                if (err) {
+                  console.log(err);
+                  return;
+                }
+                scope.codeMirrorOutput = content;
+              });
+            });
+          });
+          cm.on('dragstart', function(cm, evt) {
+            element.addClass('dragging');
+            evt.dataTransfer.dropEffect = 'copy';
+          });
+          cm.on('dragenter', function(cm, evt) {
+            element.addClass('dragging');
+            evt.dataTransfer.dropEffect = 'copy';
+          });
+          cm.on('dragleave', function(cm, evt) {
+            element.removeClass('dragging');
+            evt.dataTransfer.dropEffect = 'none';
+          });
+          cm.on('drop', function(cm, evt) {
+            element.removeClass('dragging');
+            evt.preventDefault();
+            if(!confirm('Insert upload here?')) {
+              return;
+            }
+            scope.handleUpload(evt);
+          });
+          if(scope.data) {
+            cm.setValue(scope.data);
           }
         });
 
@@ -195,7 +357,7 @@ angular.module('{{adminAppName}}')
             .success(function(html) {
               element.html(html);
             }).then(function(response) {
-              element = element.replaceWith($compile(element.html())(scope));
+              element = element.replaceWith($compile(response.data)(scope));
             });
         }
 
@@ -213,27 +375,32 @@ angular.module('{{adminAppName}}')
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/editor.html',
-      '<div class="editor-data"><h3>{{verb}}</h3><div class="editor-actions"><a href class="save btn btn-primary" ng-click="saveData()"><span class="glyphicon glyphicon-save"></span> Save</a> <a href class="btn btn-default" ng-click="closeData()"><span class="glyphicon glyphicon-remove"></span></a></div><div class="editor-data-holder"></div><div class="delete-holder" ng-show="verb == \'Edit\'"><button class="delete btn btn-danger" ng-click="deleteConfirm()"><span ng-class="{active: isDeleting == false}">Delete</span><span ng-class="{active: isDeleting == true}">Click again to confirm</span></button> <button class="btn btn-default" ng-show="isDeleting == true" ng-click="cancelDelete()">Cancel</button></div></div>');
+    '<div class="editor-data"><h3>{{verb}}</h3><div class="editor-actions"><a href class="save btn btn-primary" ng-click="saveData()"><span class="glyphicon glyphicon-save"></span> Save</a> <a href class="btn btn-default" ng-click="closeData()"><span class="glyphicon glyphicon-remove"></span></a></div><div class="editor-data-holder"></div><div class="delete-holder" ng-show="verb == \'Edit\'"><button class="delete btn btn-danger" ng-click="deleteConfirm()"><span ng-class="{active: isDeleting == false}">Delete</span><span ng-class="{active: isDeleting == true}">Click again to confirm</span></button> <button class="btn btn-default" ng-show="isDeleting == true" ng-click="cancelDelete()">Cancel</button></div></div>');
 }]);
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/text.html',
-    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="text" ng-model="data"></div>');
+    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="text" ng-model="data" ng-enter="saveData()"></div>');
+}]);
+
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/editor-data/textarea.html',
+    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><textarea class="form-control" ng-model="data"></textarea></div>');
 }]);
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/email.html',
-    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="email" ng-model="data"></div>');
+    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="email" ng-model="data" ng-enter="saveData()"></div>');
 }]);
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/password.html',
-    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="password" ng-model="data" ng-init="data = \'\'"></div>');
+    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="password" ng-model="data" ng-init="data = \'\'" ng-enter="saveData()"></div>');
 }]);
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/currency.html',
-    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="text" ng-model="data"></div>');
+    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><input class="form-control" type="text" ng-model="data" ng-enter="saveData()"></div>');
 }]);
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
@@ -249,4 +416,29 @@ angular.module('{{adminAppName}}').run(['$templateCache', function($templateCach
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/button.html',
     '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><button class="btn btn-default" ng-click="doCallback()">{{label}}</button></div>');
+}]);
+
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/editor-data/tag-cloud.html',
+    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><token-input type="text" ng-model="data" placeholder="Begin typing a tag" tag-cloud="{{scheme.tag_cloud}}"></token-input></div>');
+}]);
+
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/editor-data/datetime.html',
+    '<div class="form-group" ng-show="scheme.verbs.indexOf(verb) > -1"><label ng-bind="label"></label><p class="input-group"><input type="text" class="form-control" datepicker-popup="MMMM dd yyyy" ng-model="data" is-open="datetimeOpened" close-text="Close" /> <span class="input-group-btn"><button type="button" class="btn btn-default" ng-click="datetimeOpen($event)"><i class="glyphicon glyphicon-calendar"></i></button></span></p><p><timepicker ng-model="data" hour-step="1" minute-step="1" show-meridian="true"></timepicker></p></div>');
+}]);
+
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/editor-data/markdown.html',
+    '<div class="form-group codemirror" ng-show="scheme.verbs.indexOf(verb) > -1"><label> <a href class="btn btn-xs btn-success" ng-click="toggleCodeMirrorPreview()" ng-bind="codeMirrorPreview ? \'Write\' : \'Preview\'"></a></label><div ng-show="codeMirrorPreview" ng-bind-html="codeMirrorOutput"></div><div ng-show="!codeMirrorPreview" ng-model="data" vern-codemirror="codeMirrorOptions"></div></div>');
+}]);
+
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/editor-data/images.html',
+    '<div class="form-group image-upload" ng-show="scheme.verbs.indexOf(verb) > -1"><label></label><asset-upload options="scheme.options" ng-model="data"></asset-upload></div>')
+}]);
+
+angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
+  $templateCache.put('template/editor-data/slug.html',
+    '<div class="form-group slug" ng-show="scheme.verbs.indexOf(verb) > -1"><label> <a href class="btn btn-xs btn-success" ng-click="generateSlug()">Generate</a></label><input class="form-control" type="text" ng-model="data" ng-enter="saveData()"></div>')
 }]);

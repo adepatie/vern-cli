@@ -1,3 +1,4 @@
-<div class="tests" ng-controller="TestsCtrl">
-  <h2>A test page</h2>
+<div class="tests container" ng-controller="TestsCtrl">
+  <h2 ng-repeat-start="data in testData" ng-bind="data.name"></h2>
+  <h3 ng-bind="data.tags.join(', ')" ng-repeat-end></h3>
 </div>

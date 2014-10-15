@@ -1,19 +1,43 @@
 'use strict';
 angular.module('{{adminAppName}}')
-  .directive('tokenInput', function($rootScope, $compile) {
+  .directive('tokenInput', function($rootScope, $compile, apiRequest, $q) {
     return {
       restrict: 'AE',
-      scope: { tokens: '=ngModel', onUpdate: '&onUpdate', autocomplete: '=?autocomplete' },
+      scope: { tokens: '=ngModel', onUpdate: '&onUpdate', autocomplete: '@', tagCloud: '@' },
       replace: false,
-      template: '<div class="ngTokenInput {{ options.cssClass }}">' +
-                '  <ul>' +
-                '    <li ng-repeat="token in tokens">' +
-                '      <span>{{token}} <i class="icon icon-times" ng-click="removeToken($index)"></i></span>' +
-                '    </li>' +
-                '  </ul>' +
-                '  <input type="text" data-min-length="0" placeholder="{{options.placeholder}}" tabindex="-1" ng-model="tokenText" bs-typeahead="autocomplete">' +
-                '</div>',
-      controller: function($scope, $attrs) {
+      template: function(tElement, tAttrs) {
+        var typeaheads = '';
+        for(var i in tAttrs) {
+          if(i.indexOf('typeahead-') >= 0) {
+            typeaheads += ' ' + i + '="' + tAttrs[i] + '"';
+          }
+        }
+
+        if(tAttrs.tagCloud) {
+          tAttrs.autocomplete = 'tag for tag in getTags($viewValue)';
+        }
+
+        if(!tAttrs.placement || (tAttrs.placement && tAttrs.placement === 'top')) {
+          return  '<div class="ngTokenInput {{ options.cssClass }}">' +
+            '  <ul class="top-placement">' +
+            '    <li ng-repeat="token in tokens">' +
+            '      <span>{{token}} <i class="glyphicon glyphicon-remove" ng-click="removeToken($index)"></i></span>' +
+            '    </li>' +
+            '  </ul>' +
+            (tAttrs.autocomplete ? '  <input type="text" class="form-control" data-min-length="0" typeahead-min-length="0" placeholder="{{options.placeholder}}" ng-model="tokenText" typeahead="' + tAttrs.autocomplete + '"' + typeaheads + ' typeahead-on-select="selectAutoComplete($item, $model, $label)">' : '  <input type="text" class="form-control" data-min-length="0" placeholder="{{options.placeholder}}" ng-model="tokenText">') +
+            '</div>';
+        } else if(tAttrs.placement && tAttrs.placement === 'bottom') {
+          return  '<div class="ngTokenInput {{ options.cssClass }}">' +
+            (tAttrs.autocomplete ? '  <input type="text" class="form-control" data-min-length="0" typeahead-min-length="0" placeholder="{{options.placeholder}}" ng-model="tokenText" typeahead="' + tAttrs.autocomplete + '"' + typeaheads + ' typeahead-on-select="selectAutoComplete($item, $model, $label)">' : '  <input type="text" class="form-control" data-min-length="0" placeholder="{{options.placeholder}}" ng-model="tokenText">') +
+            '  <ul class="bottom-placement">' +
+            '    <li ng-repeat="token in tokens">' +
+            '      <span>{{token}} <i class="glyphicon glyphicon-remove" ng-click="removeToken($index)"></i></span>' +
+            '    </li>' +
+            '  </ul>' +
+            '</div>';
+        }
+      },
+      controller: function($scope, $element, $attrs) {
         $scope.tokens = $scope.tokens || [];
         $scope.tokenText = '';
         $scope.options = {
@@ -22,28 +46,47 @@ angular.module('{{adminAppName}}')
           maxTokens: parseInt($attrs.maxTokens)
         };
 
-        if(typeof $attrs.autocomplete !== 'undefined') {
-          $scope.autocomplete = $scope.autocomplete || [];
-        } else {
+        if(typeof $scope.autocomplete === 'undefined') {
           $scope.autocomplete = null;
         }
+
+        $scope.addTagToCloud = function(tag) {
+          apiRequest.post({
+            path: 'tags',
+            data: {type: $scope.tagCloud, name: tag},
+            success: function(res) {
+            }
+          });
+        };
+
+        $scope.$watch('tokens', function() {
+          if(!($scope.tokens instanceof Array)) {
+            $scope.tokens = [];
+          }
+        }, true);
 
         var updateHandler = $scope.onUpdate;
         if(!updateHandler) {
           updateHandler = function() {};
         }
-        
+
         $scope.addToken = function(t) {
+          if(!t || !t.length) {
+            return;
+          }
           if($scope.options.maxTokens > 0 && $scope.tokens.length >= $scope.options.maxTokens) {
             return;
           }
           if($scope.tokens.indexOf(t) === -1) {
             $scope.tokens.push(t);
             $scope.tokenText = '';
+            if($scope.tagCloud) {
+              $scope.addTagToCloud(t);
+            }
           }
           updateHandler($scope.tokens);
         };
-        
+
         $scope.removeToken = function(i) {
           $scope.tokens.splice(i, 1);
           updateHandler($scope.tokens);
@@ -66,22 +109,24 @@ angular.module('{{adminAppName}}')
           }
         });
 
-        elm.find('input').on('focus', function(e) {
-          if(!scope.autocomplete) {
-            return;
-          }
-          var autocomplete = elm.find('.typeahead');
-          if(autocomplete.length <= 0) {
-            return;
-          }
+        scope.selectAutoComplete = function($item, $model, $label) {
+          scope.addToken($item);
+        };
 
-          if(scope.autocomplete.indexOf(scope.tokenText) > -1 && scope.tokens.indexOf(scope.tokenText) === -1) {
-            scope.addToken(scope.tokenText);
-            e.preventDefault();
-            elm.find('input').trigger('blur');
-            scope.$apply();
-          }
-        });
+        scope.getTags = function(val) {
+          return apiRequest.get({
+            path: 'tags',
+            data: {conditions: {type: scope.tagCloud}, search: {value: val.toLowerCase()}}
+          }).then(function(data) {
+            var res = data.data;
+            var tags = [];
+            for(var i = 0; i < res.pkg.data.length; i++) {
+              tags.push(res.pkg.data[i].name);
+            }
+
+            return tags;
+          });
+        };
       }
     };
   });

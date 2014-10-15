@@ -100,6 +100,7 @@ module.exports = {
       var deferred = Q.defer();
 
       var text = fs.readFileSync(template).toString();
+      /*
       mustache.compileText('project_tpl', text, function(err, compiled) {
         if(err) {
           console.log(err);
@@ -117,6 +118,12 @@ module.exports = {
             deferred.resolve(text);
           });
       });
+      */
+      for(var i in params) {
+        text = text.replace(new RegExp('{{' + i + '}}', 'g'), params[i]);
+      }
+
+      deferred.resolve(text);
 
       return deferred.promise;
     }

@@ -52,16 +52,20 @@ var app = angular.module('{{adminAppName}}')
       }
     });
 
-    $rootScope.addAlert = $rootScope.addRootAlert = function(type, msg) {
+    $rootScope.addAlert = $rootScope.addRootAlert = function(type, msg, timeout) {
       if(type === 'error') {
         type = 'danger';
       }
+      if(!timeout) {
+        timeout = 5000;
+      }
       $rootScope.rootAlerts.push({type: type, content: msg});
-      setTimeout(function() {
-        $rootScope.rootAlerts.pop();
-        $rootScope.$apply();
-      }, 5000);
-      // Could add in timeout here for removing notifications.
+      if(timeout > 0) {
+        setTimeout(function () {
+          $rootScope.rootAlerts.pop();
+          $rootScope.$apply();
+        }, timeout);
+      }
     };
 
     $rootScope.closeAlert = $rootScope.closeRootAlert = function(index) {
