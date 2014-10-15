@@ -7,6 +7,7 @@ function Model($vern) {
   function IndexModel() {
     this.name = null;
     this.tags = [];
+    this.post = null;
 
     return this.update(arguments[0]);
   }
