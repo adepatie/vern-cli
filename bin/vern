@@ -57,6 +57,7 @@ program.option('use-provider', {flag: true, help: 'Create service as a provider'
 program.option('partial', {flag: true, help: 'Create view as a partial'});
 program.option('modal', {flag: true, help: 'Create service as a modal'});
 program.option('no-install', {flag: true, help: 'Start server without performing installs'});
+program.option('path', {flag: true, help: 'Define path for routes and views'});
 program.command('create').callback(parseCreate).help('Create a new component (controller, model, route, view, view_controller, stylesheet, directive, service, or filter) or project');
 program.command('start').callback(parseStart).help('Start a server module (api, public, admin, all)');
 program.command('stop').callback(parseStop).help('Stop a server module');
@@ -65,7 +66,7 @@ program.command('install').callback(parseInstall).help('Install a module to your
 program.command('uninstall').callback(parseUninstall).help('Uninstall a module from your project');
 program.command('build').callback(parseBuild).help('Build environment for distribution (default public)');
 program.command('package').callback(parsePackage).help('Start the package builder');
-program.command('deploy').callback(parseDeploy).help('Perform deployment commands');
+program.command('deploy').callback(parseDeploy).help('Perform deployment commands, vern deploy setup to initialize');
 program.command('config').callback(parseConfig).help('Configure your application options');
 program.parse();
 
@@ -760,8 +761,18 @@ function Builds() {
     return null;
   };
 
-  $scope.buildContainer = function(options) {
+  $scope.saveProjectConfig = function(data, project_path) {
+    if(!project_path) {
+      project_path = path.join(cwd, 'vern.json');
+    }
 
+    return fs.outputJsonSync(project_path, data);
+  };
+
+  $scope.buildContainer = function(options) {
+    /**
+     * TODO
+     */
   };
 
   $scope.buildController = function(options) {
@@ -1571,23 +1582,50 @@ function parseDeploy() {
     case 'setup':
       new Deploy().setup(params);
       break;
+    default:
+      new Deploy().handleDeployment(params);
+      break;
   }
 }
 
 function Deploy() {
   var $scope = this;
+  var projectConfig = new Builds().loadProjectConfig();
 
   $scope.setup = function(params) {
+    if(!projectConfig) {
+      return console.log('Invalid project directory');
+    }
     inquirer.prompt([
       {
-        type: 'confirm',
-        name: '',
-        message: 'Enter a project name (use . for current directory)'
+        type: 'input',
+        name: 'environment',
+        message: 'Enter an environment name',
+        default: 'production'
+      },
+      {
+        type: 'list',
+        name: 'infrastructure',
+        message: 'Select infrastructure',
+        choices: [
+          {name: 'Custom Server IP', value: 'custom'},
+          {name: 'AWS', value: 'aws'}
+        ],
+        default: 'custom'
       }
     ], function(answers) {
-      var project_name = answers.project.length ? answers.project : '.';
-      build(project_name, project_name);
+      var env = answers.environment;
+      var inf = answers.infrastructure;
+
+      console.log(env + ': ' + inf);
     });
+  };
+
+  $scope.handleDeployment = function(params) {
+    if(!projectConfig) {
+      return console.log('Invalid project directory');
+    }
+    console.log(params);
   };
 
   return $scope;
