@@ -1617,7 +1617,84 @@ function Deploy() {
       var env = answers.environment;
       var inf = answers.infrastructure;
 
-      console.log(env + ': ' + inf);
+      switch(inf) {
+        case 'custom':
+          $scope.handleCustomDeploySetup(env);
+          break;
+        case 'aws':
+          $scope.handleAWSDeploySetup(env);
+          break;
+      }
+    });
+  };
+
+  $scope.handleCustomDeploySetup = function(env) {
+    inquirer.prompt([
+      {
+        type: 'input',
+        name: 'host',
+        message: 'Enter the hostname or ip'
+      },
+      {
+        type: 'input',
+        name: 'login',
+        message: 'Enter the username to access the host'
+      },
+      {
+        type: 'confirm',
+        name: 'setup_server',
+        message: 'Would you like to set up the server with all necessary software?',
+        default: true
+      }
+    ], function(answers) {
+      console.log('Thank you, please make sure you have the ssh key added to your keychain (ssh-add) in order to access the server.');
+      console.log(answers);
+    });
+  };
+
+  $scope.handleAWSDeploySetup = function(env) {
+    console.log('You will need your AWS credentials handy to set up the server, but they will not be stored.');
+    console.log('');
+    inquirer.prompt([
+      {
+        type: 'input',
+        name: 'aws_access_token',
+        message: 'Enter your AWS Access Token'
+      },
+      {
+        type: 'input',
+        name: 'aws_access_secret',
+        message: 'Enter your AWS Access Secret'
+      },
+      {
+        type: 'input',
+        name: 'aws_region',
+        message: 'Enter your AWS Region',
+        default: 'us-east-1'
+      },
+      {
+        type: 'list',
+        name: 'key_option',
+        message: 'Generate a new Key Pair or use an existing one?',
+        choices: [
+          {name: 'Generate a Key Pair', value: 'generate'},
+          {name: 'Use an existing Key Pair', value: 'existing'},
+          //{name: 'Import an RSA key to use', value: 'import'}
+        ],
+        default: 'generate'
+      }
+    ], function(answers) {
+      /**
+       * Work flow:
+       *
+       * - create Security Group
+       * - create or use PEM key
+       * - Spin up server
+       * - Get details
+       * - Allocate IP
+       * - Assign IP
+       */
+      console.log(answers);
     });
   };
 
