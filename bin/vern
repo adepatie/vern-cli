@@ -68,6 +68,7 @@ program.command('build').callback(parseBuild).help('Build environment for distri
 program.command('package').callback(parsePackage).help('Start the package builder');
 program.command('deploy').callback(parseDeploy).help('Perform deployment commands, vern deploy setup to initialize');
 program.command('config').callback(parseConfig).help('Configure your application options');
+program.command('module').callback(parseModule).help('Create a vern module');
 program.parse();
 
 /*
@@ -1703,6 +1704,32 @@ function Deploy() {
       return console.log('Invalid project directory');
     }
     console.log(params);
+  };
+
+  return $scope;
+}
+
+/*
+ * Custom Module functions
+ *
+ * These methods are used to create custom vern modules
+ *
+ * Outside of the scope of a project, these modules are mean to be a template for creating vern modules to be added functionality to vern-core or other modules.
+ *
+ */
+function parseModule() {
+  var i = process.argv.indexOf('modules');
+  var params = process.argv.slice(i + 1);
+
+  var actionName = params[0];
+}
+
+function Module() {
+  var $scope = this;
+  var projectConfig = new Builds().loadProjectConfig();
+
+  $scope.createModule = function(params) {
+
   };
 
   return $scope;
