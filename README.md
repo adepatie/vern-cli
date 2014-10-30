@@ -11,7 +11,7 @@ For full documentation, [see the documentation site](http://www.vern.io)
 To contribute to the CLI tool:
 
 1. Fork the repository
-2. Clone your fork `git clone https://github.com/<your_username_or_organization>/vern-cli.git
+2. Clone your fork `git clone https://github.com/<your_username_or_organization>/vern-cli.git`
 3. Submit a pull request with changes, bug fixes for consideration
 4. Open issue for bugs found
 
