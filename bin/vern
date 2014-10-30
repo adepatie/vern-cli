@@ -24,7 +24,8 @@ var program          = require('nomnom'),
     _stylesheet      = require(path.join(template_dir, 'stylesheet')),
     utils            = require(path.join(__dirname, '..', 'utils')),
     default_config   = require(path.join(template_dir, 'vern_config.json')),
-    pkg              = require(path.join(__dirname, '..', 'package.json'));
+    pkg              = require(path.join(__dirname, '..', 'package.json')),
+    allDefault       = false;
 
 if(process.argv.length <= 2) {
   return console.log('No command given, ' + 'vern -h'.green + ' for usage');
@@ -58,6 +59,7 @@ program.option('partial', {flag: true, help: 'Create view as a partial'});
 program.option('modal', {flag: true, help: 'Create service as a modal'});
 program.option('no-install', {flag: true, help: 'Start server without performing installs'});
 program.option('path', {flag: true, help: 'Define path for routes and views'});
+program.option('y', {flag: true, help: 'Answer all questions with the default', callback: function() { allDefault = true; }});
 program.command('create').callback(parseCreate).help('Create a new component (controller, model, route, view, view_controller, stylesheet, directive, service, or filter) or project');
 program.command('start').callback(parseStart).help('Start a server module (api, public, admin, all)');
 program.command('stop').callback(parseStop).help('Stop a server module');
@@ -496,7 +498,7 @@ function Starter(options) {
  *
  */
 
-function parseCreate() {
+function parseCreate(args) {
   var i = process.argv.indexOf('create');
   var params = process.argv.slice(i + 1);
 
@@ -504,6 +506,13 @@ function parseCreate() {
     if(!params[j].length) {
       params.splice(j, 1);
       j--;
+      continue;
+    }
+    if(params[j].charAt(0) === '-' && j < params.length-1) {
+      params.push(params[j]);
+      params.splice(j, 1);
+      j--;
+      continue;
     }
   }
   var buildName = params[0];
@@ -563,7 +572,10 @@ function Builds() {
           type: 'confirm',
           name: 'customize',
           message: 'Do you want to customize your project folders?',
-          default: false
+          default: false,
+          when: function() {
+            return !allDefault;
+          }
         },
         {
           type: 'input',
@@ -572,6 +584,9 @@ function Builds() {
           default: 'admin@vern.io',
           validate: function(input) {
             return validator.isEmail(input);
+          },
+          when: function() {
+            return !allDefault;
           }
         },
         {
@@ -581,6 +596,9 @@ function Builds() {
           message: 'Enter a password for your administrator',
           validate: function(input) {
             return input.length > 6;
+          },
+          when: function() {
+            return !allDefault;
           }
         }
       ], function(answers) {
@@ -682,7 +700,10 @@ function Builds() {
           type: 'confirm',
           name: 'install',
           message: 'Would you like to install all dependencies now? It will take a few minutes.',
-          default: false
+          default: false,
+          when: function() {
+            return !allDefault;
+          }
         }, function(answers) {
           if(answers.install === true) {
             var newCWD = path.join(cwd, project_path);
