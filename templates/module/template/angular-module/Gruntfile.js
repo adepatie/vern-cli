@@ -141,7 +141,7 @@ module.exports = function(grunt) {
       }
     },
     ngmin: {
-      {{name}}: {
+      {{appName}}: {
         src: [
           '<%= dist %>/<%= filename %>.js',
         ],
