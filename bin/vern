@@ -22,6 +22,7 @@ var program          = require('nomnom'),
     _view            = require(path.join(template_dir, 'view')),
     _view_controller = require(path.join(template_dir, 'view_controller')),
     _stylesheet      = require(path.join(template_dir, 'stylesheet')),
+    _module          = require(path.join(template_dir, 'module')),
     utils            = require(path.join(__dirname, '..', 'utils')),
     default_config   = require(path.join(template_dir, 'vern_config.json')),
     pkg              = require(path.join(__dirname, '..', 'package.json')),
@@ -60,6 +61,7 @@ program.option('modal', {flag: true, help: 'Create service as a modal'});
 program.option('no-install', {flag: true, help: 'Start server without performing installs'});
 program.option('path', {flag: true, help: 'Define path for routes and views'});
 program.option('y', {flag: true, help: 'Answer all questions with the default', callback: function() { allDefault = true; }});
+program.option('type', {abbr: 't', help: 'Type of module/view/etc, used in multiple commands'});
 program.command('create').callback(parseCreate).help('Create a new component (controller, model, route, view, view_controller, stylesheet, directive, service, or filter) or project');
 program.command('start').callback(parseStart).help('Start a server module (api, public, admin, all)');
 program.command('stop').callback(parseStop).help('Stop a server module');
@@ -517,7 +519,7 @@ function parseCreate(args) {
   }
   var buildName = params[0];
   buildName = utils.toCamelCase(buildName);
-  new Builds()['build' + buildName](params.slice(1));
+  new Builds()['build' + buildName](params.slice(1), args);
 }
 
 function Builds() {
@@ -1272,6 +1274,55 @@ function Builds() {
 
       console.log('');
       console.log(success.green);
+      console.log('');
+    });
+  };
+
+  $scope.buildModule = function(options, args) {
+    if(options.length < 1) {
+      console.log('');
+      console.log('You must specify a name'.red);
+      console.log('');
+      return;
+    }
+
+    var newDir = true;
+    if(options[0] === '.') {
+      options[0] = process.cwd().split('/').slice(-1);
+      newDir = false;
+    }
+    var name = utils.toHyphenated(options[0]);
+    var appName = utils.toCamelCase(options[0], true);
+
+    var acceptableTypes = [
+      'module',
+      'angular-module'
+    ];
+
+    var type = 'module';
+    if(args.type) {
+      type = args.type;
+    }
+    if(acceptableTypes.indexOf(type) === -1) {
+      return console.log('Invalid module type'.red);
+    }
+
+    var params = {
+      newDir: newDir,
+      appName: appName,
+      name: name,
+      type: type,
+      module_dir: newDir ? path.join(process.cwd(), name) : process.cwd()
+    };
+
+    _module.copy(params, function(err, success) {
+      if(err) {
+        console.log('Error:');
+        return console.log(err);
+      }
+
+      console.log('');
+      console.log(success.join('\n').green);
       console.log('');
     });
   };

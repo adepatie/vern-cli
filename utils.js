@@ -1,6 +1,7 @@
 var path = require('path');
-var fs = require('fs');
-
+var fs = require('fs-extra');
+var Q = require('q');
+var valid_ext = ['txt', 'md', 'js', 'css', 'less', 'html', 'json'];
 
 function generatePassword(len) {
   if(!len) {
@@ -8,6 +9,86 @@ function generatePassword(len) {
   }
 
   return (Math.random()*(Math.pow(36, len))).toString(36).slice(0, len);
+}
+
+function applyVariables(template, params) {
+  var deferred = Q.defer();
+
+  var text = fs.readFileSync(template).toString();
+  for(var i in params) {
+    text = text.replace(new RegExp('{{' + i + '}}', 'g'), params[i]);
+  }
+
+  deferred.resolve(text);
+
+  return deferred.promise;
+}
+
+function applyVariablesSync(template, params) {
+  var text = fs.readFileSync(template).toString();
+  for(var i in params) {
+    text = text.replace(new RegExp('{{' + i + '}}', 'g'), params[i]);
+  }
+  return text;
+}
+
+function walkTemplate(dir, templateDir, params, log) {
+  var deferred = Q.defer();
+  var fileName, j;
+  if(!log) {
+    log = [];
+  }
+
+  fs.mkdirsSync(templateDir);
+  var templateFiles = fs.readdirSync(dir);
+  var pending = templateFiles.length;
+  if(!pending) {
+    deferred.resolve('');
+    return deferred.promise;
+  }
+
+  for(var i = 0; i < templateFiles.length; i++) {
+    if(fs.statSync(path.join(dir, templateFiles[i])).isDirectory()) {
+      walkTemplate(path.join(dir, templateFiles[i]), path.join(templateDir, templateFiles[i]), params, log).then(function() {
+        if(!--pending) {
+          deferred.resolve(log);
+        }
+      });
+      continue;
+    }
+
+    // real file, check if it has a valid extension type for editing
+    var ext = templateFiles[i].split('.').pop().toLowerCase();
+    if(valid_ext.indexOf(ext) <= -1) {
+      fileName = templateFiles[i];
+      if(fileName.substr(0, 2) === '__') {
+        for(j in params) {
+          fileName = fileName.replace('__' + j + '__', params[j]);
+        }
+      }
+      log.push('Setting up: ' + path.join(templateDir, fileName));
+      fs.copySync(path.join(dir, templateFiles[i]), path.join(templateDir, fileName));
+      if(!--pending) {
+        deferred.resolve(log);
+      }
+      continue;
+    }
+
+    var newFile = applyVariablesSync(path.join(dir, templateFiles[i]), params);
+    fileName = templateFiles[i];
+    if(fileName.substr(0, 2) === '__') {
+      for(j in params) {
+        fileName = fileName.replace('__' + j + '__', params[j]);
+      }
+    }
+    fs.writeFileSync(path.join(templateDir, fileName), newFile);
+    log.push('Setting up: ' + path.join(templateDir, fileName));
+    if(!--pending) {
+      deferred.resolve(log);
+    }
+  }
+
+  return deferred.promise;
 }
 
 /*
@@ -90,5 +171,8 @@ module.exports = {
   generatePassword: generatePassword,
   rewrite: rewrite,
   toCamelCase: toCamelCase,
-  toHyphenated: toHyphenated
+  toHyphenated: toHyphenated,
+  applyVariables: applyVariables,
+  applyVariablesSync: applyVariablesSync,
+  walkTemplate: walkTemplate
 };

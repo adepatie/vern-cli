@@ -1,0 +1,38 @@
+{
+  "name": "{{name}}",
+  "main": [
+    "dist/{{name}}.js",
+    "dist/styles/{{name}}.css"
+  ],
+  "version": "0.0.1",
+  "authors": [
+    {
+      "name": "",
+      "email": ""
+    }
+  ],
+  "description": "AngularJS Vern Module",
+  "keywords": [
+    "angular",
+    "angularjs",
+    "vern"
+  ],
+  "license": "AGPL",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "/styles",
+    "{{name}}-templates",
+    "examples",
+    "public",
+    "/src",
+    "build",
+    "Gruntfile.js",
+    "npm-debug.log",
+    "package.json"
+  ],
+  "devDependencies": {
+    "angular": "~1.2.26"
+  }
+}
