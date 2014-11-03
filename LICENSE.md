@@ -1,9 +1,9 @@
 #License
 
 All files in this package are part of vern
-VERN is copyright 2014 uh-sem-blee, Co. Built by typefoo.
+Vern is copyright 2014 uh-sem-blee, Co. Built by typefoo.
 
-vern is free software: you can redistribute it and/or modify
+Vern is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
 published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
