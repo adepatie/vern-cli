@@ -69,6 +69,10 @@ module.exports = function (grunt) {
                 '/bower_components',
                 connect.static('./bower_components')
               ),
+              connect().use(
+                '/{{assetsName}}',
+                connect.static(require('path').resolve('../{{assetsName}}'))
+              ),
               connect.static(vernConfig.app)
             ];
           }
@@ -84,6 +88,10 @@ module.exports = function (grunt) {
               connect().use(
                 '/bower_components',
                 connect.static('./bower_components')
+              ),
+              connect().use(
+                '/{{assetsName}}',
+                connect.static(require('path').resolve('../{{assetsName}}'))
               ),
               connect.static(vernConfig.app)
             ];

@@ -116,7 +116,7 @@ angular.module('{{appName}}')
       var path = ((admin === true) ? 'admin/' : '') + controller;
       apiRequest.del({
         path: path,
-        data: data,
+        data: {_id: data._id},
         success: function(res) {
           defer.resolve(res);
           $rootScope.$broadcast('dataDelete', data._id);

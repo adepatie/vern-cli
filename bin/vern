@@ -192,7 +192,7 @@ function Starter(options) {
     public: null
   };
 
-  var projectConfig = new Builds().loadProjectConfig();
+  var projectConfig = new Builds().loadProjectConfig(options.cwd);
   if(!projectConfig) return;
 
   var project_dirs = {
@@ -536,7 +536,8 @@ function Builds() {
         {
           type: 'input',
           name: 'project',
-          message: 'Enter a project name (use . for current directory)'
+          message: 'Enter a project name (use . for current directory)',
+          default: '.'
         }
       ], function(answers) {
         var project_name = answers.project.length ? answers.project : '.';
@@ -550,12 +551,16 @@ function Builds() {
       if(project_path === '.') {
         project = cwd.split(path.sep).pop();
         project_path = cwd;
+        project = utils.toCamelCase(project);
       } else {
         project = project_path.split(path.sep).pop();
+        project_path = path.join(cwd, utils.toHyphenated(project_path));
+        project = utils.toCamelCase(project);
       }
-      project_path = utils.toHyphenated(project_path);
-      project = utils.toCamelCase(project);
       default_config.module = project;
+
+      console.log(project_path);
+      console.log(project);
 
       var params = {
         path: project_path,
@@ -709,6 +714,7 @@ function Builds() {
         }, function(answers) {
           if(answers.install === true) {
             var newCWD = path.join(cwd, project_path);
+            console.log(newCWD);
             new Starter({cwd: newCWD}).startAPI(true, true, function(err, success) {
               if(err) {
                 return console.log(err);
@@ -725,17 +731,16 @@ function Builds() {
                   console.log('');
                   console.log('All servers dependencies installed!');
                   console.log('');
-                  console.log('To start servers: ' + 'cd '.green + project_path.green);
-                  console.log('Then run ' + 'vern start all'.green);
-                  console.log('');
                 });
               });
             });
           } else {
             console.log('');
-            console.log('You can start your servers by running ' + 'vern start all'.green);
-            console.log('');
           }
+
+          console.log('To start servers:');
+          console.log('cd '.green + project_path.green + ' && vern start all'.green);
+          console.log('');
         });
       });
     });
@@ -759,7 +764,7 @@ function Builds() {
 
   $scope.loadProjectConfig = function(project_path) {
     if(!project_path) {
-      project_path = path.join(cwd, 'vern.json');
+      project_path = cwd;
     }
 
     var done = false;
@@ -767,10 +772,10 @@ function Builds() {
     while(!done) {
       if (fs.existsSync(project_path)) {
         cwd = path.dirname(project_path);
-        var options = require(path.join(cwd, 'vern.json'));
+        var options = require(path.join(project_path, 'vern.json'));
         options = $scope.ensureOptions(options);
-        fs.outputJsonSync(path.join(cwd, 'vern.json'), options);
-        return {options: options, cwd: cwd};
+        fs.outputJsonSync(path.join(project_path, 'vern.json'), options);
+        return {options: options, cwd: project_path};
       }
       if(path.dirname(project_path) === path.sep) {
         done = true;
@@ -1315,14 +1320,24 @@ function Builds() {
       module_dir: newDir ? path.join(process.cwd(), name) : process.cwd()
     };
 
+    var startCommands = {
+      'module': 'npm install && make test'.green,
+      'angular-module': 'npm install && bower install && grunt serve'.green
+    };
+
     _module.copy(params, function(err, success) {
       if(err) {
-        console.log('Error:');
-        return console.log(err);
+        return console.log(err.red);
       }
 
       console.log('');
       console.log(success.join('\n').green);
+      console.log('');
+      if(newDir) {
+        console.log('Change to your module directory: ' + 'cd '.green + name.green);
+      }
+
+      console.log('Start your module, ' + startCommands[type]);
       console.log('');
     });
   };

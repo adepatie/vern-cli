@@ -430,15 +430,15 @@ angular.module('{{adminAppName}}').run(['$templateCache', function($templateCach
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/markdown.html',
-    '<div class="form-group codemirror" ng-show="scheme.verbs.indexOf(verb) > -1"><label> <a href class="btn btn-xs btn-success" ng-click="toggleCodeMirrorPreview()" ng-bind="codeMirrorPreview ? \'Write\' : \'Preview\'"></a></label><div ng-show="codeMirrorPreview" ng-bind-html="codeMirrorOutput"></div><div ng-show="!codeMirrorPreview" ng-model="data" vern-codemirror="codeMirrorOptions"></div></div>');
+    '<div class="form-group codemirror" ng-show="scheme.verbs.indexOf(verb) > -1"><label>{{label}} <a href class="btn btn-xs btn-success" ng-click="toggleCodeMirrorPreview()" ng-bind="codeMirrorPreview ? \'Write\' : \'Preview\'"></a></label><div ng-show="codeMirrorPreview" ng-bind-html="codeMirrorOutput"></div><div ng-show="!codeMirrorPreview" ng-model="data" vern-codemirror="codeMirrorOptions"></div></div>');
 }]);
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/images.html',
-    '<div class="form-group image-upload" ng-show="scheme.verbs.indexOf(verb) > -1"><label></label><asset-upload options="scheme.options" ng-model="data"></asset-upload></div>')
+    '<div class="form-group image-upload" ng-show="scheme.verbs.indexOf(verb) > -1"><label>{{label}}</label><asset-upload options="scheme.options" ng-model="data"></asset-upload></div>')
 }]);
 
 angular.module('{{adminAppName}}').run(['$templateCache', function($templateCache) {
   $templateCache.put('template/editor-data/slug.html',
-    '<div class="form-group slug" ng-show="scheme.verbs.indexOf(verb) > -1"><label> <a href class="btn btn-xs btn-success" ng-click="generateSlug()">Generate</a></label><input class="form-control" type="text" ng-model="data" ng-enter="saveData()"></div>')
+    '<div class="form-group slug" ng-show="scheme.verbs.indexOf(verb) > -1"><label>{{label}} <a href class="btn btn-xs btn-success" ng-click="generateSlug()">Generate</a></label><input class="form-control" type="text" ng-model="data" ng-enter="saveData()"></div>')
 }]);

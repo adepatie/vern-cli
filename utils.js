@@ -39,6 +39,20 @@ function walkTemplate(dir, templateDir, params, log) {
     log = [];
   }
 
+  if(templateDir.charAt(templateDir.length-1) === path.sep) {
+    templateDir = templateDir.substr(0, -1);
+  }
+  var dirPieces = templateDir.split('/');
+  var dirName = dirPieces.pop();
+  if(dirName.substr(0, 2) === '__') {
+    for(j in params) {
+      dirName = dirName.replace('__' + j + '__', params[j]);
+    }
+  }
+
+  dirPieces.push(dirName);
+  templateDir = dirPieces.join(path.sep);
+
   fs.mkdirsSync(templateDir);
   var templateFiles = fs.readdirSync(dir);
   var pending = templateFiles.length;
