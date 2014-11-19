@@ -559,9 +559,6 @@ function Builds() {
       }
       default_config.module = project;
 
-      console.log(project_path);
-      console.log(project);
-
       var params = {
         path: project_path,
         projectName: project,
