@@ -768,7 +768,7 @@ function Builds() {
 
     while(!done) {
       if (fs.existsSync(project_path)) {
-        cwd = path.dirname(project_path);
+        cwd = project_path;
         var options = require(path.join(project_path, 'vern.json'));
         options = $scope.ensureOptions(options);
         fs.outputJsonSync(path.join(project_path, 'vern.json'), options);
@@ -778,7 +778,7 @@ function Builds() {
         done = true;
         continue;
       }
-      project_path = path.normalize(path.dirname(project_path) + path.sep + '..' + path.sep + 'vern.json');
+      project_path = path.dirname(project_path);
     }
 
     console.log('');
@@ -837,7 +837,7 @@ function Builds() {
 
     var params = {
       name: utils.toCamelCase(options[0]) + 'Controller',
-      path: path.join(cwd, 'app', projectConfig.options.folders.api, 'controllers')
+      path: path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'controllers')
     };
 
     if(model) {
@@ -850,7 +850,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: path.join(cwd, 'app', projectConfig.options.folders.api, 'server.js'),
+        path: path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'server.js'),
         needle: '// buildpoint',
         insertions: [
             '$vern.controllers.' + utils.toCamelCase(options[0], true) + ' = new $vern.controllers.' + params.name + '($vern).init({',
@@ -874,7 +874,7 @@ function Builds() {
 
     var params = {
       name: utils.toCamelCase(options[0]) + 'Model',
-      path: path.join(cwd, 'app', projectConfig.options.folders.api, 'models'),
+      path: path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'models'),
       collection: options[0].toLowerCase(),
       indexes: [],
       exclude: [],
@@ -928,7 +928,7 @@ function Builds() {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       type: type,
-      service_path: path.join(cwd, 'app', env, 'app', 'scripts', 'services')
+      service_path: path.join(projectConfig.cwd, 'app', env, 'app', 'scripts', 'services')
     };
 
     _service.copy(params, function(err, success) {
@@ -937,7 +937,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: path.join(cwd, 'app', env, 'app', 'index.html'),
+        path: path.join(projectConfig.cwd, 'app', env, 'app', 'index.html'),
         needle: '<!-- endbuild -->',
         insertions: [
             '<script type="text/javascript" src="scripts/services/' + params.name + '.js"></script>'
@@ -998,8 +998,8 @@ function Builds() {
         appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
         name: name,
         directive_name: directive_name,
-        directive_path: path.join(cwd, 'app', env, 'app', 'scripts', 'directives'),
-        less_path: path.join(cwd, 'app', env, 'app', 'styles', 'less', 'directives'),
+        directive_path: path.join(projectConfig.cwd, 'app', env, 'app', 'scripts', 'directives'),
+        less_path: path.join(projectConfig.cwd, 'app', env, 'app', 'styles', 'less', 'directives'),
         scope: (res.needs.indexOf('Inherited Scope') > -1),
         restrictions: restrictions,
         templateCache: (res.needs.indexOf('$templateCache') > -1),
@@ -1019,7 +1019,7 @@ function Builds() {
         }
 
         utils.rewrite({
-          path: path.join(cwd, 'app', env, 'app', 'index.html'),
+          path: path.join(projectConfig.cwd, 'app', env, 'app', 'index.html'),
           needle: '<!-- endbuild -->',
           insertions: [
               '<script type="text/javascript" src="scripts/directives/' + params.name + '.js"></script>'
@@ -1028,7 +1028,7 @@ function Builds() {
 
         if(params.lessFile) {
           utils.rewrite({
-            path: path.join(cwd, 'app', env, 'app', 'styles', 'less', 'main.less'),
+            path: path.join(projectConfig.cwd, 'app', env, 'app', 'styles', 'less', 'main.less'),
             needle: '// buildpoint',
             insertions: [
                 '@import "directives/' + params.name + '.less";'
@@ -1072,7 +1072,7 @@ function Builds() {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       filter_name: filter_name,
-      filter_path: path.join(cwd, 'app', env, 'app', 'scripts', 'filters')
+      filter_path: path.join(projectConfig.cwd, 'app', env, 'app', 'scripts', 'filters')
     };
 
     _filter.copy(params, function(err, success) {
@@ -1081,7 +1081,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: path.join(cwd, 'app', env, 'app', 'index.html'),
+        path: path.join(projectConfig.cwd, 'app', env, 'app', 'index.html'),
         needle: '<!-- endbuild -->',
         insertions: [
             '<script type="text/javascript" src="scripts/filters/' + params.name + '.js"></script>'
@@ -1163,7 +1163,7 @@ function Builds() {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       action: action,
-      view_path: path.join(cwd, 'app', env, 'app', 'views', (extraPath + path.sep + name)),
+      view_path: path.join(projectConfig.cwd, 'app', env, 'app', 'views', (extraPath + path.sep + name)),
       controller_name: controller_name
     };
 
@@ -1207,7 +1207,7 @@ function Builds() {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       controller_name: controller_name,
-      controller_path: path.join(cwd, 'app', env, 'app', 'scripts', 'controllers')
+      controller_path: path.join(projectConfig.cwd, 'app', env, 'app', 'scripts', 'controllers')
     };
 
     _view_controller.copy(params, function(err, success) {
@@ -1216,7 +1216,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: path.join(cwd, 'app', env, 'app', 'index.html'),
+        path: path.join(projectConfig.cwd, 'app', env, 'app', 'index.html'),
         needle: '<!-- endbuild -->',
         insertions: [
             '<script type="text/javascript" src="scripts/controllers/' + params.name + '.js"></script>'
@@ -1258,7 +1258,7 @@ function Builds() {
     var params = {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
-      style_path: path.join(cwd, 'app', env, 'app', 'styles', 'less')
+      style_path: path.join(projectConfig.cwd, 'app', env, 'app', 'styles', 'less')
     };
 
     _stylesheet.copy(params, function(err, success) {
@@ -1267,7 +1267,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: path.join(cwd, 'app', env, 'app', 'styles', 'less', 'main.less'),
+        path: path.join(projectConfig.cwd, 'app', env, 'app', 'styles', 'less', 'main.less'),
         needle: '// buildpoint',
         insertions: [
             '@import "' + params.name + '.less";'
