@@ -527,6 +527,42 @@ function Builds() {
 
   var cwd = process.cwd();
 
+  $scope.loadProjectConfig = function(project_path) {
+    if(!project_path) {
+      project_path = cwd;
+    }
+
+    var done = false;
+
+    while(!done) {
+      if (fs.existsSync(path.join(project_path, 'vern.json'))) {
+        cwd = project_path;
+        var options = require(path.join(project_path, 'vern.json'));
+        options = $scope.ensureOptions(options);
+        fs.outputJsonSync(path.join(project_path, 'vern.json'), options);
+        return {options: options, cwd: project_path};
+      }
+      if(path.dirname(project_path) === path.sep) {
+        done = true;
+        continue;
+      }
+      project_path = path.dirname(project_path);
+    }
+
+    console.log('');
+    console.log('No ' + 'vern.json'.red + ' found');
+    console.log('');
+    return null;
+  };
+
+  $scope.saveProjectConfig = function(data, project_path) {
+    if(!project_path) {
+      project_path = path.join(cwd, 'vern.json');
+    }
+
+    return fs.outputJsonSync(project_path, data);
+  };
+
   $scope.buildProject = function(options) {
     var project_path = options[0];
     var project = null;
@@ -757,42 +793,6 @@ function Builds() {
     }
 
     return options;
-  };
-
-  $scope.loadProjectConfig = function(project_path) {
-    if(!project_path) {
-      project_path = cwd;
-    }
-
-    var done = false;
-
-    while(!done) {
-      if (fs.existsSync(project_path)) {
-        cwd = project_path;
-        var options = require(path.join(project_path, 'vern.json'));
-        options = $scope.ensureOptions(options);
-        fs.outputJsonSync(path.join(project_path, 'vern.json'), options);
-        return {options: options, cwd: project_path};
-      }
-      if(path.dirname(project_path) === path.sep) {
-        done = true;
-        continue;
-      }
-      project_path = path.dirname(project_path);
-    }
-
-    console.log('');
-    console.log('No ' + 'vern.json'.red + ' found');
-    console.log('');
-    return null;
-  };
-
-  $scope.saveProjectConfig = function(data, project_path) {
-    if(!project_path) {
-      project_path = path.join(cwd, 'vern.json');
-    }
-
-    return fs.outputJsonSync(project_path, data);
   };
 
   $scope.buildContainer = function(options) {
