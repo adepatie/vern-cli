@@ -1129,6 +1129,10 @@ function Builds() {
     var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
     var extraPath = path.sep + 'main';
+    if(env === projectConfig.options.folders.admin) {
+      extraPath += path.sep + 'account';
+    }
+
     if(options.indexOf('--partial') > -1) {
       extraPath = path.sep + 'partials';
     }
