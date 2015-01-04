@@ -62,7 +62,7 @@ program.option('no-install', {flag: true, help: 'Start server without performing
 program.option('path', {flag: true, help: 'Define path for routes and views'});
 program.option('y', {flag: true, help: 'Answer all questions with the default', callback: function() { allDefault = true; }});
 program.option('type', {abbr: 't', help: 'Type of module/view/etc, used in multiple commands'});
-program.command('create').callback(parseCreate).help('Create a new component (controller, model, route, view, view_controller, stylesheet, directive, service, or filter) or project');
+program.command('create').callback(parseCreate).help('Create a new component (controller, model, route, view, view_controller, stylesheet, directive, service, or filter) or project or module');
 program.command('start').callback(parseStart).help('Start a server module (api, public, admin, all)');
 program.command('stop').callback(parseStop).help('Stop a server module');
 program.command('restart').callback(parseRestart).help('Restart a server module');
@@ -1301,11 +1301,11 @@ function Builds() {
     var appName = utils.toCamelCase(options[0], true);
 
     var acceptableTypes = [
-      'module',
-      'angular-module'
+      'api',
+      'angular'
     ];
 
-    var type = 'module';
+    var type = 'angular';
     if(args.type) {
       type = args.type;
     }
@@ -1322,8 +1322,8 @@ function Builds() {
     };
 
     var startCommands = {
-      'module': 'npm install && make test'.green,
-      'angular-module': 'npm install && bower install && grunt serve'.green
+      'api': 'npm install && make test'.green,
+      'angular': 'npm install && bower install && grunt server'.green
     };
 
     _module.copy(params, function(err, success) {

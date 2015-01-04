@@ -12,6 +12,8 @@ module.exports = {
       fs.mkdirpSync(params.module_dir);
     }
 
+    console.log()
+
     utils.walkTemplate(module_tpl_path, params.module_dir, params).then(function(log) {
       callback(null, log);
     }).fail(function(err) {
