@@ -1,8 +1,8 @@
 'use strict';
 
 angular.module('{{appName}}')
-  .controller('MenuCtrl', function ($scope, config, ngDictionary, $location, $rootScope) {
-    $scope.lang = ngDictionary[config.language].header;
+  .controller('MenuCtrl', function ($scope, vernConfig, ngDictionary, $location, $rootScope) {
+    $scope.lang = ngDictionary[vernConfig.language].header;
     $scope.menu = [];
 
     $scope.checkMenuActive = function(c) {

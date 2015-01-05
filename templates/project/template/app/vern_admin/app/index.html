@@ -39,7 +39,7 @@
     <div class="alerts">
       <alert ng-repeat="alert in rootAlerts" type="{{alert.type}}" close="closeAlert($index)"><div ng-bind="alert.content"></div></alert>
     </div>
-        
+
     <ng-view></ng-view>
 
     <!-- build:js(.) scripts/vendor.js -->
@@ -58,23 +58,10 @@
 
     <script src="scripts/dictionary/index.js"></script>
 
-    <script src="scripts/services/apiRequest.js"></script>
-    <script src="scripts/services/accountManager.js"></script>
-    <script src="scripts/services/dataManager.js"></script>
-
     <script src="scripts/controllers/main.js"></script>
     <script src="scripts/controllers/menu.js"></script>
     <script src="scripts/controllers/account/main.js"></script>
     <script src="scripts/controllers/account/test.js"></script>
-
-    <script src="scripts/directives/open-modal.js"></script>
-    <script src="scripts/directives/ng-toggle.js"></script>
-    <script src="scripts/directives/token-input.js"></script>
-    <script src="scripts/directives/asset-upload.js"></script>
-    <script src="scripts/directives/ng-validate.js"></script>
-    <script src="scripts/directives/ng-enter.js"></script>
-    <script src="scripts/directives/display-data-set.js"></script>
-    <script src="scripts/directives/vern-codemirror.js"></script>
 
     <script src="scripts/filters/semantic-date.js"></script>
     <!-- endbuild -->

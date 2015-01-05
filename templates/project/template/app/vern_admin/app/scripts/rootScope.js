@@ -1,14 +1,14 @@
 var app = angular.module('{{adminAppName}}')
-  .run(function($rootScope, config, localStorageService, $route, $routeParams, $location, accountManager, dataManager) {
+  .run(function($rootScope, vernConfig, localStorageService, $route, $routeParams, $location, accountManager, dataManager) {
     $rootScope.page_title = '';
     $rootScope.controller = '';
     $rootScope.event = null;
-    $rootScope.userData = localStorageService.get(config.sessionName);
+    $rootScope.userData = localStorageService.get(vernConfig.sessionName);
     $rootScope.redirect_path = null;
 
     $rootScope.rootAlerts = [];
     $rootScope.apiLoading = false;
-    $rootScope.config = config;
+    $rootScope.vernConfig = vernConfig;
     $rootScope.accountManager = accountManager;
     $rootScope.dataManager = dataManager;
 
@@ -38,7 +38,7 @@ var app = angular.module('{{adminAppName}}')
           $rootScope.innerController = $route.current.innerController;
         }
 
-        config.language = $rootScope.userData && $rootScope.userData.lang ? $rootScope.userData.lang : config.defaultLanguage;
+        vernConfig.language = $rootScope.userData && $rootScope.userData.lang ? $rootScope.userData.lang : vernConfig.defaultLanguage;
       }
     );
 
@@ -93,15 +93,15 @@ var app = angular.module('{{adminAppName}}')
 
     $rootScope.setUser = function(data) {
       $rootScope.userData = data;
-      localStorageService.add(config.sessionName, JSON.stringify(data));
+      localStorageService.add(vernConfig.sessionName, JSON.stringify(data));
     };
 
     $rootScope.getConfig = function(v) {
-      return $rootScope.config[v];
+      return $rootScope.vernConfig[v];
     };
 
     $rootScope.setConfig = function(t, v) {
-      $rootScope.config[t] = v;
-      return $rootScope.config[t];
+      $rootScope.vernConfig[t] = v;
+      return $rootScope.vernConfig[t];
     };
   });
