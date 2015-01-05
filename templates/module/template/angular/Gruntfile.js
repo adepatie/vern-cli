@@ -25,12 +25,13 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-conventional-changelog');
   grunt.loadNpmTasks('grunt-ngdocs');
   grunt.loadNpmTasks('grunt-ngmin');
+  grunt.loadNpmTasks('grunt-wiredep');
 
   // Project configuration.
   grunt.util.linefeed = '\n';
 
   grunt.initConfig({
-    ngversion: '1.2.26',
+    ngversion: '1.3.8',
     modules: [],//to be filled in by build task
     pkg: grunt.file.readJSON('package.json'),
     dist: 'dist',
@@ -135,6 +136,15 @@ module.exports = function(grunt) {
         }
       }
     },
+    wiredep: {
+      options: {
+        cwd: '.'
+      },
+      app: {
+        src: ['<%= examples %>/*.html'],
+        ignorePath:  /\.\.\//
+      }
+    },
     less: {
       dev: {
         files: {
@@ -192,6 +202,7 @@ module.exports = function(grunt) {
     'build',
     'less:dev',
     'copy:server',
+    'wiredep',
     'connect',
     'watch'
   ]);

@@ -42,7 +42,7 @@
     "grunt-conventional-changelog": "^1.1.0",
     "grunt-ngdocs": "^0.2.2",
     "grunt-ngmin": "0.0.3",
-    "karma": "^0.12.16",
+    "grunt-wiredep": "^2.0.0",
     "node-markdown": "^0.1.1",
     "semver": "^2.3.1"
   }

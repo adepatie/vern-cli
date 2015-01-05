@@ -31,8 +31,5 @@
     "Gruntfile.js",
     "npm-debug.log",
     "package.json"
-  ],
-  "devDependencies": {
-    "angular": "~1.2.26"
-  }
+  ]
 }
