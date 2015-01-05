@@ -200,7 +200,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('server', [
     'build',
-    'less:dev',
+    'less:dist',
     'copy:server',
     'wiredep',
     'connect',
@@ -217,12 +217,11 @@ module.exports = function(grunt) {
     grunt.task.run(['clean:build']);
 
     //If arguments define what modules to build, build those. Else, everything
-    var modules = [];
+    var modules = ['src/{{name}}.js'];
     grunt.file.expand({
       filter: 'isDirectory', cwd: '.'
-    }, 'src/*').forEach(function(dir) {
-      console.log(dir);
-      var name = dir.split('/')[1];
+    }, 'src/**/*').forEach(function(dir) {
+      var name = dir.split('/').splice(1).join('/');
       modules.push(grunt.file.expand('src/'+name+'/*.js'));
     });
 
