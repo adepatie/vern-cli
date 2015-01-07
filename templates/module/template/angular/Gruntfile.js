@@ -90,6 +90,13 @@ module.exports = function(grunt) {
       }
     },
     watch: {
+      bower: {
+        files: ['bower.json'],
+        tasks: ['wiredep'],
+        options: {
+          livereload: '<%= connect.options.livereload %>'
+        }
+      },
       site: {
         files: [
           '<%= examples %>/*.html',

@@ -26,7 +26,10 @@ module.exports = function (grunt) {
     watch: {
       bower: {
         files: ['bower.json'],
-        tasks: ['wiredep']
+        tasks: ['wiredep'],
+        options: {
+          livereload: '<%= connect.options.livereload %>'
+        }
       },
       js: {
         files: ['<%= vern.app %>/scripts/**/*.js'],
