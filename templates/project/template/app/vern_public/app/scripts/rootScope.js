@@ -63,6 +63,10 @@ var app = angular.module('{{appName}}')
       }
     });
 
+    $rootScope.$on('apiError', function(evt, msg, timeout) {
+      $rootScope.addAlert('danger', msg, timeout);
+    });
+
     $rootScope.addAlert = $rootScope.addRootAlert = function(type, msg, timeout) {
       if(type === 'error') {
         type = 'danger';
