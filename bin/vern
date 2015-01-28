@@ -25,6 +25,7 @@ var program          = require('nomnom'),
     _module          = require(path.join(template_dir, 'module')),
     utils            = require(path.join(__dirname, '..', 'utils')),
     default_config   = require(path.join(template_dir, 'vern_config.json')),
+    default_mconfig  = require(path.join(template_dir, 'vern_module_config.json')),
     pkg              = require(path.join(__dirname, '..', 'package.json')),
     allDefault       = false;
 
@@ -837,7 +838,7 @@ function Builds() {
 
     var params = {
       name: utils.toCamelCase(options[0]) + 'Controller',
-      path: path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'controllers')
+      path: projectConfig.options.type === 'project' ? path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'controllers') : path.join(projectConfig.cwd, 'lib')
     };
 
     if(model) {
@@ -850,7 +851,7 @@ function Builds() {
       }
 
       utils.rewrite({
-        path: path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'server.js'),
+        path: projectConfig.options.type === 'project' ? path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'server.js') : path.join(projectConfig.cwd, 'lib', 'index.js'),
         needle: '// buildpoint',
         insertions: [
             '$vern.controllers.' + utils.toCamelCase(options[0], true) + ' = new $vern.controllers.' + params.name + '($vern).init({',
@@ -874,7 +875,7 @@ function Builds() {
 
     var params = {
       name: utils.toCamelCase(options[0]) + 'Model',
-      path: path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'models'),
+      path: projectConfig.options.type === 'project' ? path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'models') : path.join(projectConfig.cwd, 'lib'),
       collection: options[0].toLowerCase(),
       indexes: [],
       exclude: [],
@@ -888,6 +889,14 @@ function Builds() {
       if(err) {
         return console.log(err);
       }
+
+      utils.rewrite({
+        path: projectConfig.options.type === 'project' ? path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'server.js') : path.join(projectConfig.cwd, 'lib', 'index.js'),
+        needle: '// buildpoint',
+        insertions: [
+          '$vern.models.' + params.name + ' = require(\'./' + params.name + '\')($vern);'
+        ]
+      });
 
       console.log('');
       console.log(success.green);
@@ -1322,7 +1331,7 @@ function Builds() {
     };
 
     var startCommands = {
-      'api': 'npm install && make test'.green,
+      'api': 'npm install && node examples/test'.green,
       'angular': 'npm install && bower install && grunt server'.green
     };
 
@@ -1330,6 +1339,11 @@ function Builds() {
       if(err) {
         return console.log(err.red);
       }
+
+      default_mconfig.module = appName;
+      default_mconfig.vern_version = pkg.version;
+
+      fs.outputJsonSync(path.join(params.module_dir, 'vern.json'), default_mconfig);
 
       console.log('');
       console.log(success.join('\n').green);

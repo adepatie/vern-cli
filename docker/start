@@ -1,0 +1,4 @@
+#!/bin/bash
+
+mongod
+vern start all
