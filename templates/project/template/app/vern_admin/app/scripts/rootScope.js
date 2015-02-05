@@ -11,6 +11,7 @@ var app = angular.module('{{adminAppName}}')
     $rootScope.vernConfig = vernConfig;
     $rootScope.accountManager = accountManager;
     $rootScope.dataManager = dataManager;
+    var authErrors = 0;
 
     $rootScope.$on(
       "$routeChangeSuccess",
@@ -52,7 +53,14 @@ var app = angular.module('{{adminAppName}}')
       }
     });
 
-    $rootScope.$on('apiError', function(evt, msg, timeout) {
+    $rootScope.$on('apiError', function(evt, msg, res, timeout) {
+      if(res.responseCode === 403) {
+        authErrors++;
+        if(authErrors > 1) {
+          authErrors = 0;
+          $rootScope.userLogout('/');
+        }
+      }
       $rootScope.addAlert('danger', msg, timeout);
     });
 
