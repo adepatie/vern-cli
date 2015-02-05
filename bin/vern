@@ -854,7 +854,7 @@ function Builds() {
         path: projectConfig.options.type === 'project' ? path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'server.js') : path.join(projectConfig.cwd, 'lib', 'index.js'),
         needle: '// buildpoint',
         insertions: [
-          projectConfig.options.type === 'project' ? '$vern.controllers.' + params.name + ' = require(\'./' + params.name + '\');' : '',
+          projectConfig.options.type === 'project' ? '' : '$vern.controllers.' + params.name + ' = require(\'./' + params.name + '\');',
             '$vern.controllers.' + utils.toCamelCase(options[0], true) + ' = new $vern.controllers.' + params.name + '($vern).init({',
           model ? '  model: $vern.models.' + model + ',' : '',
             '  publicRoute: \'/' + utils.toHyphenated(options[0]) + '\',',
@@ -895,7 +895,7 @@ function Builds() {
         path: projectConfig.options.type === 'project' ? path.join(projectConfig.cwd, 'app', projectConfig.options.folders.api, 'server.js') : path.join(projectConfig.cwd, 'lib', 'index.js'),
         needle: '// buildpoint',
         insertions: [
-          projectConfig.options.type === 'project' ? '$vern.models.' + params.name + ' = require(\'./' + params.name + '\')($vern);' : ''
+          projectConfig.options.type === 'project' ? '' : '$vern.models.' + params.name + ' = require(\'./' + params.name + '\')($vern);'
         ]
       });
 
