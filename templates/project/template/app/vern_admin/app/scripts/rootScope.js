@@ -54,7 +54,7 @@ var app = angular.module('{{adminAppName}}')
     });
 
     $rootScope.$on('apiError', function(evt, msg, res, timeout) {
-      if(res.responseCode === 403) {
+      if(res && res.responseCode === 403) {
         authErrors++;
         if(authErrors > 1) {
           authErrors = 0;
