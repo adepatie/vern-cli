@@ -67,7 +67,7 @@ module.exports = function (grunt) {
           open: true,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
+              connect().use('/.tmp', connect.static('./.tmp')),
               connect().use(
                 '/bower_components',
                 connect.static('./bower_components')
@@ -86,7 +86,7 @@ module.exports = function (grunt) {
           port: 9001,
           middleware: function (connect) {
             return [
-              connect.static('.tmp'),
+              connect().use('/.tmp', connect.static('./.tmp')),
               connect.static('test'),
               connect().use(
                 '/bower_components',
@@ -138,8 +138,13 @@ module.exports = function (grunt) {
       },
       dist: {
         files: {
-          '<%= vern.dist %>/styles/main.css': '<%= vern.app %>/styles/less/main.less'
+          '<%= vern.dist %>/styles/main.css': '.tmp/styles/main.css'
         }
+      }
+    },
+    cssmin: {
+      options: {
+        rebase: false
       }
     },
     useminPrepare: {
@@ -187,7 +192,10 @@ module.exports = function (grunt) {
         html: ['<%= vern.dist %>/*.html']
       }
     },
-    ngmin: {
+    ngAnnotate: {
+      options: {
+        singleQuotes: true
+      },
       dist: {
         files: [{
           expand: true,
@@ -277,7 +285,7 @@ module.exports = function (grunt) {
     'concat',
     'cssmin',
     'copy',
-    'ngmin',
+    'ngAnnotate',
     'rev',
     'usemin'
   ]);

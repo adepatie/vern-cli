@@ -17,7 +17,7 @@
     "grunt-usemin": "latest",
     "grunt-rev": "latest",
     "grunt-open": "latest",
-    "grunt-ngmin": "latest",
+    "grunt-ng-annotate": "latest",
     "grunt-contrib-less": "latest",
     "grunt-wiredep": "latest",
     "load-grunt-tasks": "latest"
