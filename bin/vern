@@ -1104,19 +1104,22 @@ function Builds() {
     });
   };
 
-  $scope.buildRoute = function(options) {
+  $scope.buildRoute = function(options, args) {
     if(options.length < 1) {
       console.log('');
       console.log('You must specify a name'.red);
       console.log('');
       return;
     }
-    $scope.buildView(options, true);
-    $scope.buildViewController(options);
-    $scope.buildStylesheet(options);
+
+    args.build_controller = true;
+
+    $scope.buildView(options, args);
+    $scope.buildViewController(options, args);
+    $scope.buildStylesheet(options, args);
   };
 
-  $scope.buildView = function(options, build_controller) {
+  $scope.buildView = function(options, args) {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
@@ -1161,7 +1164,7 @@ function Builds() {
     }
 
     var controller_name = null;
-    if(build_controller) {
+    if(args.build_controller) {
       controller_name = utils.toCamelCase(options[1]) + 'Ctrl';
     }
 
@@ -1176,9 +1179,11 @@ function Builds() {
     var params = {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
+      descriptor: utils.toWords(name) + 's',
       action: action,
       view_path: path.join(projectConfig.cwd, 'app', env, 'app', 'views', (extraPath + path.sep + name)),
-      controller_name: controller_name
+      controller_name: controller_name,
+      admin: options[0] === 'admin'
     };
 
     _view.copy(params, function(err, success) {
@@ -1221,7 +1226,8 @@ function Builds() {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       controller_name: controller_name,
-      controller_path: path.join(projectConfig.cwd, 'app', env, 'app', 'scripts', 'controllers')
+      controller_path: path.join(projectConfig.cwd, 'app', env, 'app', 'scripts', 'controllers'),
+      admin: options[0] === 'admin'
     };
 
     _view_controller.copy(params, function(err, success) {
@@ -1236,6 +1242,16 @@ function Builds() {
             '<script type="text/javascript" src="scripts/controllers/' + params.name + '.js"></script>'
         ]
       });
+
+      if(options[0] === 'admin') {
+        utils.rewrite({
+          path: path.join(projectConfig.cwd, 'app', env, 'app', 'views', 'partials', 'page', 'header.html'),
+          needle: '<!-- buildpoint -->',
+          insertions: [
+            '<li class="' + params.name + '"><a href="/#!/' + params.name + '">' + utils.toWords(name) + 's</a></li>'
+          ]
+        });
+      }
 
       console.log('');
       console.log(success.green);

@@ -174,6 +174,12 @@ function toCamelCase(text, pascal) {
   }
 }
 
+function toWords(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase().replace(/[-_\s](.)/g, function(match, group) {
+      return ' ' + group.toUpperCase();
+    });
+}
+
 function toHyphenated(text) {
   if(!text) {
     return undefined;
@@ -186,6 +192,7 @@ module.exports = {
   rewrite: rewrite,
   toCamelCase: toCamelCase,
   toHyphenated: toHyphenated,
+  toWords: toWords,
   applyVariables: applyVariables,
   applyVariablesSync: applyVariablesSync,
   walkTemplate: walkTemplate

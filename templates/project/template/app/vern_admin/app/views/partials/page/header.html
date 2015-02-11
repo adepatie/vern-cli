@@ -14,15 +14,10 @@
     <div class="collapse navbar-collapse" id="collapsable-nav">
       <ul class="nav navbar-nav navbar-right">
         <li class="dashboard"><a href="/#!/dashboard">Dashboard</a></li>
-        <li class="users"><a href="/#!/test">Tests</a></li>
+        <!-- buildpoint -->
         <li class="dropdown settings" dropdown>
           <a href class="dropdown-toggle" dropdown-toggle><span ng-bind="userData.first_name + ' ' + userData.last_name"></span> <span class="glyphicon glyphicon-cog"></span></a>
           <ul class="dropdown-menu" role="menu">
-            <li><a href="/#!/settings">Settings</a></li>
-            <li><a href="/#!/servers">Servers</a></li>
-            <li><a href="/#!/buckets">Buckets</a></li>
-            <li><a href="/#!/db">Database</a></li>
-            <li><a href="/#!/deployments">Deployments</a></li>
             <li class="divider"></li>
             <li><a href ng-click="userLogout()">Logout</a></li>
           </ul>

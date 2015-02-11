@@ -10,10 +10,16 @@ module.exports = {
       fs.mkdirpSync(params.view_path, '0777');
     }
 
-    var view_tpl = fs.readFileSync(path.join(__dirname, 'template', 'view.html')).toString();
+    var view_file = 'view.html';
+    if(params.admin && params.controller_name) {
+      view_file = 'admin-view.html';
+    }
+
+    var view_tpl = fs.readFileSync(path.join(__dirname, 'template', view_file)).toString();
 
     var view = {
       appName: params.appName,
+      descriptor: params.descriptor,
       name: params.name,
       controller_text: ''
     };

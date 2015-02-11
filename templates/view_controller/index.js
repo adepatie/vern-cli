@@ -10,12 +10,18 @@ module.exports = {
       fs.mkdirpSync(params.controller_path);
     }
 
-    var controller_tpl = fs.readFileSync(path.join(__dirname, 'template', 'controller.js')).toString();
+    var controller_file = 'controller.js';
+    if(params.admin) {
+      controller_file = 'admin-controller.js';
+    }
+
+    var controller_tpl = fs.readFileSync(path.join(__dirname, 'template', controller_file)).toString();
 
     var view = {
       appName: params.appName,
       name: params.name,
-      controller_name: params.controller_name
+      controller_name: params.controller_name,
+      api_route: params.name
     };
 
     var out = '';
