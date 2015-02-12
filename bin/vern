@@ -1179,7 +1179,7 @@ function Builds() {
     var params = {
       appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
-      descriptor: utils.toWords(name) + 's',
+      descriptor: utils.toWords(name),
       action: action,
       view_path: path.join(projectConfig.cwd, 'app', env, 'app', 'views', (extraPath + path.sep + name)),
       controller_name: controller_name,
@@ -1248,7 +1248,7 @@ function Builds() {
           path: path.join(projectConfig.cwd, 'app', env, 'app', 'views', 'partials', 'page', 'header.html'),
           needle: '<!-- buildpoint -->',
           insertions: [
-            '<li class="' + params.name + '"><a href="/#!/' + params.name + '">' + utils.toWords(name) + 's</a></li>'
+            '<li class="' + params.name + '"><a href="/#!/' + params.name + '">' + utils.toWords(name) + '</a></li>'
           ]
         });
       }
