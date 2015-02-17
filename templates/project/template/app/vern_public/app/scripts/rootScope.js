@@ -72,7 +72,11 @@ var app = angular.module('{{appName}}')
           $rootScope.userLogout('/');
         }
       }
-      $rootScope.addAlert('danger', msg, timeout);
+      if(typeof msg === 'object') {
+        $rootScope.addAlert('danger', msg.pkg.statusMessage, timeout);
+      } else {
+        $rootScope.addAlert('danger', msg, timeout);
+      }
     });
 
     $rootScope.addAlert = $rootScope.addRootAlert = function(type, msg, timeout) {
