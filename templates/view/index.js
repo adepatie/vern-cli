@@ -38,8 +38,12 @@ module.exports = {
         .on('data', function(buf) { out += buf.toString(); })
         .on('end', function() {
           var fileName = path.join(params.view_path, params.action + '.html');
-          fs.writeFileSync(fileName, out);
-          callback(null, 'View created in ' + params.view_path);
+          if(!fs.existsSync(fileName)) {
+            fs.writeFileSync(fileName, out);
+            callback(null, 'View created in ' + fileName);
+          } else {
+            callback(null, 'View already exists at ' + fileName);
+          }
         })
         .on('error', function(err) {
           callback(err, null);

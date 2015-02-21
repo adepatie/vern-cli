@@ -32,8 +32,12 @@ module.exports = {
         })
         .on('end', function () {
           var fileName = path.join(params.style_path, params.name + '.less');
-          fs.writeFileSync(fileName, out);
-          log.push('LESS Stylesheet created in ' + fileName);
+          if(!fs.existsSync(fileName)) {
+            fs.writeFileSync(fileName, out);
+            log.push('LESS Stylesheet created in ' + fileName);
+          } else {
+            log.push('LESS Stylesheet already exists at ' + fileName);
+          }
           callback(null, log.join('\n'));
         })
         .on('error', function(err) {

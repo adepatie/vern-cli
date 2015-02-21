@@ -38,8 +38,12 @@ module.exports = {
         })
         .on('end', function () {
           var fileName = path.join(params.controller_path, params.name + '.js');
-          fs.writeFileSync(fileName, out);
-          log.push('JavaScript View Controller created in ' + fileName);
+          if(!fs.existsSync(fileName)) {
+            fs.writeFileSync(fileName, out);
+            log.push('JavaScript View Controller created in ' + fileName);
+          } else {
+            log.push('File already exists at ' + fileName);
+          }
           callback(null, log.join('\n'));
         })
         .on('error', function(err) {

@@ -27,6 +27,7 @@ var program          = require('nomnom'),
     default_config   = require(path.join(template_dir, 'vern_config.json')),
     default_mconfig  = require(path.join(template_dir, 'vern_module_config.json')),
     pkg              = require(path.join(__dirname, '..', 'package.json')),
+    util             = require('util'),
     allDefault       = false;
 
 if(process.argv.length <= 2) {
@@ -1123,27 +1124,35 @@ function Builds() {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 1) {
+    var originalOpts = options.slice(0);
+
+    if(originalOpts.length < 1) {
       console.log('');
       console.log('You must specify a name'.red);
       console.log('');
       return;
     }
 
-    options[0] = utils.toHyphenated(options[0]);
-    options[1] = utils.toHyphenated(options[1]);
+    originalOpts[0] = utils.toHyphenated(originalOpts[0]);
+    originalOpts[1] = utils.toHyphenated(originalOpts[1]);
 
-    options[0] = options[0].toLowerCase();
-    if(['admin', 'public'].indexOf(options[0]) <= -1) {
-      options[1] = options[0];
-      options[0] = 'public';
+    originalOpts[0] = originalOpts[0].toLowerCase();
+    if(['admin', 'public'].indexOf(originalOpts[0]) <= -1) {
+      originalOpts[1] = originalOpts[0];
+      originalOpts[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var viewPathParts = originalOpts[1].split(path.sep);
+    originalOpts[1] = viewPathParts.pop();
+
+    var env = originalOpts[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
     var extraPath = path.sep + 'main';
     if(env === projectConfig.options.folders.admin) {
       extraPath += path.sep + 'account';
+    }
+    if(viewPathParts.length) {
+      extraPath = path.sep + viewPathParts.join(path.sep);
     }
 
     if(options.indexOf('--partial') > -1) {
@@ -1156,7 +1165,7 @@ function Builds() {
       Create a view in a path relative to /app/views
      */
     if(options.indexOf('--path') > -1) {
-      extraPath = options[options.indexOf('--path') + 1];
+      extraPath = originalOpts[originalOpts.indexOf('--path') + 1];
     }
 
     if(extraPath.charAt(0) !== path.sep) {
@@ -1165,10 +1174,10 @@ function Builds() {
 
     var controller_name = null;
     if(args.build_controller) {
-      controller_name = utils.toCamelCase(options[1]) + 'Ctrl';
+      controller_name = utils.toCamelCase(originalOpts[1]) + 'Ctrl';
     }
 
-    var name = options[1].toLowerCase();
+    var name = originalOpts[1].toLowerCase();
     var action = 'index';
     if(name.indexOf(':') > -1) {
       var parts = name.split(':');
@@ -1177,13 +1186,13 @@ function Builds() {
     }
 
     var params = {
-      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
+      appName: projectConfig.options.module + (originalOpts[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       descriptor: utils.toWords(name),
       action: action,
       view_path: path.join(projectConfig.cwd, 'app', env, 'app', 'views', (extraPath + path.sep + name)),
       controller_name: controller_name,
-      admin: options[0] === 'admin'
+      admin: originalOpts[0] === 'admin'
     };
 
     _view.copy(params, function(err, success) {
@@ -1200,34 +1209,39 @@ function Builds() {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 1) {
+    var originalOpts = options.slice(0);
+
+    if(originalOpts.length < 1) {
       console.log('');
       console.log('You must specify a name'.red);
       console.log('');
       return;
     }
 
-    options[0] = utils.toHyphenated(options[0]);
-    options[1] = utils.toHyphenated(options[1]);
+    originalOpts[0] = utils.toHyphenated(originalOpts[0]);
+    originalOpts[1] = utils.toHyphenated(originalOpts[1]);
 
-    options[0] = options[0].toLowerCase();
-    if(['admin', 'public'].indexOf(options[0]) <= -1) {
-      options[1] = options[0];
-      options[0] = 'public';
+    originalOpts[0] = originalOpts[0].toLowerCase();
+    if(['admin', 'public'].indexOf(originalOpts[0]) <= -1) {
+      originalOpts[1] = originalOpts[0];
+      originalOpts[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var env = originalOpts[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
 
-    var name = options[1].toLowerCase();
+    var name = originalOpts[1].toLowerCase();
 
-    var controller_name = utils.toCamelCase(options[1]) + 'Ctrl';
+    var controller_name = utils.toCamelCase(originalOpts[1]) + 'Ctrl';
+
+    var viewPathParts = originalOpts[1].split(path.sep);
+    name = viewPathParts.pop();
 
     var params = {
-      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
+      appName: projectConfig.options.module + (originalOpts[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       controller_name: controller_name,
-      controller_path: path.join(projectConfig.cwd, 'app', env, 'app', 'scripts', 'controllers'),
-      admin: options[0] === 'admin'
+      controller_path: path.join(projectConfig.cwd, 'app', env, 'app', 'scripts', 'controllers', viewPathParts.join(path.sep)),
+      admin: originalOpts[0] === 'admin'
     };
 
     _view_controller.copy(params, function(err, success) {
@@ -1263,30 +1277,35 @@ function Builds() {
     var projectConfig = $scope.loadProjectConfig();
     if(!projectConfig) return;
 
-    if(options.length < 1) {
+    var originalOpts = options.slice(0);
+
+    if(originalOpts.length < 1) {
       console.log('');
       console.log('You must specify a name'.red);
       console.log('');
       return;
     }
 
-    options[0] = utils.toHyphenated(options[0]);
-    options[1] = utils.toHyphenated(options[1]);
+    originalOpts[0] = utils.toHyphenated(originalOpts[0]);
+    originalOpts[1] = utils.toHyphenated(originalOpts[1]);
 
-    options[0] = options[0].toLowerCase();
-    if(['admin', 'public'].indexOf(options[0]) <= -1) {
-      options[1] = options[0];
-      options[0] = 'public';
+    originalOpts[0] = originalOpts[0].toLowerCase();
+    if(['admin', 'public'].indexOf(originalOpts[0]) <= -1) {
+      originalOpts[1] = originalOpts[0];
+      originalOpts[0] = 'public';
     }
 
-    var env = options[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+    var viewPathParts = originalOpts[1].split(path.sep);
+    originalOpts[1] = viewPathParts.pop();
 
-    var name = options[1].toLowerCase();
+    var env = originalOpts[0] === 'admin' ? projectConfig.options.folders.admin : projectConfig.options.folders.public;
+
+    var name = originalOpts[1].toLowerCase();
 
     var controller_name = utils.toCamelCase(name, true);
 
     var params = {
-      appName: projectConfig.options.module + (options[0] === 'admin' ? 'AdminApp' : 'App'),
+      appName: projectConfig.options.module + (originalOpts[0] === 'admin' ? 'AdminApp' : 'App'),
       name: name,
       style_path: path.join(projectConfig.cwd, 'app', env, 'app', 'styles', 'less')
     };

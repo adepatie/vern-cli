@@ -162,20 +162,23 @@ function toCamelCase(text, pascal) {
   if(!text) {
     return undefined;
   }
+  if(text.charAt(0).match(/[-_\\\/\s]/)) {
+    text = text.substr(1);
+  }
   if(pascal) {
     // first letter is lowercase
-    return text.toLowerCase().replace(/[-_\s](.)/g, function(match, group) {
+    return text.toLowerCase().replace(/[-_\\\/\s](.)/g, function(match, group) {
       return group.toUpperCase();
     });
   } else {
-    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase().replace(/[-_\s](.)/g, function(match, group) {
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase().replace(/[-_\\\/\s](.)/g, function(match, group) {
       return group.toUpperCase();
     });
   }
 }
 
 function toWords(text) {
-  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase().replace(/[-_\s](.)/g, function(match, group) {
+  return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase().replace(/[-_\\\/\s](.)/g, function(match, group) {
       return ' ' + group.toUpperCase();
     });
 }
