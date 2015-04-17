@@ -1262,7 +1262,7 @@ function Builds() {
           path: path.join(projectConfig.cwd, 'app', env, 'app', 'views', 'partials', 'page', 'header.html'),
           needle: '<!-- buildpoint -->',
           insertions: [
-            '<li class="' + params.name + '"><a href="/#!/' + params.name + '">' + utils.toWords(name) + '</a></li>'
+            '<md-button class="' + params.name + '" aria-label="' + utils.toWords(name) + '" ng-href="/#!/' + params.name + '">' + utils.toWords(name) + '</md-button>'
           ]
         });
       }

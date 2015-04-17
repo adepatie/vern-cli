@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('{{adminAppName}}')
-  .controller('MenuCtrl', function ($scope, vernConfig, ngDictionary, $location, $rootScope) {
+  .controller('MenuCtrl', function ($scope, vernConfig, ngDictionary, $location, $mdSidenav) {
     $scope.lang = ngDictionary[vernConfig.language].header;
     $scope.menu = [];
 
@@ -14,4 +14,7 @@ angular.module('{{adminAppName}}')
 
       return '';
     };
+
+    $scope.toggleMenu = function() { return $mdSidenav('menu').toggle()};
+    $scope.closeMenu = function() { return $mdSidenav('menu').close()};
   });

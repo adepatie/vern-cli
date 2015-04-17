@@ -1,28 +1,22 @@
-<nav class="navbar navbar-default" role="navigation">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#collapsable-nav">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href="/#!/"><span ng-bind="config.appName"></span></a>
+<md-content>
+  <md-toolbar layout="row" layout-padding layout-align="space-between center">
+    <div class="md-toolbar-tools">
+      <h2>
+        <span>Vern Administrative Panel</span>
+      </h2>
+      <span flex></span>
+      <div layout="row" layout-align="end center">
+        <md-button class="md-icon-button" aria-label="Settings" ng-click="toggleMenu()">
+          <md-icon md-svg-icon="images/icons/menu.svg"></md-icon>
+        </md-button>
+      </div>
     </div>
-
-    <div class="collapse navbar-collapse" id="collapsable-nav">
-      <ul class="nav navbar-nav navbar-right">
-        <li class="dashboard"><a href="/#!/dashboard">Dashboard</a></li>
-        <!-- buildpoint -->
-        <li class="dropdown settings" dropdown>
-          <a href class="dropdown-toggle" dropdown-toggle><span ng-bind="userData.first_name + ' ' + userData.last_name"></span> <span class="glyphicon glyphicon-cog"></span></a>
-          <ul class="dropdown-menu" role="menu">
-            <li class="divider"></li>
-            <li><a href ng-click="userLogout()">Logout</a></li>
-          </ul>
-        </li>
-      </ul>
-    </div>
+  </md-toolbar>
+</md-content>
+<md-sidenav class="md-sidenav-right md-whiteframe-z2 admin-menu" md-component-id="menu">
+  <div layout="column" layout-align="start end" layout-fill>
+    <md-button href aria-label="Close" class="close" ng-click="closeMenu()"><md-icon md-svg-icon="images/icons/cancel.svg"></md-icon></md-button>
+    <md-button class="dashboard" aria-label="Dashboard" ng-click="closeMenu()" ng-href="/#!/dashboard">Dashboard</md-button>
+    <!-- buildpoint -->
   </div>
-</nav>
+</md-sidenav>
