@@ -5,19 +5,20 @@ angular.module('{{appName}}').config(function(vernConfigProvider) {
     public: [
       {
         path: '/',
-        templateUrl: 'views/main/index.html',
+        templateUrl: 'templates/main.html',
+        innerTemplateUrl: 'views/main/index.html',
         controller: 'MainCtrl',
-        event: 'enterprise'
+        event: 'home'
       }
     ],
     publicRestricted: [
       // For User restricted sections
       {
         path: '/account',
-        templateUrl: 'views/account/main.html',
-        innerTemplate: 'views/account/index.html',
+        templateUrl: 'templates/account.html',
+        innerTemplateUrl: 'views/account/index.html',
         controller: 'AccountMainCtrl',
-        event: 'account.index'
+        event: 'account.home'
       }
     ],
     misc: [
