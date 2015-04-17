@@ -727,8 +727,10 @@ function Builds() {
 
       console.log(res.green);
 
-      fs.copySync(path.join(project_path, 'app', params.apiName, 'vern_config.sample.js')
-        , path.join(project_path, 'app', params.apiName, 'vern_config.js'));
+      if(!fs.existsSync(path.join(project_path, 'app', params.apiName, 'vern_config.js'))) {
+        fs.copySync(path.join(project_path, 'app', params.apiName, 'vern_config.sample.js')
+          , path.join(project_path, 'app', params.apiName, 'vern_config.js'));
+      }
 
       fs.outputJson(path.join(project_path, 'vern.json'), default_config, function(err) {
         if(err) {

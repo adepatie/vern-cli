@@ -1,5 +1,5 @@
 var app = angular.module('{{adminAppName}}')
-  .run(function($rootScope, vernConfig, localStorageService, $route, $routeParams, $location, accountManager, dataManager) {
+  .run(function($rootScope, vernConfig, localStorageService, $route, $routeParams, $location, accountManager, dataManager, $mdToast) {
     $rootScope.page_title = '';
     $rootScope.controller = '';
     $rootScope.event = null;
@@ -11,6 +11,7 @@ var app = angular.module('{{adminAppName}}')
     $rootScope.vernConfig = vernConfig;
     $rootScope.accountManager = accountManager;
     $rootScope.dataManager = dataManager;
+    $rootScope.toastPosition = 'bottom left';
     var authErrors = 0;
 
     $rootScope.$on(
@@ -86,30 +87,6 @@ var app = angular.module('{{adminAppName}}')
 
     $rootScope.closeAlert = $rootScope.closeRootAlert = function(index) {
       $rootScope.rootAlerts.splice(index, 1);
-    };
-
-    $rootScope.ensureLogin = function(redirect) {
-      if($rootScope.userData === null) {
-        if(redirect) {
-          $location.path(redirect);
-        }
-        return false;
-      }
-
-      return true;
-    };
-
-    $rootScope.userLogout = function(redirect) {
-      $rootScope.setUser(null);
-      if(redirect) {
-        return $location.path(redirect);
-      }
-      $location.path('/');
-    };
-
-    $rootScope.setUser = function(data) {
-      $rootScope.userData = data;
-      localStorageService.add(vernConfig.sessionName, JSON.stringify(data));
     };
 
     $rootScope.getConfig = function(v) {

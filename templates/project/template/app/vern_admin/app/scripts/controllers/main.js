@@ -9,7 +9,7 @@ angular.module('{{adminAppName}}')
       password: ''
     };
 
-    if($rootScope.ensureLogin()) {
+    if(accountManager.ensureLogin()) {
       $location.path('/dashboard');
     } else if($location.path() !== '/') {
       $location.path('/');
@@ -17,7 +17,7 @@ angular.module('{{adminAppName}}')
 
 
     $scope.loginUser = function() {
-      accountManager.doLogin($scope.login.username, $scope.login.password).then(function(account) {
+      accountManager.doSignIn($scope.login.username, $scope.login.password).then(function(account) {
         if(account.role !== 'admin') {
           $rootScope.addAlert('warning', 'You are not an administrator');
           return $location.path('/');

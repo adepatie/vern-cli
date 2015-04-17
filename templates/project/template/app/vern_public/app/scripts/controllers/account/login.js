@@ -12,7 +12,7 @@ angular.module('{{appName}}')
     $scope.forgot = false;
 
     $scope.loginAccount = function() {
-      accountManager.doLogin($scope.loginData.username, $scope.loginData.password).then(function(account) {
+      accountManager.doSignIn($scope.loginData.username, $scope.loginData.password).then(function(account) {
         $location.path('/account');
       }, function(err) {
         $scope.$emit('apiError', err);

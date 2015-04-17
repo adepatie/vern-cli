@@ -1,5 +1,5 @@
 <md-content>
-  <md-toolbar layout="row" layout-padding layout-align="space-between center">
+  <md-toolbar layout="row" layout-align="space-between center">
     <div class="md-toolbar-tools">
       <h2>
         <span>Vern Administrative Panel</span>
@@ -18,5 +18,6 @@
     <md-button href aria-label="Close" class="close" ng-click="closeMenu()"><md-icon md-svg-icon="images/icons/cancel.svg"></md-icon></md-button>
     <md-button class="dashboard" aria-label="Dashboard" ng-click="closeMenu()" ng-href="/#!/dashboard">Dashboard</md-button>
     <!-- buildpoint -->
+    <md-button class="logout" aria-label="Logout" ng-click="accountManager.userLogout()">Logout</md-button>
   </div>
 </md-sidenav>

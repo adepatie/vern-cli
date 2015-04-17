@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('{{adminAppName}}')
-  .controller('AccountMainCtrl', function ($scope, apiRequest, ngDictionary, $rootScope, $location) {
+  .controller('AccountMainCtrl', function ($scope, accountManager) {
     $scope.dashboard = {};
-    $rootScope.ensureLogin('/');
+    accountManager.ensureLogin('/')
   });
