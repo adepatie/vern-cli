@@ -99,30 +99,6 @@ var app = angular.module('{{appName}}')
       $rootScope.rootAlerts.splice(index, 1);
     };
 
-    $rootScope.ensureLogin = function(redirect) {
-      if($rootScope.userData === null) {
-        if(redirect) {
-          $location.path(redirect);
-        }
-        return false;
-      }
-
-      return true;
-    };
-
-    $rootScope.userLogout = function(redirect) {
-      $rootScope.setUser(null);
-      if(redirect) {
-        return $location.path(redirect);
-      }
-      $location.path('/');
-    };
-
-    $rootScope.setUser = function(data) {
-      $rootScope.userData = data;
-      localStorageService.add(vernConfig.sessionName, JSON.stringify(data));
-    };
-
     $rootScope.getConfig = function(v) {
       return $rootScope.vernConfig[v];
     };

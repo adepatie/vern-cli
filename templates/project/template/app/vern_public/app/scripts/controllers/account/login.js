@@ -1,35 +1,29 @@
 'use strict';
 
 angular.module('{{appName}}')
-  .controller('LoginCtrl', function($scope, apiRequest, $rootScope, $modalInstance) {
+  .controller('LoginCtrl', function($scope, accountManager, $location, $rootScope) {
     $scope.loginData = {
       username: null,
       password: null
     };
+    $scope.passwordData = {
+      email: null
+    };
+    $scope.forgot = false;
 
     $scope.loginAccount = function() {
-      apiRequest.post({
-        path: 'auth/login',
-        data: {username: $scope.loginData.username, password: $scope.loginData.password},
-        success: function(res) {
-          $rootScope.setUser(res.pkg.data);
-          if($rootScope.redirect_path) {
-            var redirect = $rootScope.redirect_path;
-            $rootScope.redirect_path = null;
-            $modalInstance.close();
-            return $location.path(redirect);
-          }
-          $modalInstance.close();
-        },
-        error: function(res) {
-          console.log(res);
-          if(!res || res.pkg === undefined) {
-            $rootScope.addRootAlert('error', 'An error occurred connecting to the server');
-            return;
-          }
-          $rootScope.addRootAlert('error', res.pkg.statusMessage);
-          $rootScope.setUser(null);
-        }
+      accountManager.doLogin($scope.loginData.username, $scope.loginData.password).then(function(account) {
+        $location.path('/account');
+      }, function(err) {
+        $scope.$emit('apiError', err);
+      });
+    };
+
+    $scope.getPasswordCode = function() {
+      accountManager.doForgotPassword($scope.passwordData.email).then(function(res) {
+        $rootScope.addAlert('success', 'Password reset instructions sent to your email');
+      }, function(err) {
+        $scope.$emit('apiError', err);
       });
     };
   });

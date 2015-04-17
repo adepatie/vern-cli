@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('{{adminAppName}}')
-  .controller('MainCtrl', function ($scope, apiRequest, ngDictionary, $rootScope, $location) {
+  .controller('MainCtrl', function ($scope, accountManager, ngDictionary, $rootScope, $location) {
     $scope.homeData = {};
     $scope.lang = ngDictionary.home;
     $scope.login = {
@@ -11,25 +11,25 @@ angular.module('{{adminAppName}}')
 
     if($rootScope.ensureLogin()) {
       $location.path('/dashboard');
+    } else if($location.path() !== '/') {
+      $location.path('/');
     }
 
+
     $scope.loginUser = function() {
-      apiRequest.post({
-        path: 'auth/login',
-        data: {username: $scope.login.username, password: $scope.login.password},
-        success: function(res) {
-          if(res.pkg.data.role !== 'admin') {
-            $rootScope.addAlert('warning', 'You are not an administrator');
-            return $location.path('/');
-          }
-          $rootScope.setUser(res.pkg.data);
-          if($rootScope.redirect_path) {
-            var redirect = $rootScope.redirect_path;
-            $rootScope.redirect_path = null;
-            return $location.path(redirect);
-          }
-          $location.path('/dashboard');
+      accountManager.doLogin($scope.login.username, $scope.login.password).then(function(account) {
+        if(account.role !== 'admin') {
+          $rootScope.addAlert('warning', 'You are not an administrator');
+          return $location.path('/');
         }
+        if($rootScope.redirect_path) {
+          var redirect = $rootScope.redirect_path;
+          $rootScope.redirect_path = null;
+          return $location.path(redirect);
+        }
+        $location.path('/dashboard');
+      }, function(err) {
+        $scope.$emit('apiError', err);
       });
     };
   });
