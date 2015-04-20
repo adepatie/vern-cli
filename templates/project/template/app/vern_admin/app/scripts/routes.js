@@ -31,7 +31,7 @@ angular.module('{{adminAppName}}').config(function(vernConfigProvider) {
 
    Configure additional routes here
 
-   vernConfigProvider.routes.public.push(
+   vernConfigProvider.routes.publicRestricted.push(
    {
    path: '/blog/:slug',
    templateUrl: 'templates/main.html',
