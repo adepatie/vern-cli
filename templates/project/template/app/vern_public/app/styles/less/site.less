@@ -33,45 +33,31 @@ h1, h2, h3, h4, h5, h6 {
   top: 0;
   left: 0;
   z-index: 99999;
-  max-height: 200px;
-  overflow: hidden;
-  .alert {
-    padding: 10px;
-    font-size: 18px;
-    border-bottom-width: 2px;
-    .close {
-      top: 2px;
-      right: 21px;
-      &:hover {
-        .opacity(100);
-        color: inherit;;
-      }
+  padding: 10px;
+  pointer-events: none;
+  .md-toast {
+    pointer-events: all;
+    &.danger {
+      background-color: rgb(198,40,40);
+    }
+    &.success {
+      background-color: rgb(121,134,203);
+    }
+    &.info {
+      background-color: rgb(121,134,203);
+    }
+    &.warn {
+      background-color: rgb(198,40,40);
     }
   }
 }
 
 .site {
   min-height: 100%;
-  .header {
-    .account-menu {
-      float: right;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      > li {
-        display: inline-block;
-        margin-left: 20px;
-        &:first-child, &.settings {
-          margin-left: 0;
-        }
-      }
-    }
-  }
 }
 
 .footer {
   .footer-content {
-    margin: 0 auto;
     text-align: center;
   }
 }
