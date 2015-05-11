@@ -306,7 +306,7 @@ function Starter(options) {
 
     var watchPath = path.join(cwd, project_dirs[project]);
 
-    watchr.watch({path: watchPath, listeners: {change: function(event, filename, stat, prevstat) {
+    watchr.watch({path: watchPath, ignorePaths: [path.join(watchPath, 'node_modules')], listeners: {change: function(event, filename, stat, prevstat) {
       if(!filename) {
         console.log('vern: ' + event + ' occurred but filename was not provided.');
       }

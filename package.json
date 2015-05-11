@@ -1,6 +1,6 @@
 {
   "name": "vern-cli",
-  "version": "0.1.31",
+  "version": "0.1.32",
   "description": "Vern module and project management",
   "main": "bin/vern",
   "bin": {
@@ -45,6 +45,6 @@
     "q": "^1.0.1",
     "ssh2": "^0.3.3",
     "validator": "latest",
-    "watchr": "^2.4.11"
+    "watchr": "^2.4.13"
   }
 }
