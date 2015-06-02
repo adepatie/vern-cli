@@ -5,6 +5,7 @@ var app = angular.module('{{adminAppName}}')
     $rootScope.event = null;
     $rootScope.userData = localStorageService.get(vernConfig.sessionName);
     $rootScope.redirect_path = null;
+    $rootScope.date = new Date();
 
     $rootScope.rootAlerts = [];
     $rootScope.apiLoading = false;

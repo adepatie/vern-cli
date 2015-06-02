@@ -229,7 +229,7 @@ module.exports = function (grunt) {
             '.htaccess',
             'components/**/*',
             'lib/**/*',
-            'images/**/*.{gif,webp,jpg,png}',
+            'images/**/*.{gif,webp,jpg,png,svg}',
             'styles/fonts/**/*',
             'styles/**/*.{gif,jpg,png}',
             'designer/**/*',
