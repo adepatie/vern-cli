@@ -34,7 +34,7 @@
 
     <!-- Add your site or application content here -->
     <div class="api-loading" ng-if="apiLoading"><md-progress-circular md-mode="indeterminate"></md-progress-circular></div>
-    <div class="alerts">
+    <div class="alerts" ng-cloak>
       <md-toast ng-repeat="alert in rootAlerts" class="md-toast md-default-theme {{alert.type}}"><div ng-bind="alert.content"></div></md-toast>
     </div>
 
