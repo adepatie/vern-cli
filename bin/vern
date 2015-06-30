@@ -1376,6 +1376,12 @@ function parseInstall() {
   var params = process.argv.slice(i + 1);
 
   var installName = params[0];
+  if(!installName) {
+    console.log('');
+    console.log('You must specify npm or bower modules to install: `vern install <type> <environment> <package_name>`'.red);
+    console.log('');
+    return;
+  }
   installName = installName.charAt(0).toUpperCase() + installName.slice(1).toLowerCase();
   new Installs()['install' + installName](params.slice(1));
 }
@@ -1385,6 +1391,12 @@ function parseUninstall() {
   var params = process.argv.slice(i + 1);
 
   var installName = params[0];
+  if(!installName) {
+    console.log('');
+    console.log('You must specify npm or bower modules to uninstall: `vern uninstall <type> <environment> <package_name>`'.red);
+    console.log('');
+    return;
+  }
   installName = installName.charAt(0).toUpperCase() + installName.slice(1).toLowerCase();
   new Installs()['uninstall' + installName](params.slice(1));
 }
@@ -1400,14 +1412,14 @@ function Installs(opts) {
 
     if(options.length < 1) {
       console.log('');
-      console.log('You must specify an environment modules: api, admin, public'.red);
+      console.log('You must specify an environment modules: api, admin, or public'.red);
       console.log('');
       return;
     }
 
     if(['api', 'admin', 'public'].indexOf(options[0]) <= -1) {
       console.log('');
-      console.log('You must specify an environment modules: api, admin, public'.red);
+      console.log('You must specify an environment modules: api, admin, or public'.red);
       console.log('');
       return;
     }
