@@ -738,47 +738,10 @@ function Builds() {
         }
 
         console.log('Created ' + path.join(project_path, 'vern.json').green);
-        // Now we will prompt the user to start adding base routes, controllers, and models.
-        // We can also setup a deployment strategy(ies)
-        inquirer.prompt({
-          type: 'confirm',
-          name: 'install',
-          message: 'Would you like to install all dependencies now? It will take a few minutes.',
-          default: false,
-          when: function() {
-            return !allDefault;
-          }
-        }, function(answers) {
-          if(answers.install === true) {
-            var newCWD = path.join(cwd, project_path);
-            console.log(newCWD);
-            new Starter({cwd: newCWD}).startAPI(true, true, function(err, success) {
-              if(err) {
-                return console.log(err);
-              }
-              new Starter({cwd: newCWD}).startPublic(true, true, function (err, success) {
-                if(err) {
-                  return console.log(err);
-                }
-                new Starter({cwd: newCWD}).startAdmin(true, true, function (err, success) {
-                  if(err) {
-                    return console.log(err);
-                  }
 
-                  console.log('');
-                  console.log('All servers dependencies installed!');
-                  console.log('');
-                });
-              });
-            });
-          } else {
-            console.log('');
-          }
-
-          console.log('To start servers:');
-          console.log('cd '.green + project_path.green + ' && vern start all'.green);
-          console.log('');
-        });
+        console.log('To start servers:');
+        console.log('cd '.green + project_path.green + ' && vern start all'.green);
+        console.log('');
       });
     });
   }
