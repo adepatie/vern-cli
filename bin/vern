@@ -1375,30 +1375,46 @@ function parseInstall() {
   var i = process.argv.indexOf('install');
   var params = process.argv.slice(i + 1);
 
-  var installName = params[0];
-  if(!installName) {
+  if(params.length < 1) {
     console.log('');
-    console.log('You must specify npm or bower modules to install: `vern install <type> <environment> <package_name>`'.red);
+    console.log('You must specify an environment module: api, admin, or public'.red);
     console.log('');
     return;
   }
-  installName = installName.charAt(0).toUpperCase() + installName.slice(1).toLowerCase();
-  new Installs()['install' + installName](params.slice(1));
+
+  if(['api', 'admin', 'public'].indexOf(params[0]) <= -1) {
+    console.log('');
+    console.log('You must specify an environment module: api, admin, or public'.red);
+    console.log('');
+    return;
+  }
+
+  var installName = params[0] === 'api' ? 'Npm' : 'Bower';
+
+  new Installs()['install' + installName](params);
 }
 
 function parseUninstall() {
   var i = process.argv.indexOf('uninstall');
   var params = process.argv.slice(i + 1);
 
-  var installName = params[0];
-  if(!installName) {
+  if(params.length < 1) {
     console.log('');
-    console.log('You must specify npm or bower modules to uninstall: `vern uninstall <type> <environment> <package_name>`'.red);
+    console.log('You must specify an environment module: api, admin, or public'.red);
     console.log('');
     return;
   }
-  installName = installName.charAt(0).toUpperCase() + installName.slice(1).toLowerCase();
-  new Installs()['uninstall' + installName](params.slice(1));
+
+  if(['api', 'admin', 'public'].indexOf(params[0]) <= -1) {
+    console.log('');
+    console.log('You must specify an environment module: api, admin, or public'.red);
+    console.log('');
+    return;
+  }
+
+  var installName = params[0] === 'api' ? 'Npm' : 'Bower';
+  
+  new Installs()['uninstall' + installName](params);
 }
 
 function Installs(opts) {
@@ -1409,20 +1425,6 @@ function Installs(opts) {
   function npmCommand(type, options) {
     var projectConfig = new Builds().loadProjectConfig();
     if(!projectConfig) return;
-
-    if(options.length < 1) {
-      console.log('');
-      console.log('You must specify an environment modules: api, admin, or public'.red);
-      console.log('');
-      return;
-    }
-
-    if(['api', 'admin', 'public'].indexOf(options[0]) <= -1) {
-      console.log('');
-      console.log('You must specify an environment modules: api, admin, or public'.red);
-      console.log('');
-      return;
-    }
 
     var save = '--save';
     if(options.indexOf('--no-save') > -1) {
