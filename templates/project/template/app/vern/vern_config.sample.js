@@ -27,13 +27,9 @@ module.exports = {
   create_user_group_on_registration: true,
   max_groups_per_user: 0,
   env: {
-  
+
     // Development
     development: {
-      defaults: {
-        default_admin: '{{defaultAdmin}}',
-        default_password: '{{defaultPassword}}'
-      },
       web_host: 'http://localhost',
       port: 3458,
       // Database, CouchDB
@@ -48,13 +44,9 @@ module.exports = {
     },
 
     // Add more environments...
-    
+
     // Production
     production: {
-      defaults: {
-        default_admin: '{{defaultAdmin}}',
-        default_password: '{{defaultPassword}}'
-      },
       web_host: 'https://www.mydomain.com',
       port: 3458,
       // Database, CouchDB
@@ -67,6 +59,6 @@ module.exports = {
         }
       }
     }
-    
+
   }
 };
