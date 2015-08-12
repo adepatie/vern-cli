@@ -39,6 +39,8 @@
   "dependencies": {
     "colors": "latest",
     "fs-extra": "latest",
+    "grunt": "^0.4.5",
+    "grunt-tsd": "^0.2.0-beta.1",
     "inquirer": "latest",
     "mu2": "latest",
     "nomnom": "^1.8.0",
