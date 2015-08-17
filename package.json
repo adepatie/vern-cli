@@ -3,6 +3,7 @@
   "version": "0.1.44",
   "description": "Vern module and project management",
   "main": "bin/vern",
+  "preferGlobal": true,
   "bin": {
     "vern": "./bin/vern"
   },
